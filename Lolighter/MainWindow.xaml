@@ -1,0 +1,58 @@
+﻿<Window x:Class="Lolighter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Lolighter" Height="224.5" Width="624.667" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
+    <Grid Margin="0,0,0,-1">
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="199" Margin="311,0,0,0" VerticalAlignment="Top" Width="156">
+            <Label Content="Light" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold" Width="40" Margin="58,9,0,0"/>
+        </Border>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="199" Margin="465,0,-1,0" VerticalAlignment="Top" Width="156"/>
+        <Button x:Name="OpenFile" Content="Open" HorizontalAlignment="Left" VerticalAlignment="Top" Width="156" Height="50" Click="OpenFile_Click" IsDefault="True"/>
+        <Button x:Name="LoloppeGenerator" Content="Loloppe" HorizontalAlignment="Left" Margin="156,99,0,0" VerticalAlignment="Top" Width="155" Height="50" Click="LoloppeGenerator_Click" IsEnabled="False" RenderTransformOrigin="0.82,0.46"/>
+        <Button x:Name="SimpleLighter" Content="Light" HorizontalAlignment="Left" Margin="156,0,0,0" VerticalAlignment="Top" Width="155" Height="50" Click="SimpleLighter_Click" IsEnabled="False"/>
+        <Button x:Name="SlidersMadness" Content="Sliders" HorizontalAlignment="Left" Margin="0,50,0,0" VerticalAlignment="Top" Width="156" Height="50" Click="SlidersMadness_Click" IsEnabled="False"/>
+        <Button x:Name="InvertedMadness" Content="Inverted" HorizontalAlignment="Left" Margin="156,50,0,0" VerticalAlignment="Top" Width="155" Height="50" Click="InvertedMadness_Click" IsEnabled="False"/>
+        <Button x:Name="BombGenerator" Content="Bomb" HorizontalAlignment="Left" Margin="0,99,0,0" VerticalAlignment="Top" Width="156" Height="50" Click="BombGenerator_Click" IsEnabled="False"/>
+        <Button x:Name="SaveFile" Content="Save" HorizontalAlignment="Left" Margin="156,149,0,0" VerticalAlignment="Top" Width="155" Height="50" Click="SaveFile_Click" IsEnabled="False" RenderTransformOrigin="0.82,0.46"/>
+        <Button x:Name="Downscale" Content="Downscaler" HorizontalAlignment="Left" Margin="0,149,0,0" VerticalAlignment="Top" Width="156" Height="50" Click="Downscaler_Click" IsEnabled="False" RenderTransformOrigin="0.82,0.46"/>
+        <Label Content="Limiter (in beat)" HorizontalAlignment="Left" Margin="470,36,0,0" VerticalAlignment="Top"/>
+        <Label Content="New file name" HorizontalAlignment="Left" Margin="470,133,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="Limiter" HorizontalAlignment="Left" Height="23" Margin="472,62,0,0" TextWrapping="Wrap" Text="0.25" VerticalAlignment="Top" Width="139"/>
+        <TextBox x:Name="FileName" HorizontalAlignment="Left" Height="23" Margin="472,160,0,0" TextWrapping="Wrap" Text="ExpertPlusStandard" VerticalAlignment="Top" Width="139" RenderTransformOrigin="0.189,0.174"/>
+        <Label Content="Color swap offset (in beat)" HorizontalAlignment="Left" Margin="311,148,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="ColorOffset" HorizontalAlignment="Left" Height="23" Margin="316,169,0,0" TextWrapping="Wrap" Text="0.00" VerticalAlignment="Top" Width="144"/>
+        <Label Content="Color swap speed (in beat)" HorizontalAlignment="Left" Margin="313,108,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="ColorSwapSpeed" HorizontalAlignment="Left" Height="23" Margin="316,131,0,0" TextWrapping="Wrap" Text="4.00" VerticalAlignment="Top" Width="144"/>
+        <CheckBox x:Name="AllowLimiter" HorizontalAlignment="Left" Margin="595,42,0,0" VerticalAlignment="Top" Width="17" IsChecked="True"/>
+        <Label Content="Modifier" HorizontalAlignment="Left" Margin="511,10,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="69"/>
+        <Label Content="General" HorizontalAlignment="Left" Margin="514,107,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="54"/>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="199" Margin="156,0,0,0" VerticalAlignment="Top" Width="156"/>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="199" VerticalAlignment="Top" Width="156"/>
+        <Label Content="Use Strobe" HorizontalAlignment="Left" Margin="313,36,0,0" VerticalAlignment="Top"/>
+        <Label Content="Use Fade" HorizontalAlignment="Left" Margin="313,61,0,0" VerticalAlignment="Top"/>
+        <Label Content="Spin/Zoom" HorizontalAlignment="Left" Margin="313,86,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="AllowStrobe" HorizontalAlignment="Left" Margin="377,42,0,0" VerticalAlignment="Top" Width="17" IsChecked="True"/>
+        <CheckBox x:Name="AllowFade" HorizontalAlignment="Left" Margin="377,68,0,0" VerticalAlignment="Top" Width="17" IsChecked="True"/>
+        <CheckBox x:Name="AllowSpin" HorizontalAlignment="Left" Margin="377,93,0,0" VerticalAlignment="Top" Width="17" IsChecked="True"/>
+        <Label Content="Spin Speed" HorizontalAlignment="Left" Margin="395,36,0,0" VerticalAlignment="Top"/>
+        <Label Content="Slow" HorizontalAlignment="Left" Margin="393,62,0,0" VerticalAlignment="Top"/>
+        <Label Content="Fast" HorizontalAlignment="Left" Margin="393,86,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="FastMinSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="423,90,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="19"/>
+        <TextBox x:Name="FastMaxSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="443,90,0,0" TextWrapping="Wrap" Text="13" VerticalAlignment="Top" Width="19"/>
+        <TextBox x:Name="SlowMinSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="423,67,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="19"/>
+        <TextBox x:Name="SlowMaxSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="443,67,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="19"/>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="70" Margin="394,42,0,0" VerticalAlignment="Top" Width="2" RenderTransformOrigin="0.5,0.5">
+            <Border.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Border.RenderTransform>
+        </Border>
+    </Grid>
+</Window>
