@@ -20,5 +20,10 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-### Version 1.4 
+### Version 1.5
+Modified the interface again.
+You can now select which type of light should strobe.
+Disabled Downscaler until I fix it.
+
+### Version 1.4
 Changed the interface a bit. Added Use Strobe, Use Fade, Spin/Zoom, custom Spin speed. Revamped the lighter slightly, adding the new features. Fixed the Spin/Zoom spam, wrong light offset and slight error during color swap. Mines and sliders no longer spam Spins.
