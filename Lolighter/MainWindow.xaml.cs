@@ -58,7 +58,7 @@ namespace Lolighter
                             InvertedMadness.IsEnabled = true;
                             BombGenerator.IsEnabled = true;
                             LoloppeGenerator.IsEnabled = true;
-                            Downscale.IsEnabled = true;
+                            //Downscale.IsEnabled = true;
                             OpenFile.IsEnabled = false;
                         }
                     }
@@ -137,7 +137,7 @@ namespace Lolighter
             }
 
             List<_Events> eventTempo = Light.CreateLight(noteTempo, Convert.ToDouble(ColorOffset.Text, CultureInfo.InvariantCulture), Convert.ToDouble(ColorSwapSpeed.Text, CultureInfo.InvariantCulture),
-                AllowStrobe.IsChecked.GetValueOrDefault(), AllowFade.IsChecked.GetValueOrDefault(), AllowSpin.IsChecked.GetValueOrDefault(),
+                AllowBackStrobe.IsChecked.GetValueOrDefault(), AllowNeonStrobe.IsChecked.GetValueOrDefault(), AllowSideStrobe.IsChecked.GetValueOrDefault(), AllowFade.IsChecked.GetValueOrDefault(), AllowSpin.IsChecked.GetValueOrDefault(),
                 Convert.ToInt16(SlowMinSpinSpeed.Text), Convert.ToInt16(SlowMaxSpinSpeed.Text), Convert.ToInt16(FastMinSpinSpeed.Text), Convert.ToInt16(FastMaxSpinSpeed.Text));
 
             List<_Events> sorted = eventTempo.OrderBy(o => o._time).ToList();
