@@ -58,7 +58,7 @@ namespace Lolighter
                             InvertedMadness.IsEnabled = true;
                             BombGenerator.IsEnabled = true;
                             LoloppeGenerator.IsEnabled = true;
-                            //Downscale.IsEnabled = true;
+                            Downscale.IsEnabled = true;
                             OpenFile.IsEnabled = false;
                         }
                     }

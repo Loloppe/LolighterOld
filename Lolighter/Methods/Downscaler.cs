@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lolighter.Methods
 {
@@ -514,11 +512,16 @@ namespace Lolighter.Methods
                         start = i;
                     }
                 }
-                else //Not the same rhythm as before
+                else //Not the same rhythm as before or rhythm above 1.1 beat
                 {
                     if (found)
                     {
                         last = true; //It is the last note of the rhythm
+                    }
+                    else
+                    {
+                        start = i;
+                        last = true;
                     }
                     found = false; //Reset the found value
                 }
@@ -532,37 +535,21 @@ namespace Lolighter.Methods
                 {
                     count++;
 
-                    if (newNotes.Count() == 0)
+                    for (int y = 0; y < Math.Round(count / 2, MidpointRounding.AwayFromZero); y++) //All the notes to be processed
                     {
-                        for (int y = 0; y < count; y++) //All the notes to be processed
+                        while (notes[flow]._cutDirection == 9)
                         {
-                            while (notes[flow]._cutDirection == 9 && notes.Count() == flow)
-                            {
-                                flow++;
-                            }
-
-                            newNotes.Add(notes[y]);
                             flow++;
                         }
-                    }
-                    else
-                    {
-                        for (int y = 0; y < Math.Round(count / 2, MidpointRounding.AwayFromZero); y++) //All the notes to be processed
+
+                        if (start + y == notes.Count())
                         {
-                            while(notes[flow]._cutDirection == 9)
-                            {
-                                flow++;
-                            }
-
-                            if(start + y == notes.Count())
-                            {
-                                break;
-                            }
-
-                            newNote = new _Notes(notes[start]._time + ((value * 2) * (y)), notes[flow]._lineIndex, notes[flow]._lineLayer, notes[start + y]._type, notes[flow]._cutDirection);
-                            flow++;
-                            newNotes.Add(newNote);
+                            break;
                         }
+
+                        newNote = new _Notes(notes[start]._time + ((value * 2) * (y)), notes[flow]._lineIndex, notes[flow]._lineLayer, notes[start + y]._type, notes[flow]._cutDirection);
+                        flow++;
+                        newNotes.Add(newNote);
                     }
 
                     //Reset value for the next rhythm
