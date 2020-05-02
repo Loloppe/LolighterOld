@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Lolighter.Items.Enum;
 
 namespace Lolighter.Methods
 {
@@ -17,367 +18,367 @@ namespace Lolighter.Methods
             {
                 n = noteTemp[i];
 
-                if (n._type == 3) //Skip bomb
+                if (n._type == NoteType.Mine) //Skip Bomb
                 {
                     continue;
                 }
-                else if (n._cutDirection == 8) //Skip dot
+                else if (n._cutDirection == CutDirection.Any) //Skip Any
                 {
                     continue;
                 }
 
                 switch (n._lineLayer) //Each layer, index and cut direction are handled manually.
                 {
-                    case 0:
+                    case Layer.Bottom:
                         switch (n._lineIndex)
                         {
-                            case 0:
+                            case Line.Left:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time, 1, 0, 3, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time, 1, 0, 3, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 2:
-                                        newNote.Add(new _Notes(n._time, 0, 1, 3, 8));
+                                    case CutDirection.Left:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        newNote.Add(new _Notes(n._time, 0, 1, 3, 8));
+                                    case CutDirection.Right:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 1:
+                            case Line.MiddleLeft:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time, 0, 0, 3, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time, 0, 0, 3, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 5:
-                                        newNote.Add(new _Notes(n._time, 0, 1, 3, 8));
+                                    case CutDirection.UpRight:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 6:
-                                        newNote.Add(new _Notes(n._time, 0, 1, 3, 8));
+                                    case CutDirection.DownLeft:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 2:
+                            case Line.MiddleRight:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time, 3, 0, 3, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time, 3, 0, 3, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 4:
-                                        newNote.Add(new _Notes(n._time, 3, 1, 3, 8));
+                                    case CutDirection.UpLeft:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 7:
-                                        newNote.Add(new _Notes(n._time, 3, 1, 3, 8));
+                                    case CutDirection.DownRight:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 3:
+                            case Line.Right:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time, 2, 0, 3, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time, 2, 0, 3, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 2:
-                                        newNote.Add(new _Notes(n._time, 3, 1, 3, 8));
+                                    case CutDirection.Left:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        newNote.Add(new _Notes(n._time, 3, 1, 3, 8));
+                                    case CutDirection.Right:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
                                 }
                                 break;
                         }
                         break;
-                    case 1:
+                    case Layer.Middle:
                         switch (n._lineIndex)
                         {
-                            case 0:
+                            case Line.Left:
                                 switch (n._cutDirection)
                                 {
-                                    case 2:
+                                    case CutDirection.Left:
                                         if (random.Next(1) == 0)
                                         {
-                                            newNote.Add(new _Notes(n._time, 0, 2, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.Left, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time, 0, 0, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.Left, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         }
                                         break;
-                                    case 3:
+                                    case CutDirection.Right:
                                         if (random.Next(1) == 0)
                                         {
-                                            newNote.Add(new _Notes(n._time, 0, 2, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.Left, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time, 0, 0, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.Left, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         }
                                         break;
-                                    case 4:
-                                        newNote.Add(new _Notes(n._time, 1, 2, 3, 8));
+                                    case CutDirection.UpLeft:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 5:
-                                        newNote.Add(new _Notes(n._time, 1, 0, 3, 8));
+                                    case CutDirection.UpRight:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 6:
-                                        newNote.Add(new _Notes(n._time, 1, 0, 3, 8));
+                                    case CutDirection.DownLeft:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 7:
-                                        newNote.Add(new _Notes(n._time, 1, 2, 3, 8));
+                                    case CutDirection.DownRight:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 1:
+                            case Line.MiddleLeft:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time, 0, 1, 3, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time, 0, 1, 3, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 2:
+                                    case CutDirection.Left:
                                         if (random.Next(1) == 0)
                                         {
-                                            newNote.Add(new _Notes(n._time, 1, 2, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time, 1, 0, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         }
                                         break;
-                                    case 3:
+                                    case CutDirection.Right:
                                         if (random.Next(1) == 0)
                                         {
-                                            newNote.Add(new _Notes(n._time, 1, 2, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time, 1, 0, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         }
                                         break;
-                                    case 4:
+                                    case CutDirection.UpLeft:
                                         if (random.Next(1) == 0)
                                         {
-                                            newNote.Add(new _Notes(n._time, 0, 0, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.Left, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time, 2, 2, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         }
                                         break;
-                                    case 5:
+                                    case CutDirection.UpRight:
                                         if (random.Next(1) == 0)
                                         {
-                                            newNote.Add(new _Notes(n._time, 0, 2, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.Left, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time, 2, 0, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         }
                                         break;
-                                    case 6:
+                                    case CutDirection.DownLeft:
                                         if (random.Next(1) == 0)
                                         {
-                                            newNote.Add(new _Notes(n._time, 0, 2, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.Left, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time, 2, 0, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         }
                                         break;
-                                    case 7:
+                                    case CutDirection.DownRight:
                                         if (random.Next(1) == 0)
                                         {
-                                            newNote.Add(new _Notes(n._time, 0, 0, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.Left, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time, 2, 2, 3, 8));
-                                        }
-                                        break;
-                                }
-                                break;
-                            case 2:
-                                switch (n._cutDirection)
-                                {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time, 3, 1, 3, 8));
-                                        break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time, 3, 1, 3, 8));
-                                        break;
-                                    case 2:
-                                        if (random.Next(1) == 0)
-                                        {
-                                            newNote.Add(new _Notes(n._time, 2, 2, 3, 8));
-                                        }
-                                        else
-                                        {
-                                            newNote.Add(new _Notes(n._time, 2, 0, 3, 8));
-                                        }
-                                        break;
-                                    case 3:
-                                        if (random.Next(1) == 0)
-                                        {
-                                            newNote.Add(new _Notes(n._time, 2, 2, 3, 8));
-                                        }
-                                        else
-                                        {
-                                            newNote.Add(new _Notes(n._time, 2, 0, 3, 8));
-                                        }
-                                        break;
-                                    case 4:
-                                        if (random.Next(1) == 0)
-                                        {
-                                            newNote.Add(new _Notes(n._time, 1, 0, 3, 8));
-                                        }
-                                        else
-                                        {
-                                            newNote.Add(new _Notes(n._time, 3, 2, 3, 8));
-                                        }
-                                        break;
-                                    case 5:
-                                        if (random.Next(1) == 0)
-                                        {
-                                            newNote.Add(new _Notes(n._time, 1, 2, 3, 8));
-                                        }
-                                        else
-                                        {
-                                            newNote.Add(new _Notes(n._time, 3, 0, 3, 8));
-                                        }
-                                        break;
-                                    case 6:
-                                        if (random.Next(1) == 0)
-                                        {
-                                            newNote.Add(new _Notes(n._time, 1, 2, 3, 8));
-                                        }
-                                        else
-                                        {
-                                            newNote.Add(new _Notes(n._time, 3, 0, 3, 8));
-                                        }
-                                        break;
-                                    case 7:
-                                        if (random.Next(1) == 0)
-                                        {
-                                            newNote.Add(new _Notes(n._time, 1, 0, 3, 8));
-                                        }
-                                        else
-                                        {
-                                            newNote.Add(new _Notes(n._time, 3, 2, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         }
                                         break;
                                 }
                                 break;
-                            case 3:
+                            case Line.MiddleRight:
                                 switch (n._cutDirection)
                                 {
-                                    case 2:
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Middle, NoteType.Mine, CutDirection.Any));
+                                        break;
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Middle, NoteType.Mine, CutDirection.Any));
+                                        break;
+                                    case CutDirection.Left:
                                         if (random.Next(1) == 0)
                                         {
-                                            newNote.Add(new _Notes(n._time, 3, 2, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time, 3, 0, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         }
                                         break;
-                                    case 3:
+                                    case CutDirection.Right:
                                         if (random.Next(1) == 0)
                                         {
-                                            newNote.Add(new _Notes(n._time, 3, 2, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time, 3, 0, 3, 8));
+                                            newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         }
                                         break;
-                                    case 4:
-                                        newNote.Add(new _Notes(n._time, 2, 0, 3, 8));
+                                    case CutDirection.UpLeft:
+                                        if (random.Next(1) == 0)
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Bottom, NoteType.Mine, CutDirection.Any));
+                                        }
+                                        else
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.Right, Layer.Top, NoteType.Mine, CutDirection.Any));
+                                        }
                                         break;
-                                    case 5:
-                                        newNote.Add(new _Notes(n._time, 2, 2, 3, 8));
+                                    case CutDirection.UpRight:
+                                        if (random.Next(1) == 0)
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Top, NoteType.Mine, CutDirection.Any));
+                                        }
+                                        else
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.Right, Layer.Bottom, NoteType.Mine, CutDirection.Any));
+                                        }
                                         break;
-                                    case 6:
-                                        newNote.Add(new _Notes(n._time, 2, 2, 3, 8));
+                                    case CutDirection.DownLeft:
+                                        if (random.Next(1) == 0)
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Top, NoteType.Mine, CutDirection.Any));
+                                        }
+                                        else
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.Right, Layer.Bottom, NoteType.Mine, CutDirection.Any));
+                                        }
                                         break;
-                                    case 7:
-                                        newNote.Add(new _Notes(n._time, 2, 0, 3, 8));
+                                    case CutDirection.DownRight:
+                                        if (random.Next(1) == 0)
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Bottom, NoteType.Mine, CutDirection.Any));
+                                        }
+                                        else
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.Right, Layer.Top, NoteType.Mine, CutDirection.Any));
+                                        }
+                                        break;
+                                }
+                                break;
+                            case Line.Right:
+                                switch (n._cutDirection)
+                                {
+                                    case CutDirection.Left:
+                                        if (random.Next(1) == 0)
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.Right, Layer.Top, NoteType.Mine, CutDirection.Any));
+                                        }
+                                        else
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.Right, Layer.Bottom, NoteType.Mine, CutDirection.Any));
+                                        }
+                                        break;
+                                    case CutDirection.Right:
+                                        if (random.Next(1) == 0)
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.Right, Layer.Top, NoteType.Mine, CutDirection.Any));
+                                        }
+                                        else
+                                        {
+                                            newNote.Add(new _Notes(n._time, Line.Right, Layer.Bottom, NoteType.Mine, CutDirection.Any));
+                                        }
+                                        break;
+                                    case CutDirection.UpLeft:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Bottom, NoteType.Mine, CutDirection.Any));
+                                        break;
+                                    case CutDirection.UpRight:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Top, NoteType.Mine, CutDirection.Any));
+                                        break;
+                                    case CutDirection.DownLeft:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Top, NoteType.Mine, CutDirection.Any));
+                                        break;
+                                    case CutDirection.DownRight:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Bottom, NoteType.Mine, CutDirection.Any));
                                         break;
                                 }
                                 break;
                         }
                         break;
-                    case 2:
+                    case Layer.Top:
                         switch (n._lineIndex)
                         {
-                            case 0:
+                            case Line.Left:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time, 1, 2, 3, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time, 1, 2, 3, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleLeft, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 2:
-                                        newNote.Add(new _Notes(n._time, 0, 1, 3, 8));
+                                    case CutDirection.Left:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        newNote.Add(new _Notes(n._time, 0, 1, 3, 8));
+                                    case CutDirection.Right:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 1:
+                            case Line.MiddleLeft:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time, 0, 2, 3, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time, 0, 2, 3, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time, Line.Left, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 2:
+                            case Line.MiddleRight:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time, 3, 2, 3, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time, 3, 2, 3, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 3:
+                            case Line.Right:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time, 2, 2, 3, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time, 2, 2, 3, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time, Line.MiddleRight, Layer.Top, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 2:
-                                        newNote.Add(new _Notes(n._time, 3, 1, 3, 8));
+                                    case CutDirection.Left:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        newNote.Add(new _Notes(n._time, 3, 1, 3, 8));
+                                    case CutDirection.Right:
+                                        newNote.Add(new _Notes(n._time, Line.Right, Layer.Middle, NoteType.Mine, CutDirection.Any));
                                         break;
                                 }
                                 break;
@@ -388,10 +389,10 @@ namespace Lolighter.Methods
 
             newNote.AddRange(noteTemp);
             List<_Notes> sorted = newNote.OrderBy(o => o._time).ToList();
-            
+
             for (int i = sorted.Count() - 5; i > 4; i--) //Dumb method to remove bomb that conflict with a note. (Hitbox issue)
             {
-                if (sorted[i]._type == 3)
+                if (sorted[i]._type == NoteType.Mine)
                 {
                     if (sorted[i]._time - sorted[i - 1]._time <= 0.25 && sorted[i]._lineLayer == sorted[i - 1]._lineLayer && sorted[i]._lineIndex == sorted[i - 1]._lineIndex)
                     {

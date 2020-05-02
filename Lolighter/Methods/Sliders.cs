@@ -1,6 +1,7 @@
 ﻿using Lolighter.Items;
 using System.Collections.Generic;
 using System.Linq;
+using static Lolighter.Items.Enum;
 
 namespace Lolighter.Methods
 {
@@ -18,11 +19,11 @@ namespace Lolighter.Methods
             {
                 n = noteTemp[i];
 
-                if (n._type == 3) //If bomb, skip
+                if (n._type == NoteType.Mine) //If Bomb, skip
                 {
                     continue;
                 }
-                else if(n._cutDirection == 8) //If dot, skip
+                else if (n._cutDirection == CutDirection.Any) //If Any, skip
                 {
                     continue;
                 }
@@ -30,8 +31,8 @@ namespace Lolighter.Methods
                 found = false;
 
                 foreach (_Notes temp in noteTemp) //For each note
-                {   
-                    if(n._time == temp._time && n._type == temp._type && n._cutDirection == temp._cutDirection && !IsLimited)
+                {
+                    if (n._time == temp._time && n._type == temp._type && n._cutDirection == temp._cutDirection && !IsLimited)
                     {
                         //Loloppe notes
                         break;
@@ -46,12 +47,12 @@ namespace Lolighter.Methods
                         found = true;
                         break;
                     }
-                    else if (n._time == temp._time && n._type != temp._type && n._cutDirection == temp._cutDirection && (n._cutDirection == 4 || n._cutDirection == 5))
+                    else if (n._time == temp._time && n._type != temp._type && n._cutDirection == temp._cutDirection && (n._cutDirection == CutDirection.UpLeft || n._cutDirection == CutDirection.UpRight))
                     {
                         found = true;
                         break;
                     }
-                    else if (n._time == temp._time && temp._type != n._type && ((temp._lineIndex == 0 && n._lineIndex == 1) || (temp._lineIndex == 3 && n._lineIndex == 2)))
+                    else if (n._time == temp._time && temp._type != n._type && ((temp._lineIndex == Line.Left && n._lineIndex == Line.MiddleLeft) || (temp._lineIndex == Line.Right && n._lineIndex == Line.MiddleRight)))
                     {
                         found = true;
                         break;
@@ -65,362 +66,362 @@ namespace Lolighter.Methods
 
                 switch (n._lineLayer) //Process the note into a sliders depending on layer, lane and cut direction manually. This is pretty Pepega.
                 {
-                    case 0:
+                    case Layer.Bottom:
                         switch (n._lineIndex)
                         {
-                            case 0:
+                            case Line.Left:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 1, n._type, 8));
-                                        if (n._type == 0)
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Middle, n._type, CutDirection.Any));
+                                        if (n._type == NoteType.Red)
                                         {
-                                            newNote.Add(new _Notes(n._time + 0.0625, 0, 2, n._type, 8));
+                                            newNote.Add(new _Notes(n._time + 0.0625, Line.Left, Layer.Top, n._type, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time + 0.0625, 1, 2, n._type, 8));
+                                            newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleLeft, Layer.Top, n._type, CutDirection.Any));
                                         }
                                         break;
-                                    case 1:
-                                        n._lineLayer = 2;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 1, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 0, 0, n._type, 8));
+                                    case CutDirection.Down:
+                                        n._lineLayer = Layer.Top;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Middle, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.Left, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 2:
+                                    case CutDirection.Left:
+                                        n._lineIndex = Line.MiddleLeft;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Bottom, n._type, CutDirection.Any));
+                                        break;
+                                    case CutDirection.Right:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Bottom, n._type, CutDirection.Any));
+                                        break;
+                                    case CutDirection.UpLeft:
                                         n._lineIndex = 1;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 0, n._type, 8));
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Middle, n._type, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 0, n._type, 8));
+                                    case CutDirection.UpRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 4:
-                                        n._lineIndex = 1;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 1, n._type, 8));
+                                    case CutDirection.DownLeft:
+                                        n._lineIndex = Line.MiddleLeft;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 5:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 2, n._type, 8));
-                                        break;
-                                    case 6:
-                                        n._lineIndex = 1;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 0, n._type, 8));
-                                        break;
-                                    case 7:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 0, n._type, 8));
+                                    case CutDirection.DownRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 1:
+                            case Line.MiddleLeft:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time + 0.0625, 1, 2, n._type, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleLeft, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 2:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 0, n._type, 8));
+                                    case CutDirection.Left:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 0, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 3, 0, n._type, 8));
+                                    case CutDirection.Right:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Bottom, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.Right, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 4:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 1, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 0, 2, n._type, 8));
+                                    case CutDirection.UpLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Middle, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.Left, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 5:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 2, n._type, 8));
+                                    case CutDirection.UpRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 6:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 0, n._type, 8));
+                                    case CutDirection.DownLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 7:
-                                        n._lineLayer = 1;
-                                        n._lineIndex = 0;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 0, n._type, 8));
+                                    case CutDirection.DownRight:
+                                        n._lineLayer = Layer.Middle;
+                                        n._lineIndex = Line.Left;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 2:
+                            case Line.MiddleRight:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time + 0.0625, 2, 2, n._type, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleRight, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 2:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 0, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 0, 0, n._type, 8));
+                                    case CutDirection.Left:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Bottom, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.Left, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 0, n._type, 8));
+                                    case CutDirection.Right:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 4:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 2, n._type, 8));
+                                    case CutDirection.UpLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 5:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 1, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 3, 2, n._type, 8));
+                                    case CutDirection.UpRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Middle, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.Right, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 6:
-                                        n._lineLayer = 1;
-                                        n._lineIndex = 3;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 0, n._type, 8));
+                                    case CutDirection.DownLeft:
+                                        n._lineLayer = Layer.Middle;
+                                        n._lineIndex = Line.Right;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 7:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 0, n._type, 8));
+                                    case CutDirection.DownRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 3:
+                            case Line.Right:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 1, n._type, 8));
-                                        if (n._type == 0)
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Middle, n._type, CutDirection.Any));
+                                        if (n._type == NoteType.Red)
                                         {
-                                            newNote.Add(new _Notes(n._time + 0.0625, 2, 2, n._type, 8));
+                                            newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleRight, Layer.Top, n._type, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time + 0.0625, 3, 2, n._type, 8));
+                                            newNote.Add(new _Notes(n._time + 0.0625, Line.Right, Layer.Top, n._type, CutDirection.Any));
                                         }
                                         break;
-                                    case 1:
-                                        n._lineLayer = 2;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 1, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 3, 0, n._type, 8));
+                                    case CutDirection.Down:
+                                        n._lineLayer = Layer.Top;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Middle, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.Right, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 2:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 0, n._type, 8));
+                                    case CutDirection.Left:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        n._lineIndex = 2;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 0, n._type, 8));
+                                    case CutDirection.Right:
+                                        n._lineIndex = Line.MiddleRight;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 4:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 2, n._type, 8));
+                                    case CutDirection.UpLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 5:
-                                        n._lineIndex = 2;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 1, n._type, 8));
+                                    case CutDirection.UpRight:
+                                        n._lineIndex = Line.MiddleRight;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Middle, n._type, CutDirection.Any));
                                         break;
-                                    case 6:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 0, n._type, 8));
+                                    case CutDirection.DownLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 7:
-                                        n._lineIndex = 2;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 0, n._type, 8));
+                                    case CutDirection.DownRight:
+                                        n._lineIndex = Line.MiddleRight;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
                                 }
                                 break;
                         }
                         break;
-                    case 1:
+                    case Layer.Middle:
                         switch (n._lineIndex)
                         {
-                            case 0:
+                            case Line.Left:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 2, n._type, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 0, n._type, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 5:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 2, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 2, 2, n._type, 8));
+                                    case CutDirection.UpRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Top, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleRight, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 6:
+                                    case CutDirection.DownLeft:
                                         break;
-                                    case 7:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 0, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 2, 0, n._type, 8));
+                                    case CutDirection.DownRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Bottom, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleRight, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 1:
+                            case Line.MiddleLeft:
                                 switch (n._cutDirection)
                                 {
-                                    case 2:
-                                        n._lineIndex = 0;
+                                    case CutDirection.Left:
+                                        n._lineIndex = Line.Left;
                                         break;
-                                    case 3:
-                                        n._lineIndex = 3;
+                                    case CutDirection.Right:
+                                        n._lineIndex = Line.Right;
                                         break;
                                 }
                                 break;
-                            case 2:
+                            case Line.MiddleRight:
                                 switch (n._cutDirection)
                                 {
-                                    case 2:
-                                        n._lineIndex = 0;
+                                    case CutDirection.Left:
+                                        n._lineIndex = Line.Left;
                                         break;
-                                    case 3:
-                                        n._lineIndex = 3;
+                                    case CutDirection.Right:
+                                        n._lineIndex = Line.Right;
                                         break;
                                 }
                                 break;
-                            case 3:
+                            case Line.Right:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 2, n._type, 8));
+                                    case CutDirection.Up:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 0, n._type, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 4:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 2, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 1, 2, n._type, 8));
+                                    case CutDirection.UpLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Top, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleLeft, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 6:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 0, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 1, 0, n._type, 8));
+                                    case CutDirection.DownLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Bottom, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleLeft, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
                                 }
                                 break;
                         }
                         break;
-                    case 2:
+                    case Layer.Top:
                         switch (n._lineIndex)
                         {
-                            case 0:
+                            case Line.Left:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        n._lineLayer = 0;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 1, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 0, 2, n._type, 8));
+                                    case CutDirection.Up:
+                                        n._lineLayer = Layer.Bottom;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Middle, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.Left, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 1, n._type, 8));
-                                        if (n._type == 0)
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Middle, n._type, CutDirection.Any));
+                                        if (n._type == NoteType.Red)
                                         {
-                                            newNote.Add(new _Notes(n._time + 0.0625, 0, 0, n._type, 8));
+                                            newNote.Add(new _Notes(n._time + 0.0625, Line.Left, Layer.Bottom, n._type, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time + 0.0625, 1, 0, n._type, 8));
+                                            newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleLeft, Layer.Bottom, n._type, CutDirection.Any));
                                         }
                                         break;
-                                    case 2:
-                                        n._lineIndex = 1;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 2, n._type, 8));
+                                    case CutDirection.Left:
+                                        n._lineIndex = Line.MiddleLeft;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 2, n._type, 8));
+                                    case CutDirection.Right:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 4:
-                                        n._lineLayer = 1;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 2, n._type, 8));
+                                    case CutDirection.UpLeft:
+                                        n._lineLayer = Layer.Middle;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 5:
-                                        n._lineLayer = 1;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 2, n._type, 8));
+                                    case CutDirection.UpRight:
+                                        n._lineLayer = Layer.Middle;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 6:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 1, n._type, 8));
+                                    case CutDirection.DownLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Middle, n._type, CutDirection.Any));
                                         break;
-                                    case 7:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 0, n._type, 8));
-                                        break;
-                                }
-                                break;
-                            case 1:
-                                switch (n._cutDirection)
-                                {
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time + 0.0625, 1, 0, n._type, 8));
-                                        break;
-                                    case 2:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 2, n._type, 8));
-                                        break;
-                                    case 3:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 2, n._type, 8));
-                                        break;
-                                    case 4:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 2, n._type, 8));
-                                        break;
-                                    case 5:
-                                        n._lineIndex = 0;
-                                        n._lineLayer = 1;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 2, n._type, 8));
-                                        break;
-                                    case 6:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 1, n._type, 8));
-                                        break;
-                                    case 7:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 0, n._type, 8));
+                                    case CutDirection.DownRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 2:
+                            case Line.MiddleLeft:
                                 switch (n._cutDirection)
                                 {
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time + 0.0625, 2, 0, n._type, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleLeft, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 2:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 2, n._type, 8));
+                                    case CutDirection.Left:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 2, n._type, 8));
+                                    case CutDirection.Right:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 4:
-                                        n._lineIndex = 3;
-                                        n._lineLayer = 1;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 2, n._type, 8));
+                                    case CutDirection.UpLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 5:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 2, n._type, 8));
+                                    case CutDirection.UpRight:
+                                        n._lineIndex = Line.Left;
+                                        n._lineLayer = Layer.Middle;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 6:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 0, 0, n._type, 8));
+                                    case CutDirection.DownLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Middle, n._type, CutDirection.Any));
                                         break;
-                                    case 7:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 1, n._type, 8));
+                                    case CutDirection.DownRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
                                 }
                                 break;
-                            case 3:
+                            case Line.MiddleRight:
                                 switch (n._cutDirection)
                                 {
-                                    case 0:
-                                        n._lineLayer = 0;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 1, n._type, 8));
-                                        newNote.Add(new _Notes(n._time + 0.0625, 3, 2, n._type, 8));
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleRight, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 1:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 1, n._type, 8));
-                                        if (n._type == 1)
+                                    case CutDirection.Left:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Top, n._type, CutDirection.Any));
+                                        break;
+                                    case CutDirection.Right:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Top, n._type, CutDirection.Any));
+                                        break;
+                                    case CutDirection.UpLeft:
+                                        n._lineIndex = Line.Right;
+                                        n._lineLayer = Layer.Middle;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Top, n._type, CutDirection.Any));
+                                        break;
+                                    case CutDirection.UpRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Top, n._type, CutDirection.Any));
+                                        break;
+                                    case CutDirection.DownLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Left, Layer.Bottom, n._type, CutDirection.Any));
+                                        break;
+                                    case CutDirection.DownRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Middle, n._type, CutDirection.Any));
+                                        break;
+                                }
+                                break;
+                            case Line.Right:
+                                switch (n._cutDirection)
+                                {
+                                    case CutDirection.Up:
+                                        n._lineLayer = Layer.Bottom;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Middle, n._type, CutDirection.Any));
+                                        newNote.Add(new _Notes(n._time + 0.0625, Line.Right, Layer.Top, n._type, CutDirection.Any));
+                                        break;
+                                    case CutDirection.Down:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Middle, n._type, CutDirection.Any));
+                                        if (n._type == NoteType.Blue)
                                         {
-                                            newNote.Add(new _Notes(n._time + 0.0625, 3, 0, n._type, 8));
+                                            newNote.Add(new _Notes(n._time + 0.0625, Line.Right, Layer.Bottom, n._type, CutDirection.Any));
                                         }
                                         else
                                         {
-                                            newNote.Add(new _Notes(n._time + 0.0625, 2, 0, n._type, 8));
+                                            newNote.Add(new _Notes(n._time + 0.0625, Line.MiddleRight, Layer.Bottom, n._type, CutDirection.Any));
                                         }
                                         break;
-                                    case 2:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 2, 2, n._type, 8));
+                                    case CutDirection.Left:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleRight, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 3:
-                                        n._lineIndex = 2;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 2, n._type, 8));
+                                    case CutDirection.Right:
+                                        n._lineIndex = Line.MiddleRight;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 4:
-                                        n._lineLayer = 1;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 2, n._type, 8));
+                                    case CutDirection.UpLeft:
+                                        n._lineLayer = Layer.Middle;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 5:
-                                        n._lineLayer = 1;
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 2, n._type, 8));
+                                    case CutDirection.UpRight:
+                                        n._lineLayer = Layer.Middle;
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Top, n._type, CutDirection.Any));
                                         break;
-                                    case 6:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 1, 0, n._type, 8));
+                                    case CutDirection.DownLeft:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.MiddleLeft, Layer.Bottom, n._type, CutDirection.Any));
                                         break;
-                                    case 7:
-                                        newNote.Add(new _Notes(n._time + 0.03125, 3, 1, n._type, 8));
+                                    case CutDirection.DownRight:
+                                        newNote.Add(new _Notes(n._time + 0.03125, Line.Right, Layer.Middle, n._type, CutDirection.Any));
                                         break;
                                 }
                                 break;
@@ -438,7 +439,7 @@ namespace Lolighter.Methods
             //Here, we try to remove stacked notes that has been created.
             for (int i = sorted.Count() - 5; i > 4; i--) //For each note in reverse-order
             {
-                if (sorted[i]._cutDirection == 8) //If it's a dot
+                if (sorted[i]._cutDirection == CutDirection.Any) //If it's a dot
                 {
                     if (sorted[i]._time - sorted[i - 1]._time <= 0.25 && sorted[i]._lineLayer == sorted[i - 1]._lineLayer && sorted[i]._lineIndex == sorted[i - 1]._lineIndex)
                     {

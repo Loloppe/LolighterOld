@@ -1,6 +1,7 @@
 ﻿using Lolighter.Items;
 using System;
 using System.Collections.Generic;
+using static Lolighter.Items.Enum;
 
 namespace Lolighter.Methods
 {
@@ -33,15 +34,15 @@ namespace Lolighter.Methods
             {
                 if (AllowFade)
                 {
-                    color = 3; //Red Fade
+                    color = EventLightValue.BlueFlashFade; //Blue Fade
                 }
                 else
                 {
-                    color = 1; //Red On
+                    color = EventLightValue.BlueOn; //Blue On
                 }
                 foreach (_Notes note in noteTempo) //For each note
                 {
-                    if(note._type == 0 || note._type == 1) //Find the first note to know where to start the timer
+                    if (note._type == NoteType.Red || note._type == NoteType.Blue) //Find the first note to know where to start the timer
                     {
                         firstNote = note._time;
                         break;
@@ -60,10 +61,10 @@ namespace Lolighter.Methods
 
             int Inverse(int temp) //Red -> Blue, Blue -> Red
             {
-                if (temp >= 4)
-                    return temp - 4;
+                if (temp > EventLightValue.BlueFlashFade)
+                    return temp - 4; //Turn to blue
                 else
-                    return temp + 4;
+                    return temp + 4; //Turn to red
             }
 
             void TimerDuration() //Check the checkpoint
@@ -94,7 +95,7 @@ namespace Lolighter.Methods
                     count = 0; //Reset the count, we are moving forward (in time).
                     for (int i = 0; i < 2; i++)
                     {
-                        if (light[i] != 0 && time[0] - time[1] <= 2.5) //TODO: Readd as an option left/right laser strobe.
+                        if (light[i] != 0 && time[0] - time[1] <= 2.5) //TODO: Re-add as an option left/right laser strobe.
                         {
                             //ev = new _Events((time[0] - (time[0] - time[1]) / 2), light[i], 0);
                             //eventTempo.Add(ev);
@@ -125,15 +126,15 @@ namespace Lolighter.Methods
                 switch (light[0]) //Add laser + speed
                 {
                     case 2:
-                        ev = new _Events(time[0], 2, color);
+                        ev = new _Events(time[0], EventType.LightLeftLasers, color);
                         eventTempo.Add(ev);
-                        ev = new _Events(time[0], 12, speed);
+                        ev = new _Events(time[0], EventType.RotatingLeftLasers, speed);
                         eventTempo.Add(ev);
                         break;
                     case 3:
-                        ev = new _Events(time[0], 3, color);
+                        ev = new _Events(time[0], EventType.LightRightLasers, color);
                         eventTempo.Add(ev);
-                        ev = new _Events(time[0], 13, speed);
+                        ev = new _Events(time[0], EventType.RotatingRightLasers, speed);
                         eventTempo.Add(ev);
                         break;
                 }
@@ -150,18 +151,18 @@ namespace Lolighter.Methods
                 //Here we process Spin and Zoom
                 if (time[0] == firstNote && time[1] == 0.0D && AllowSpinZoom) //If we are processing the first note, add spin + zoom to it.
                 {
-                    ev = new _Events(time[0], 8, 0);
+                    ev = new _Events(time[0], EventType.RotationAllTrackRings, 0);
                     eventTempo.Add(ev);
-                    ev = new _Events(time[0], 9, 0);
+                    ev = new _Events(time[0], EventType.RotationSmallTrackRings, 0);
                     eventTempo.Add(ev);
                 }
                 else if (time[0] >= ColorOffset + ColorSwap + offset && time[0] > firstNote && AllowSpinZoom) //If we are reaching the next threshold of the timer
                 {
-                    ev = new _Events(offset, 8, 0); //Add a spin at timer.
+                    ev = new _Events(offset, EventType.RotationAllTrackRings, 0); //Add a spin at timer.
                     eventTempo.Add(ev);
                     if (count == 0) //Only add zoom every 2 spin.
                     {
-                        ev = new _Events(offset, 9, 0);
+                        ev = new _Events(offset, EventType.RotationSmallTrackRings, 0);
                         eventTempo.Add(ev);
                         count = 1;
                     }
@@ -173,7 +174,7 @@ namespace Lolighter.Methods
                 //If there's a quarter between two double parallel notes and timer didn't pass the check.
                 else if (time[1] - time[2] == 0.25 && time[3] == time[2] && time[1] == time[0] && timer < offset && AllowSpinZoom)
                 {
-                    ev = new _Events(time[0], 8, 0);
+                    ev = new _Events(time[0], EventType.RotationAllTrackRings, 0);
                     eventTempo.Add(ev);
                 }
 
@@ -183,30 +184,30 @@ namespace Lolighter.Methods
                 {
                     if (last != 0.0D && time[0] - last <= 2.5) //Off event
                     {
-                        if(AllowBackStrobe) //Back Top Laser
+                        if (AllowBackStrobe) //Back Top Laser
                         {
-                            ev = new _Events(time[0] - (time[0] - last) / 2, 0, 0);
+                            ev = new _Events(time[0] - (time[0] - last) / 2, EventType.LightBackTopLasers, 0);
                             eventTempo.Add(ev);
                         }
-                        if(AllowNeonStrobe) //Neon Light
+                        if (AllowNeonStrobe) //Neon Light
                         {
-                            ev = new _Events(time[0] - (time[0] - last) / 2, 1, 0);
+                            ev = new _Events(time[0] - (time[0] - last) / 2, EventType.LightTrackRingNeons, 0);
                             eventTempo.Add(ev);
                         }
                         if (AllowSideStrobe) //Side Light
                         {
-                            ev = new _Events(time[0] - (time[0] - last) / 2, 4, 0);
+                            ev = new _Events(time[0] - (time[0] - last) / 2, EventType.LightBottomBackSideLasers, 0);
                             eventTempo.Add(ev);
                         }
                     }
 
-                    ev = new _Events(time[0], 0, color); //Back Top Laser
+                    ev = new _Events(time[0], EventType.LightBackTopLasers, color); //Back Top Laser
                     eventTempo.Add(ev);
 
-                    ev = new _Events(time[0], 4, color); //Neon Light
+                    ev = new _Events(time[0], EventType.LightBottomBackSideLasers, color); //Side Light
                     eventTempo.Add(ev);
 
-                    ev = new _Events(time[0], 1, color); //Track Ring Neons
+                    ev = new _Events(time[0], EventType.LightTrackRingNeons, color); //Track Ring Neons
                     eventTempo.Add(ev);
 
                     last = time[0];
@@ -235,13 +236,13 @@ namespace Lolighter.Methods
                     }
                     else //The second note is processed a very specific way.
                     {
-                        ev = new _Events(time[0], 3, color);
+                        ev = new _Events(time[0], EventType.LightRightLasers, color);
                         eventTempo.Add(ev);
-                        ev = new _Events(0, 13, rnd.Next(SlowMinSpinSpeed, SlowMaxSpinSpeed));
+                        ev = new _Events(0, EventType.RotatingRightLasers, rnd.Next(SlowMinSpinSpeed, SlowMaxSpinSpeed));
                         eventTempo.Add(ev);
-                        ev = new _Events(time[1], 2, color);
+                        ev = new _Events(time[1], EventType.LightLeftLasers, color);
                         eventTempo.Add(ev);
-                        ev = new _Events(0, 12, rnd.Next(SlowMinSpinSpeed, SlowMaxSpinSpeed));
+                        ev = new _Events(0, EventType.RotatingLeftLasers, rnd.Next(SlowMinSpinSpeed, SlowMaxSpinSpeed));
                         eventTempo.Add(ev);
                         time[2] = time[1];
                         time[1] = time[0];
@@ -254,11 +255,11 @@ namespace Lolighter.Methods
                     if (time[0] != last && time[0] != time[1] && note._type != 3 && note._cutDirection != 8 && note._cutDirection != lastCut && AllowSpinZoom) //Spin
                     {
                         last = time[0];
-                        ev = new _Events(time[0], 8, 0);
+                        ev = new _Events(time[0], EventType.RotationAllTrackRings, 0);
                         eventTempo.Add(ev);
                         for (int i = 0; i < 8; i++)
                         {
-                            ev = new _Events(time[0] - ((time[0] - time[1]) / 8 * i), 8, 0);
+                            ev = new _Events(time[0] - ((time[0] - time[1]) / 8 * i), EventType.RotationAllTrackRings, 0);
                             eventTempo.Add(ev);
                         }
                     }

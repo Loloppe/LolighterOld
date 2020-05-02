@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Lolighter.Items.Enum;
 
 namespace Lolighter.Methods
 {
@@ -26,7 +27,7 @@ namespace Lolighter.Methods
             {
                 n = noteTemp[i];
 
-                if (n._type == 3) //Skip bomb
+                if (n._type == NoteType.Mine) //Skip Bomb
                 {
                     continue;
                 }
@@ -39,7 +40,7 @@ namespace Lolighter.Methods
                         break;
                     }
                     //Faster than 1/7 but slower than 0, same type and direction or one dot. Remove Slider or Dot spam.
-                    else if (n._time - temp._time < 0.14286 && n._time - temp._time > 0 && ((n._cutDirection == temp._cutDirection) || (n._cutDirection == 8 || temp._cutDirection == 8)) && n._type == temp._type)
+                    else if (n._time - temp._time < 0.14286 && n._time - temp._time > 0 && ((n._cutDirection == temp._cutDirection) || (n._cutDirection == CutDirection.Any || temp._cutDirection == CutDirection.Any)) && n._type == temp._type)
                     {
                         noteTemp.Remove(n);
                         break;
@@ -59,19 +60,19 @@ namespace Lolighter.Methods
                             noteTemp.Remove(temp);
                             break;
                         }
-                        else if (temp._cutDirection == 2 && (n._cutDirection == 4 || n._cutDirection == 6))
+                        else if (temp._cutDirection == CutDirection.Left && (n._cutDirection == CutDirection.UpLeft || n._cutDirection == CutDirection.DownLeft))
                         {
                             n._time = temp._time;
                             noteTemp.Remove(temp);
                             break;
                         }
-                        else if (temp._cutDirection == 3 && (n._cutDirection == 5 || n._cutDirection == 7))
+                        else if (temp._cutDirection == CutDirection.Right && (n._cutDirection == CutDirection.UpRight || n._cutDirection == CutDirection.DownRight))
                         {
                             n._time = temp._time;
                             noteTemp.Remove(temp);
                             break;
                         }
-                        else if (n._cutDirection == 8 && temp._cutDirection != 8)
+                        else if (n._cutDirection == CutDirection.Any && temp._cutDirection != CutDirection.Any)
                         {
                             noteTemp.Remove(n);
                             break;
@@ -85,15 +86,15 @@ namespace Lolighter.Methods
             //Divide notes per type to analyse the flow and make modification.
             foreach (var x in noteTemp)
             {
-                if (x._type == 0)
+                if (x._type == NoteType.Red)
                 {
                     redNotes.Add(x);
                 }
-                else if (x._type == 1)
+                else if (x._type == NoteType.Blue)
                 {
                     blueNotes.Add(x);
                 }
-                else if(x._type == 3)
+                else if (x._type == NoteType.Mine)
                 {
                     tempBomb.Add(x);
                 }
@@ -138,11 +139,11 @@ namespace Lolighter.Methods
             {
                 n = noteTemp[i];
 
-                if (n._type == 3) //Skip bomb
+                if (n._type == NoteType.Mine) //Skip Bomb
                 {
                     continue;
                 }
-                if((n._lineIndex == 0 || n._lineIndex == 3) && n._lineLayer == 1 && n._cutDirection >= 2) //Skip middle layer and left/right lane that are not Down/Up
+                if ((n._lineIndex == Line.Left || n._lineIndex == Line.Right) && n._lineLayer == Layer.Middle && n._cutDirection >= CutDirection.Left) //Skip middle layer and left/right lane that are not Down/Up
                 {
                     continue;
                 }
@@ -151,42 +152,42 @@ namespace Lolighter.Methods
 
                 foreach (_Notes temp in noteTemp) //For each note
                 {
-                    if(temp._time == n._time && temp._lineIndex == n._lineIndex && temp != n) //Same beat and lane but not same note
+                    if (temp._time == n._time && temp._lineIndex == n._lineIndex && temp != n) //Same beat and lane but not same note
                     {
                         if (n._lineLayer == temp._lineLayer + 1) //Note under, skip
                         {
                             found = true;
                             continue;
                         }
-                        else if (n._lineIndex == 1 || n._lineIndex == 2) //Middle lane, skip
+                        else if (n._lineIndex == Line.MiddleLeft || n._lineIndex == Line.MiddleRight) //Middle lane, skip
                         {
                             found = true;
                             continue;
                         }
-                        else if (((n._lineLayer == 0 && temp._lineLayer == 2) || (n._lineLayer == 2 && temp._lineLayer == 0)) && n._cutDirection != 2 && n._cutDirection != 3 && temp._cutDirection != 2 && temp._cutDirection != 3)
+                        else if (((n._lineLayer == Layer.Bottom && temp._lineLayer == Layer.Top) || (n._lineLayer == Layer.Top && temp._lineLayer == Layer.Bottom)) && n._cutDirection != CutDirection.Left && n._cutDirection != CutDirection.Right && temp._cutDirection != CutDirection.Left && temp._cutDirection != CutDirection.Right)
                         {
                             //Side note on side, skip
                             found = true;
                             continue;
                         }
                     }
-                    else if(temp._time == n._time && temp._lineIndex != n._lineIndex) //Same beat but not same lane, skip
+                    else if (temp._time == n._time && temp._lineIndex != n._lineIndex) //Same beat but not same lane, skip
                     {
                         found = true;
                         continue;
                     }
                 }
 
-                if(found) //found = skip
+                if (found) //found = skip
                 {
                     continue;
                 }
 
-                if(n._lineLayer > 0) //Lower the note to flatten
+                if (n._lineLayer > 0) //Lower the note to flatten
                 {
-                    if(n._lineIndex == 1 || n._lineIndex == 2)
+                    if (n._lineIndex == Line.MiddleLeft || n._lineIndex == Line.MiddleRight)
                     {
-                        n._lineLayer = 0;
+                        n._lineLayer = Layer.Bottom;
                     }
                     else
                     {
@@ -202,7 +203,7 @@ namespace Lolighter.Methods
                 foreach (var y in noteTemp) //For each note
                 {
                     //Close to eachother, red and blue, not same note.
-                    if (y._time - x._time <= 0.26 && y._time - x._time >= 0 && x != y && x._type == 0 && y._type == 1)
+                    if (y._time - x._time <= 0.26 && y._time - x._time >= 0 && x != y && x._type == NoteType.Red && y._type == NoteType.Blue)
                     {
                         //Same line and layer
                         if (y._lineLayer == x._lineLayer && y._lineIndex == x._lineIndex)
@@ -210,17 +211,17 @@ namespace Lolighter.Methods
                             //Fix stacked notes
                             switch (x._lineIndex)
                             {
-                                case 0:
-                                    y._lineIndex = 1;
+                                case Line.Left:
+                                    y._lineIndex = Line.MiddleLeft;
                                     break;
-                                case 1:
-                                    y._lineIndex = 2;
+                                case Line.MiddleLeft:
+                                    y._lineIndex = Line.MiddleRight;
                                     break;
-                                case 2:
-                                    y._lineIndex = 3;
+                                case Line.MiddleRight:
+                                    y._lineIndex = Line.Right;
                                     break;
-                                case 3:
-                                    x._lineIndex = 2;
+                                case Line.Right:
+                                    x._lineIndex = Line.MiddleRight;
                                     break;
                             }
                         }
@@ -228,33 +229,33 @@ namespace Lolighter.Methods
                         else if (y._lineIndex - x._lineIndex == 1)
                         {
                             //red going right
-                            if (x._cutDirection == 3 || x._cutDirection == 5 || x._cutDirection == 7)
+                            if (x._cutDirection == CutDirection.Right || x._cutDirection == CutDirection.UpRight || x._cutDirection == CutDirection.DownRight)
                             {
                                 switch (y._lineIndex)
                                 {
-                                    case 1:
+                                    case Line.MiddleLeft:
                                         y._lineIndex++;
                                         break;
-                                    case 2:
+                                    case Line.MiddleRight:
                                         y._lineIndex++;
                                         break;
-                                    case 3:
+                                    case Line.Right:
                                         x._lineIndex--;
                                         break;
                                 }
                             }
                             //blue going left
-                            else if (y._cutDirection == 2 || y._cutDirection == 4 || y._cutDirection == 6)
+                            else if (y._cutDirection == CutDirection.Left || y._cutDirection == CutDirection.UpLeft || y._cutDirection == CutDirection.DownLeft)
                             {
                                 switch (x._lineIndex)
                                 {
-                                    case 0:
+                                    case Line.Left:
                                         y._lineIndex++;
                                         break;
-                                    case 1:
+                                    case Line.MiddleLeft:
                                         x._lineIndex--;
                                         break;
-                                    case 2:
+                                    case Line.MiddleRight:
                                         x._lineIndex--;
                                         break;
                                 }
@@ -264,38 +265,38 @@ namespace Lolighter.Methods
                         else if (x._lineIndex - y._lineIndex == 1)
                         {
                             //red going right
-                            if (x._cutDirection == 3 || x._cutDirection == 5 || x._cutDirection == 7)
+                            if (x._cutDirection == CutDirection.Right || x._cutDirection == CutDirection.UpRight || x._cutDirection == CutDirection.DownRight)
                             {
                                 switch (x._lineIndex)
                                 {
-                                    case 1:
+                                    case Line.MiddleLeft:
                                         y._lineIndex += 2;
                                         x._lineIndex--;
                                         break;
-                                    case 2:
+                                    case Line.MiddleRight:
                                         y._lineIndex++;
                                         x._lineIndex -= 2;
                                         break;
-                                    case 3:
+                                    case Line.Right:
                                         y._lineIndex++;
                                         x._lineIndex -= 2;
                                         break;
                                 }
                             }
                             //blue going left
-                            else if (y._cutDirection == 2 || y._cutDirection == 4 || y._cutDirection == 6)
+                            else if (y._cutDirection == CutDirection.Left || y._cutDirection == CutDirection.UpLeft || y._cutDirection == CutDirection.DownLeft)
                             {
                                 switch (y._lineIndex)
                                 {
-                                    case 0:
+                                    case Line.Left:
                                         y._lineIndex += 2;
                                         x._lineIndex--;
                                         break;
-                                    case 1:
+                                    case Line.MiddleLeft:
                                         y._lineIndex++;
                                         x._lineIndex -= 2;
                                         break;
-                                    case 2:
+                                    case Line.MiddleRight:
                                         y._lineIndex++;
                                         x._lineIndex -= 2;
                                         break;
@@ -304,26 +305,26 @@ namespace Lolighter.Methods
                         }
 
                         //Flatten if possible
-                        if ((y._lineIndex == 1 || y._lineIndex == 2) && y._lineLayer == 1)
+                        if ((y._lineIndex == Line.MiddleLeft || y._lineIndex == Line.MiddleRight) && y._lineLayer == Layer.Middle)
                         {
-                            y._lineLayer = 0;
+                            y._lineLayer = Layer.Bottom;
                         }
-                        if ((x._lineIndex == 1 || x._lineIndex == 2) && x._lineLayer == 1)
+                        if ((x._lineIndex == Line.MiddleLeft || x._lineIndex == Line.MiddleRight) && x._lineLayer == Layer.Middle)
                         {
-                            x._lineLayer = 0;
+                            x._lineLayer = Layer.Bottom;
                         }
-                        if (y._lineLayer == 2 && y._cutDirection == 1 || y._cutDirection == 6 || y._cutDirection == 7)
+                        if (y._lineLayer == Layer.Top && y._cutDirection == CutDirection.Down || y._cutDirection == CutDirection.DownLeft || y._cutDirection == CutDirection.DownRight)
                         {
-                            y._lineLayer = 0;
+                            y._lineLayer = Layer.Bottom;
                         }
-                        if (x._lineLayer == 2 && x._cutDirection == 1 || x._cutDirection == 6 || x._cutDirection == 7)
+                        if (x._lineLayer == Layer.Top && x._cutDirection == CutDirection.Down || x._cutDirection == CutDirection.DownLeft || x._cutDirection == CutDirection.DownRight)
                         {
-                            x._lineLayer = 0;
+                            x._lineLayer = Layer.Bottom;
                         }
 
                         if (x._lineIndex == y._lineIndex) //on top of eachother
                         {
-                            if(x._lineIndex < 2)
+                            if (x._lineIndex < Line.MiddleRight)
                             {
                                 y._lineIndex++;
                             }
@@ -334,51 +335,51 @@ namespace Lolighter.Methods
                         }
                         if ((x._lineIndex == y._lineIndex - 1 || x._lineIndex == y._lineIndex - 2) && x._lineLayer == y._lineLayer) //side by side, it's preference here.
                         {
-                            if (x._cutDirection == 5)
+                            if (x._cutDirection == CutDirection.UpRight)
                             {
-                                x._cutDirection = 0;
+                                x._cutDirection = CutDirection.Up;
                             }
-                            else if (x._cutDirection == 7)
+                            else if (x._cutDirection == CutDirection.DownRight)
                             {
-                                x._cutDirection = 1;
+                                x._cutDirection = CutDirection.Down;
                             }
-                            else if (x._cutDirection == 4)
+                            else if (x._cutDirection == CutDirection.UpLeft)
                             {
-                                x._cutDirection = 0;
+                                x._cutDirection = CutDirection.Up;
                             }
-                            else if (x._cutDirection == 6)
+                            else if (x._cutDirection == CutDirection.DownLeft)
                             {
-                                x._cutDirection = 1;
+                                x._cutDirection = CutDirection.Down;
                             }
-                            else if(x._cutDirection == 3)
+                            else if (x._cutDirection == CutDirection.Right)
                             {
-                                x._lineIndex = 1;
-                                x._lineLayer = 0;
-                                y._lineIndex = 3;
-                                y._lineLayer = 1;
+                                x._lineIndex = Line.MiddleLeft;
+                                x._lineLayer = Layer.Bottom;
+                                y._lineIndex = Line.Right;
+                                y._lineLayer = Layer.Middle;
                             }
-                            else if (y._cutDirection == 5)
+                            else if (y._cutDirection == CutDirection.UpRight)
                             {
-                                y._cutDirection = 0;
+                                y._cutDirection = CutDirection.Up;
                             }
-                            else if (y._cutDirection == 7)
+                            else if (y._cutDirection == CutDirection.DownRight)
                             {
-                                y._cutDirection = 1;
+                                y._cutDirection = CutDirection.Down;
                             }
-                            else if (y._cutDirection == 4)
+                            else if (y._cutDirection == CutDirection.UpLeft)
                             {
-                                y._cutDirection = 0;
+                                y._cutDirection = CutDirection.Up;
                             }
-                            else if (y._cutDirection == 6)
+                            else if (y._cutDirection == CutDirection.DownLeft)
                             {
-                                y._cutDirection = 1;
+                                y._cutDirection = CutDirection.Down;
                             }
-                            else if(y._cutDirection == 2)
+                            else if (y._cutDirection == CutDirection.Left)
                             {
-                                y._lineIndex = 2;
-                                y._lineLayer = 0;
-                                x._lineIndex = 0;
-                                x._lineLayer = 1;
+                                y._lineIndex = Line.MiddleRight;
+                                y._lineLayer = Layer.Bottom;
+                                x._lineIndex = Line.Left;
+                                x._lineLayer = Layer.Middle;
                             }
                         }
                     }
@@ -389,26 +390,26 @@ namespace Lolighter.Methods
 
             foreach (var x in noteTemp) //For each note
             {
-                if(x._type == 0 && x._lineIndex == 0 && (x._cutDirection == 5 || x._cutDirection == 7)) //Red and left lane with Up-Right or Down-Right cut direction.
+                if (x._type == NoteType.Red && x._lineIndex == Line.Left && (x._cutDirection == CutDirection.UpRight || x._cutDirection == CutDirection.DownRight)) //Red and left lane with Up-Right or Down-Right cut direction.
                 {
-                    if(x._cutDirection == 5) //Up-Right
+                    if (x._cutDirection == CutDirection.UpRight) //Up-Right
                     {
-                        x._cutDirection = 0; //Up
+                        x._cutDirection = CutDirection.Up; //Up
                     }
-                    else if (x._cutDirection == 7) //Down-Right
+                    else if (x._cutDirection == CutDirection.DownRight) //Down-Right
                     {
-                        x._cutDirection = 1; //Down
+                        x._cutDirection = CutDirection.Down; //Down
                     }
                 }
-                else if (x._type == 1 && x._lineIndex == 3 && (x._cutDirection == 4 || x._cutDirection == 6)) //Blue and right lane with Up-Left or Down-Left cut direction.
+                else if (x._type == NoteType.Blue && x._lineIndex == Line.Right && (x._cutDirection == CutDirection.UpLeft || x._cutDirection == CutDirection.DownLeft)) //Blue and right lane with Up-Left or Down-Left cut direction.
                 {
-                    if (x._cutDirection == 4) //Up-Left
+                    if (x._cutDirection == CutDirection.UpLeft) //Up-Left
                     {
-                        x._cutDirection = 0; //Up
+                        x._cutDirection = CutDirection.Up; //Up
                     }
-                    else if (x._cutDirection == 6) //Down-Left
+                    else if (x._cutDirection == CutDirection.DownLeft) //Down-Left
                     {
-                        x._cutDirection = 1; //Down
+                        x._cutDirection = CutDirection.Down; //Down
                     }
                 }
             }
@@ -458,7 +459,7 @@ namespace Lolighter.Methods
                         start = i;
                     }
                 }
-                else if (notes[i + 1]._time - n._time <= 0.35 && notes[i + 1]._time - n._time>= 0.30 && (value == 0 || value == 0.33333333333)) // 1/3 rhythm
+                else if (notes[i + 1]._time - n._time <= 0.35 && notes[i + 1]._time - n._time >= 0.30 && (value == 0 || value == 0.33333333333)) // 1/3 rhythm
                 {
                     if (!found) //Start of the rhythm
                     {
@@ -476,7 +477,7 @@ namespace Lolighter.Methods
                         start = i;
                     }
                 }
-                else if (notes[i + 1]._time - n._time < 0.22 && notes[i + 1]._time - n._time>= 0.18 && (value == 0 || value == 0.2)) // 1/5 rhythm
+                else if (notes[i + 1]._time - n._time < 0.22 && notes[i + 1]._time - n._time >= 0.18 && (value == 0 || value == 0.2)) // 1/5 rhythm
                 {
                     if (!found) //Start of the rhythm
                     {
@@ -512,7 +513,7 @@ namespace Lolighter.Methods
                         start = i;
                     }
                 }
-                else //Not the same rhythm as before or rhythm above 1.1 beat
+                else //Not the same rhythm as before or rhythm above 1.1
                 {
                     if (found)
                     {
@@ -570,20 +571,20 @@ namespace Lolighter.Methods
             {
                 for (int d = notes.Count() - 1; d > 0; d--) //For each note in reverse-order
                 {
-                    if (notes[d]._type == 1 && notes[d]._lineIndex == 0)
+                    if (notes[d]._type == NoteType.Blue && notes[d]._lineIndex == Line.Left)
                     {
-                        notes[d]._lineIndex = 1;
-                        if(notes[d]._lineLayer == 1)
+                        notes[d]._lineIndex = Line.MiddleLeft;
+                        if (notes[d]._lineLayer == Layer.Middle)
                         {
-                            notes[d]._lineLayer = 0;
+                            notes[d]._lineLayer = Layer.Bottom;
                         }
                     }
-                    else if (notes[d]._type == 0 && notes[d]._lineIndex == 3)
+                    else if (notes[d]._type == NoteType.Red && notes[d]._lineIndex == Line.Right)
                     {
-                        notes[d]._lineIndex = 2;
-                        if (notes[d]._lineLayer == 1)
+                        notes[d]._lineIndex = Line.MiddleRight;
+                        if (notes[d]._lineLayer == Layer.Middle)
                         {
-                            notes[d]._lineLayer = 0;
+                            notes[d]._lineLayer = Layer.Bottom;
                         }
                     }
                 }

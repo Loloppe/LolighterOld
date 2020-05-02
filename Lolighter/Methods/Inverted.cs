@@ -1,6 +1,7 @@
 ﻿using Lolighter.Items;
 using System.Collections.Generic;
 using System.Linq;
+using static Lolighter.Items.Enum;
 
 namespace Lolighter.Methods
 {
@@ -15,7 +16,7 @@ namespace Lolighter.Methods
             {
                 n = noteTemp[i];
 
-                if (n._type == 3) //If bomb, skip
+                if (n._type == NoteType.Mine) //If Bomb, skip
                 {
                     continue;
                 }
@@ -53,31 +54,31 @@ namespace Lolighter.Methods
 
                 switch (n._cutDirection) //Based on the cut direction, change the layer of the note.
                 {
-                    case 0:
-                        n._lineLayer = 0;
+                    case CutDirection.Up:
+                        n._lineLayer = Layer.Bottom;
                         break;
-                    case 1:
-                        n._lineLayer = 2;
+                    case CutDirection.Down:
+                        n._lineLayer = Layer.Top;
                         break;
-                    case 2:
-                        n._lineIndex = 3;
+                    case CutDirection.Left:
+                        n._lineIndex = Line.Right;
                         break;
-                    case 3:
-                        n._lineIndex = 0;
+                    case CutDirection.Right:
+                        n._lineIndex = Line.Left;
                         break;
-                    case 4:
-                        n._lineLayer = 0;
+                    case CutDirection.UpLeft:
+                        n._lineLayer = Layer.Bottom;
                         break;
-                    case 5:
-                        n._lineLayer = 0;
+                    case CutDirection.UpRight:
+                        n._lineLayer = Layer.Bottom;
                         break;
-                    case 6:
-                        n._lineLayer = 2;
+                    case CutDirection.DownLeft:
+                        n._lineLayer = Layer.Top;
                         break;
-                    case 7:
-                        n._lineLayer = 2;
+                    case CutDirection.DownRight:
+                        n._lineLayer = Layer.Top;
                         break;
-                    case 8:
+                    case CutDirection.Any:
                         break;
                 }
             }
