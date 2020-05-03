@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows;
-using Microsoft.Win32;
 using Newtonsoft.Json;
 using Lolighter.Items;
 using Lolighter.Methods;
 using System.Globalization;
+using System.Diagnostics;
+using System.Windows;
+using Microsoft.Win32;
+using Osu2Saber.ViewModel;
 
 namespace Lolighter
 {
@@ -16,51 +18,51 @@ namespace Lolighter
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Rootobject map;
+        public static Rootobject map = new Rootobject();
+        public static MainWindow window;
         private String extension;
+        public static readonly MainWindowViewModel Osu2BS = new MainWindowViewModel();
 
         public MainWindow()
         {
             InitializeComponent();
+            window = this;
         }
-        
+
         #region File
 
         private void OpenFile_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog open = new OpenFileDialog
             {
-                Filter = "Dat|*.dat",
-                Multiselect = true
+                Filter = "dat osz zip|*.dat;*.osz;*.zip",
+                Multiselect = false
             };
 
             if (open.ShowDialog() == true)
             {
-                extension = System.IO.Path.GetExtension(open.FileName);
-                foreach (String file in open.FileNames)
+                extension = Path.GetExtension(open.FileName);
+                String file = open.FileNames[0];
+
+                if (extension == ".dat")
                 {
                     var mapFile = new MapFile(file);
-                    string jsonData = File.ReadAllText(mapFile.Path);
-                    if(extension == ".dat")
-                    {
-                        map = JsonConvert.DeserializeObject<Rootobject>(jsonData);
-                    }
+                    string data = File.ReadAllText(mapFile.Path);
+                    map = JsonConvert.DeserializeObject<Rootobject>(data);
                 }
+                else if (extension == ".osz" || extension == ".zip")
+                {
+                    OsuWindow o = new OsuWindow();
+                    o.Show();
+                    Osu2BS.SetPath(AppDomain.CurrentDomain.BaseDirectory);
+                    Osu2BS.OszFiles.Add(file);
+                }
+
                 try
                 {
-                    if (extension == ".dat")
+                    if (extension == ".dat" && map._notes != null)
                     {
-                       if(map._notes != null)
-                       {
-                            SaveFile.IsEnabled = true;
-                            SimpleLighter.IsEnabled = true;
-                            SlidersMadness.IsEnabled = true;
-                            InvertedMadness.IsEnabled = true;
-                            BombGenerator.IsEnabled = true;
-                            LoloppeGenerator.IsEnabled = true;
-                            Downscale.IsEnabled = true;
-                            OpenFile.IsEnabled = false;
-                        }
+                        IsReady();
                     }
                 }
                 catch (Exception)
@@ -75,14 +77,23 @@ namespace Lolighter
         {
             try
             {
-                string path = FileName.Text+extension;
+                string path = FileName.Text+".dat";
+
                 using (StreamWriter wr = new StreamWriter(path))
-                    if(extension == ".dat")
-                    {
-                        wr.WriteLine(JsonConvert.SerializeObject(map));
-                    }
+                {
+                    wr.WriteLine(JsonConvert.SerializeObject(map));
+                }
 
                 MessageBox.Show("A new file has been created");
+
+                ProcessStartInfo dir = new ProcessStartInfo
+                {
+                    Arguments = AppDomain.CurrentDomain.BaseDirectory,
+                    FileName = "explorer.exe"
+                };
+
+                Process.Start(dir);
+
                 SimpleLighter.IsEnabled = false;
                 SaveFile.IsEnabled = false;
                 SlidersMadness.IsEnabled = false;
@@ -98,26 +109,30 @@ namespace Lolighter
             }
         }
 
+        public static void IsReady()
+        {
+            window.SaveFile.IsEnabled = true;
+            window.SimpleLighter.IsEnabled = true;
+            window.SlidersMadness.IsEnabled = true;
+            window.InvertedMadness.IsEnabled = true;
+            window.BombGenerator.IsEnabled = true;
+            window.LoloppeGenerator.IsEnabled = true;
+            window.Downscale.IsEnabled = true;
+            window.OpenFile.IsEnabled = false;
+        }
+
         #endregion
 
         #region Modification
 
         private void SlidersMadness_Click(object sender, RoutedEventArgs e)
         {
-            List<_Notes> noteTemp = new List<_Notes>();
-
-            if (extension == ".dat")
-            {
-                noteTemp = new List<_Notes>(map._notes);
-                map._notes = null;
-            }
+            List<_Notes> noteTemp = new List<_Notes>(map._notes);
+            map._notes = null;
 
             noteTemp = Sliders.MakeSliders(noteTemp, Convert.ToDouble(Limiter.Text, CultureInfo.InvariantCulture), AllowLimiter.IsChecked.GetValueOrDefault());
 
-            if (extension == ".dat")
-            {
-                map._notes = noteTemp.ToArray();
-            }
+            map._notes = noteTemp.ToArray();
 
             SlidersMadness.IsEnabled = false;
         }
@@ -126,14 +141,11 @@ namespace Lolighter
         {
             List<_Notes> noteTempo = null;
 
-            if (extension == ".dat")
+            noteTempo = new List<_Notes>(map._notes);
+            noteTempo = noteTempo.OrderBy(a => a._time).ToList();
+            if (map._events != null)
             {
-                noteTempo = new List<_Notes>(map._notes);
-                noteTempo = noteTempo.OrderBy(a => a._time).ToList();
-                if (map._events != null)
-                {
-                    map._events = null;
-                }
+                map._events = null;
             }
 
             List<_Events> eventTempo = Light.CreateLight(noteTempo, Convert.ToDouble(ColorOffset.Text, CultureInfo.InvariantCulture), Convert.ToDouble(ColorSwapSpeed.Text, CultureInfo.InvariantCulture),
@@ -141,92 +153,56 @@ namespace Lolighter
                 Convert.ToInt16(SlowMinSpinSpeed.Text), Convert.ToInt16(SlowMaxSpinSpeed.Text), Convert.ToInt16(FastMinSpinSpeed.Text), Convert.ToInt16(FastMaxSpinSpeed.Text));
 
             List<_Events> sorted = eventTempo.OrderBy(o => o._time).ToList();
-            
-            if (extension == ".dat")
-            {
-                map._events = sorted.ToArray();
-            }
+
+            map._events = sorted.ToArray();
 
             SimpleLighter.IsEnabled = false;
         }
 
         private void InvertedMadness_Click(object sender, RoutedEventArgs e)
         {
-            List<_Notes> noteTemp = new List<_Notes>();
-
-            if (extension == ".dat")
-            {
-                noteTemp = new List<_Notes>(map._notes);
-                map._notes = null;
-            }
+            List<_Notes>  noteTemp = new List<_Notes>(map._notes);
+            map._notes = null;
 
             noteTemp = Inverted.MakeInverted(noteTemp, Convert.ToDouble(Limiter.Text, CultureInfo.InvariantCulture), AllowLimiter.IsChecked.GetValueOrDefault());
 
-            if (extension == ".dat")
-            {
-                map._notes = noteTemp.ToArray();
-            }
+            map._notes = noteTemp.ToArray();
 
             InvertedMadness.IsEnabled = false;
         }
 
         private void BombGenerator_Click(object sender, RoutedEventArgs e)
         {
-            List<_Notes> noteTemp = new List<_Notes>();
-
-            if (extension == ".dat")
-            {
-                noteTemp = new List<_Notes>(map._notes);
-                map._notes = null;
-            }
+            List<_Notes>  noteTemp = new List<_Notes>(map._notes);
+            map._notes = null;
 
             noteTemp = Bomb.CreateBomb(noteTemp);
 
-            if (extension == ".dat")
-            {
-                map._notes = noteTemp.ToArray();
-            }
+            map._notes = noteTemp.ToArray();
 
             BombGenerator.IsEnabled = false;
         }
 
         private void LoloppeGenerator_Click(object sender, RoutedEventArgs e)
         {
-            List<_Notes> noteTemp = new List<_Notes>();
-            
-
-            if (extension == ".dat")
-            {
-                noteTemp = new List<_Notes>(map._notes);
-                map._notes = null;
-            }
+            List<_Notes> noteTemp = new List<_Notes>(map._notes);
+            map._notes = null;
 
             noteTemp = Loloppe.LoloppeGen(noteTemp);
 
-            if (extension == ".dat")
-            {
-                map._notes = noteTemp.ToArray();
-            }
+            map._notes = noteTemp.ToArray();
 
             LoloppeGenerator.IsEnabled = false;
         }
 
         private void Downscaler_Click(object sender, RoutedEventArgs e)
         {
-            List<_Notes> noteTemp = new List<_Notes>();
-
-            if (extension == ".dat")
-            {
-                noteTemp = new List<_Notes>(map._notes);
-                map._notes = null;
-            }
+            List<_Notes> noteTemp = new List<_Notes>(map._notes);
+            map._notes = null;
 
             noteTemp = Downscaler.Downscale(noteTemp);
 
-            if (extension == ".dat")
-            {
-                map._notes = noteTemp.ToArray();
-            }
+            map._notes = noteTemp.ToArray();
 
             Downscale.IsEnabled = false;
         }
@@ -244,6 +220,5 @@ namespace Lolighter
             }
         }
 
-        
     }
 }
