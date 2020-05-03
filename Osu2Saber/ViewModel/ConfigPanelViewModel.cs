@@ -115,7 +115,7 @@ namespace Osu2Saber.ViewModel
             get => Osu2BsConverter.PreferHarder;
         }
 
-        public bool HandleHitSlider
+        public bool IgnoreHitSlider
         {
             set { ConvertAlgorithm.IgnoreHitSlider = value; }
             get => ConvertAlgorithm.IgnoreHitSlider;

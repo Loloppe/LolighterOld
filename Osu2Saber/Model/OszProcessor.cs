@@ -52,9 +52,12 @@ namespace Osu2Saber.Model
             using (var archive = ZipFile.Read(oszPath))
             {
                 archive.FlattenFoldersOnExtract = true;
-                foreach (var entry in archive)
+                foreach (var entry in archive.Entries)
                 {
-                    entry.Extract(OutDir, ExtractExistingFileAction.OverwriteSilently);
+                    if(!File.Exists(OutDir + "\\" + entry.FileName))
+                    {
+                        entry.Extract(OutDir, ExtractExistingFileAction.OverwriteSilently);
+                    }
                 }
             }
         }
