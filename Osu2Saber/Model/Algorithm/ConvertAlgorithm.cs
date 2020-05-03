@@ -17,7 +17,7 @@ namespace Osu2Saber.Model.Algorithm
         public static bool GenerateAllStrobe = true;
         public static bool RandomizeColor = false;
         public static bool OnlyMakeTimingNote = false;
-        public static bool CreateDouble = false;
+        public static bool CreateDouble = true;
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
@@ -26,10 +26,11 @@ namespace Osu2Saber.Model.Algorithm
         int EnoughIntervalForSymMs = 800; //is used to determine to set a symmetric note
         float EnoughInterval = 3f;  //is used to determine whether to reset cut direction
         float EnoughIntervalForSym = 2f; //is used to determine to set a symmetric note
-        public static float EnoughIntervalBetweenNotes = 0.250f;
+        public static float EnoughIntervalBetweenNotes = 0.125f;
         public static int Mix = 2;
         public static double LightOffset = 0.0D;
         public static double LimitStacked = 2;
+        public static string PatternToUse = "All";
 
         protected Beatmap org;
         protected SaberBeatmap dst;
@@ -1582,10 +1583,12 @@ namespace Osu2Saber.Model.Algorithm
         #region Process for patterns
         private void MapReader()
         {
-            PatternCreator("All");
-            //PatternCreator("Complex");
-            //PatternCreator("Random");
-            //PatternCreator("RandomStream");
+            if(PatternToUse != "All" && PatternToUse != "Complex" && PatternToUse != "Random" && PatternToUse != "RandomStream")
+            {
+                PatternToUse = "All";
+            }
+
+            PatternCreator(PatternToUse);
         }
 
         void PatternCreator(string pattern)

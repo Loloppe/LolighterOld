@@ -85,6 +85,12 @@ namespace Osu2Saber.ViewModel
             get => Mp3toOggConverter.GenerateAudio;
         }
 
+        public string PatternToUse
+        {
+            set { ConvertAlgorithm.PatternToUse = value; }
+            get => ConvertAlgorithm.PatternToUse;
+        }
+
         public bool RandomizeColor
         {
             set { ConvertAlgorithm.RandomizeColor = value; }

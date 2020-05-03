@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Lolighter" xmlns:View="clr-namespace:Osu2Saber.View;assembly=Osu2Saber"
         mc:Ignorable="d"
-        Title="Osu" Height="251.5" Width="268.5">
+        Title="Osu" Height="367.5" Width="268.5" ResizeMode="NoResize">
     <Grid>
         <View:ConfigPanel HorizontalAlignment="Right" Height="Auto" Margin="0,0,1.5,0.5" Width="262"/>
-        <Button x:Name="button" Content="Generate" HorizontalAlignment="Left" Margin="10,146,0,0" VerticalAlignment="Top" Width="238" Height="64" Click="Button_Click"/>
+        <Button x:Name="button" Content="Generate" HorizontalAlignment="Left" Margin="10,266,0,0" VerticalAlignment="Top" Width="238" Height="64" Click="Button_Click"/>
     </Grid>
 </Window>

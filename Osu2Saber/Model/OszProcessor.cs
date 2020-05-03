@@ -33,7 +33,10 @@ namespace Osu2Saber.Model
             this.oszPath = oszPath;
             OszName = Path.GetFileNameWithoutExtension(oszPath);
             OutDir = Path.Combine(WorkDir, Path.GetFileNameWithoutExtension(oszPath));
-            Directory.CreateDirectory(OutDir);
+            if (!Directory.Exists(OutDir))
+            {
+                Directory.CreateDirectory(OutDir);
+            }
 
             Decompress();
             ListOsuFiles();
@@ -41,7 +44,11 @@ namespace Osu2Saber.Model
 
         void Decompress()
         {
-            Directory.CreateDirectory(OutDir);
+            if (!Directory.Exists(OutDir))
+            {
+                Directory.CreateDirectory(OutDir);
+            }
+
             using (var archive = ZipFile.Read(oszPath))
             {
                 archive.FlattenFoldersOnExtract = true;
