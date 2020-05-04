@@ -258,7 +258,6 @@ namespace Osu2Saber.Model.Algorithm
 
             if(CreateDouble)
             {
-                List<Note> toRemove = new List<Note>();
                 var rightNotes = Notes.Where(note => note._type == (int)(NoteType.Blue)).ToList();
                 var leftNotes = Notes.Where(note => note._type == (int)(NoteType.Red)).ToList();
                 newRight = RemoveExcessNotes(rightNotes);
@@ -268,7 +267,7 @@ namespace Osu2Saber.Model.Algorithm
                     newRight.Add(note);
                 }
                 newRight = newRight.OrderBy(note => note._time).ToList();
-                for (int i = newRight.Count() - 1; i > 0; i--)
+                for (int i = newRight.Count() - 1; i > 2; i--)
                 {
                     if (newRight[i]._time - newRight[i - 1]._time >= -0.01 && newRight[i]._time - newRight[i - 1]._time <= 0.01 && newRight[i - 2]._time - newRight[i - 3]._time >= 0.1)
                     {
