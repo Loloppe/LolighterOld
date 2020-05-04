@@ -22,6 +22,8 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
+### Version 2.3
+You can now select a specific .osu difficulty file.
 ### Version 2.2
 Removed gallops generation when "Double" is activated.
 ### Version 2.1
