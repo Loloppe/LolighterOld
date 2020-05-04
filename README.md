@@ -22,10 +22,10 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-
+### Version 2.2
+Removed gallops generation when "Double" is activated.
 ### Version 2.1
 Fixed some crash. Added new features to the converter. Renamed some stuff.
-
 ### Version 2.0
 Added a modified version of Osu2Saber (https://github.com/tmokmss/Osu2Saber) to Lolighter. Only some parts of the program is used (similar to a library). LGPL-3.0 license and whole source-code included.
 Added osuBMParser https://github.com/N3bby/osuBMParser (which is necessary to use Osu2Saber). MIT license and whole source-code included.
