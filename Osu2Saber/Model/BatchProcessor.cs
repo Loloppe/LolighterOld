@@ -39,6 +39,7 @@ namespace Osu2Saber.Model
 
         public Task BatchProcess()
         {
+
             var tasks = TargetFiles.Select(file => Task.Run(() => Process(file)));
             return Task.WhenAll(tasks);
         }

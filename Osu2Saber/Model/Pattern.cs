@@ -519,7 +519,7 @@ namespace Osu2Saber.Model
             {
                 do
                 {
-                    id = ConvertAlgorithm.RandNumber(0, 17);
+                    id = ConvertAlgorithm.RandNumber(0, 18);
                 } while (id == patternID || id == 11 || id == 4);
 
                 patternID = id;
@@ -1128,6 +1128,24 @@ namespace Osu2Saber.Model
                     note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.UpLeft);
                     Complex.Add(note);
                     note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    break;
+                case 17: // Generic cross-stream
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.UpLeft);
                     Complex.Add(note);
                     break;
             }

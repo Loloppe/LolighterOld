@@ -20,7 +20,6 @@ namespace Lolighter
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("This might take a while");
             IsEnabled = false;
 
             await Task.Run(() => MainWindow.Osu2BS.ProcessBatch());

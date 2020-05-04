@@ -55,6 +55,7 @@ namespace Lolighter
                     OsuWindow o = new OsuWindow();
                     o.Show();
                     Osu2BS.SetPath(AppDomain.CurrentDomain.BaseDirectory);
+                    Osu2BS.OszFiles.Clear();
                     Osu2BS.OszFiles.Add(file);
                 }
 

@@ -1,9 +1,11 @@
 ﻿using Ionic.Zip;
+using Microsoft.Win32;
 using osuBMParser;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows;
 
 namespace Osu2Saber.Model
 {
@@ -64,8 +66,22 @@ namespace Osu2Saber.Model
 
         void ListOsuFiles()
         {
-            var filesInFull = Directory.GetFiles(OutDir, "*.osu");
-            OsuFiles = filesInFull.Select(path => Path.GetFileName(path)).ToArray();
+            OsuFiles = null;
+
+            while (OsuFiles == null)
+            {
+                OpenFileDialog open = new OpenFileDialog
+                {
+                    Filter = "osu|*.osu",
+                    Multiselect = false,
+                    InitialDirectory = OutDir
+                };
+
+                if (open.ShowDialog() == true)
+                {
+                    OsuFiles = new[] { open.SafeFileName };
+                }
+            }
         }
 
         Beatmap LoadOsuFile(string oszName)
@@ -87,8 +103,8 @@ namespace Osu2Saber.Model
         public IEnumerable<Beatmap> LoadOsuFiles()
         {
             var beatmaps = OsuFiles
-                .Select(file => LoadOsuFile(file))
-                .Where(map => map != null);
+            .Select(file => LoadOsuFile(file))
+            .Where(map => map != null);
             return beatmaps;
         }
     }
