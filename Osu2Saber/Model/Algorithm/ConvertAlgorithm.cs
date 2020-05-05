@@ -2,9 +2,7 @@
 using osuBMParser;
 using System;
 using System.Collections.Generic;
-using System.Drawing.Printing;
 using System.Linq;
-using System.Windows;
 
 namespace Osu2Saber.Model.Algorithm
 {
@@ -252,8 +250,6 @@ namespace Osu2Saber.Model.Algorithm
 
         void RemoveExcessNotes()
         {
-            int count = 0;
-
             var rightNotes = Notes.Where(note => note._type == (int)(NoteType.Blue)).ToList();
             var leftNotes = Notes.Where(note => note._type == (int)(NoteType.Red)).ToList();
 
@@ -291,8 +287,6 @@ namespace Osu2Saber.Model.Algorithm
                 {
                     if (newRight[i]._time - newRight[i - 1]._time >= -0.01 && newRight[i]._time - newRight[i - 1]._time <= 0.01)
                     {
-                        count++;
-                        Console.Write(count.ToString());
                         newRight.Remove(newRight[i]); // Doesn't matter between i or i - 1 since the Automapper will overwrite it anyway.
                     }
                 }
