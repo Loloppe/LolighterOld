@@ -1,6 +1,5 @@
 ﻿
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using System.Windows;
 using Lolighter.Items;

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows;
 
 namespace Osu2Saber.Model
 {
@@ -35,10 +34,7 @@ namespace Osu2Saber.Model
             this.oszPath = oszPath;
             OszName = Path.GetFileNameWithoutExtension(oszPath);
             OutDir = Path.Combine(WorkDir, Path.GetFileNameWithoutExtension(oszPath));
-            if (!Directory.Exists(OutDir))
-            {
-                Directory.CreateDirectory(OutDir);
-            }
+            Directory.CreateDirectory(OutDir);
 
             Decompress();
             ListOsuFiles();
@@ -46,20 +42,13 @@ namespace Osu2Saber.Model
 
         void Decompress()
         {
-            if (!Directory.Exists(OutDir))
-            {
-                Directory.CreateDirectory(OutDir);
-            }
-
+            Directory.CreateDirectory(OutDir);
+            OutDir = OutDir.TrimEnd();
             using (var archive = ZipFile.Read(oszPath))
             {
-                archive.FlattenFoldersOnExtract = true;
                 foreach (var entry in archive.Entries)
                 {
-                    if(!File.Exists(OutDir + "\\" + entry.FileName))
-                    {
-                        entry.Extract(OutDir, ExtractExistingFileAction.OverwriteSilently);
-                    }
+                    entry.Extract(OutDir, ExtractExistingFileAction.OverwriteSilently);
                 }
             }
         }

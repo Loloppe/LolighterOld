@@ -35,7 +35,7 @@
         <TextBlock HorizontalAlignment="Left" Margin="14,191,0,0" TextWrapping="Wrap" Text="Complex: Complex jumpstream" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="14,207,0,0" TextWrapping="Wrap" Text="Random: Select pattern randomly" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="13,225,0,0" TextWrapping="Wrap" Text="RandomStream: Random bottom row with no pattern" VerticalAlignment="Top"/>
-        <CheckBox IsChecked="{Binding GenerateGallops}" Content="Gallops" HorizontalAlignment="Left" Margin="15,39,0,0" VerticalAlignment="Top" ToolTip="If Double is activated, this will attempt to remove gallops"/>
+        <CheckBox IsChecked="{Binding GenerateGallops}" Content="Gallops" HorizontalAlignment="Left" Margin="15,39,0,0" VerticalAlignment="Top" ToolTip="If ticked with Double, generate gallops"/>
         <CheckBox IsChecked="{Binding AllTopUp}" Content="All Up-Top" HorizontalAlignment="Left" Margin="115,77,0,0" VerticalAlignment="Top" ToolTip="Make all the Up notes top layer"/>
 
     </Grid>
