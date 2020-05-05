@@ -2,7 +2,9 @@
 using osuBMParser;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
+using System.Windows;
 
 namespace Osu2Saber.Model.Algorithm
 {
@@ -13,11 +15,13 @@ namespace Osu2Saber.Model.Algorithm
         public static bool GenerateLight = true;
         public static bool AllBottom = false;
         public static bool AllUpDown = false;
-        public static bool GenerateAudio = true;
+        public static bool GenerateAudio = false;
         public static bool GenerateAllStrobe = true;
         public static bool RandomizeColor = false;
         public static bool OnlyMakeTimingNote = false;
         public static bool CreateDouble = true;
+        public static bool GenerateGallops = false;
+        public static bool AllTopUp = false;
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
@@ -26,7 +30,7 @@ namespace Osu2Saber.Model.Algorithm
         int EnoughIntervalForSymMs = 800; //is used to determine to set a symmetric note
         float EnoughInterval = 3f;  //is used to determine whether to reset cut direction
         float EnoughIntervalForSym = 2f; //is used to determine to set a symmetric note
-        public static float EnoughIntervalBetweenNotes = 0.125f;
+        public static float EnoughIntervalBetweenNotes = 0.250f;
         public static int Mix = 2;
         public static double LightOffset = 0.0D;
         public static double LimitStacked = 2;
@@ -67,7 +71,6 @@ namespace Osu2Saber.Model.Algorithm
         public void Convert()
         {
             MakeHitObjects();
-            FixOffset();
             if (!OnlyMakeTimingNote)
             {
                 RemoveExcessNotes();
@@ -77,10 +80,10 @@ namespace Osu2Saber.Model.Algorithm
                 LogicChecker();
                 LogicChecker();
             }
-            /*if(AllUPTop)
+            if(AllTopUp)
             {
-                AllUpTop(); //Lazy way of doing jumpstreams.
-            } */
+                AllUpTop();
+            }
             if (AllBottom)
             {
                 BottomDisplacement();
@@ -88,10 +91,6 @@ namespace Osu2Saber.Model.Algorithm
             if (AllUpDown)
             {
                 UpDown();
-            }
-            if (GenerateLight)
-            {
-                //MakeLightEffect();
             }
         }
 
@@ -134,9 +133,8 @@ namespace Osu2Saber.Model.Algorithm
                         }
                     }
                 }
-                else if (obj is HitSpinner)
+                else if (obj is HitSpinner temp)
                 {
-                    var temp = (HitSpinner)obj;
                     AddNote(temp.Time, temp.Position.x, temp.Position.y);
 
                     // this is just a nuisance at many times
@@ -254,25 +252,29 @@ namespace Osu2Saber.Model.Algorithm
 
         void RemoveExcessNotes()
         {
-            List<Note> newRight;
+            int count = 0;
 
-            if(CreateDouble)
+            var rightNotes = Notes.Where(note => note._type == (int)(NoteType.Blue)).ToList();
+            var leftNotes = Notes.Where(note => note._type == (int)(NoteType.Red)).ToList();
+
+            var newRight = RemoveExcessNotes(rightNotes);
+            var newLeft = RemoveExcessNotes(leftNotes);
+
+            foreach (var note in newLeft)
             {
-                var rightNotes = Notes.Where(note => note._type == (int)(NoteType.Blue)).ToList();
-                var leftNotes = Notes.Where(note => note._type == (int)(NoteType.Red)).ToList();
-                newRight = RemoveExcessNotes(rightNotes);
-                var newLeft = RemoveExcessNotes(leftNotes);
-                foreach (var note in newLeft)
-                {
-                    newRight.Add(note);
-                }
-                newRight = newRight.OrderBy(note => note._time).ToList();
+                newRight.Add(note);
+            }
+
+            newRight = newRight.OrderBy(note => note._time).ToList();
+
+            if (CreateDouble && !GenerateGallops) // Stream + Double
+            {
                 for (int i = newRight.Count() - 1; i > 2; i--)
                 {
                     if (newRight[i]._time - newRight[i - 1]._time >= -0.01 && newRight[i]._time - newRight[i - 1]._time <= 0.01 && newRight[i - 2]._time - newRight[i - 3]._time >= 0.1)
                     {
-                        //Gallops
-                        if(newRight[i - 2]._type == newRight[i - 1]._type)
+                        // Gallops
+                        if (newRight[i - 2]._type == newRight[i - 1]._type)
                         {
                             newRight.Remove(newRight[i - 1]);
                         }
@@ -283,9 +285,17 @@ namespace Osu2Saber.Model.Algorithm
                     }
                 }
             }
-            else
+            else if (!CreateDouble) // Stream
             {
-                newRight = RemoveExcessNotes(Notes);
+                for (int i = newRight.Count() - 1; i > 0; i--)
+                {
+                    if (newRight[i]._time - newRight[i - 1]._time >= -0.01 && newRight[i]._time - newRight[i - 1]._time <= 0.01)
+                    {
+                        count++;
+                        Console.Write(count.ToString());
+                        newRight.Remove(newRight[i]); // Doesn't matter between i or i - 1 since the Automapper will overwrite it anyway.
+                    }
+                }
             }
 
             notes = newRight.OrderBy(note => note._time).ToList();
@@ -309,14 +319,6 @@ namespace Osu2Saber.Model.Algorithm
                     newNotes.Add(note);
 
                     lastTime = note._time;
-
-                    // we want to add at most 3 sequence of notes with short gaps
-                    /*if (rushCount < 0 && savedNote != null)
-                    {
-                        newNotes.Add(savedNote);
-                        rushCount = 0;
-                        savedNote = null;
-                    }*/
                 }
                 else
                 {
@@ -358,23 +360,14 @@ namespace Osu2Saber.Model.Algorithm
         {
             var unit = 60.0 / bpm / 8.0;
             var sectionIdx = (int)Math.Round(((timeMs) / 1000.0 / unit));
-            double offset = 0.125;
-            if (GenerateAudio)
+            if(isMania)
             {
-                if(isMania)
-                {
-                    offset = offset - 0.125;
-                }
-                return Math.Round(sectionIdx / 8.0, 3, MidpointRounding.AwayFromZero) + offset;
+                return Math.Round(sectionIdx / 8.0, 3, MidpointRounding.AwayFromZero) + 0.125;
             }
             else
             {
-                if(!isMania)
-                {
-                    offset = offset + 0.0625;
-                }
-                return Math.Round(sectionIdx / 8.0, 3, MidpointRounding.AwayFromZero) + offset;
-            }    
+                return Math.Round(sectionIdx / 8.0, 3, MidpointRounding.AwayFromZero);
+            }
         }
 
         protected int ConvertBeat(double timeBeat)
@@ -625,420 +618,7 @@ namespace Osu2Saber.Model.Algorithm
         }
         #endregion
 
-        #region Process for light event
-        // TODO 
-        // Implement a better colors switch/pattern for no strobe.
-        private void MakeLightEffect()
-        {
-            double lastSpin = new double(); //Var to stop spin-stack and also a time check.
-            double lastSide = new double();
-            double[] time = new double[4]; //Now, before, before-before, before-before-before, in this order.
-            //Now, endtime, before, before-endtime for Hold Note
-            //0.0D = Default value for double, similar to NULL for int.
-            int[] light = new int[3]; //Now, before, before-before.
-            int lastLight = 0;
-            double offset = LightOffset;
-            double timer = notes[0]._time + (offset); //Timer start on the first note.
-            int count = 0; //Light counter, stop at maximum.
-            int maximum = 2; //Maximum number of light per same time.
-            EventLightValue color = (EventLightValue)3; //Set color start value.
-
-            void ResetTimer()
-            {
-                color = (EventLightValue)3;
-                offset = LightOffset;
-                timer = notes[0]._time + (offset);
-                count = 0;
-                for(int i = 0; i < 2; i++)
-                {
-                    time[i] = 0.0D;
-                    light[i] = 0;
-                }
-                time[2] = 0.0D;
-                time[3] = 0.0D;
-            }
-
-            EventLightValue Inverse(EventLightValue temp)
-            {
-                if ((int)temp >= 4)
-                    return temp - 4;
-                else
-                    return temp + 4;
-            }
-
-            void TimerDuration(double multiplier = 4) //Receive beat multiplier as var.
-            {
-                timer = time[0];
-                if (RandomizeColor)
-                {
-                    color = Inverse(color); //TODO make good/less stroby light.
-                }
-                if (timer >= offset)
-                {
-                    if(!RandomizeColor)
-                    {
-                        color = Inverse(color);
-                    }
-                    offset = offset +  multiplier;
-                }
-            }
-
-            void CreateGenericLight(int min, int max) //Receive laser speed as var.
-            {
-                if (time[0] == time[1])
-                {
-                    if (count < maximum)
-                    {
-                        count++;
-                    }
-                }
-                else
-                {
-                    count = 0;
-                    if(isMania)
-                    {
-                        for (int i = 0; i < 2; i++)
-                        {
-                            if (light[i] != 0 && GenerateAllStrobe && time[0] - time[1] <= 2.5)
-                            {
-                                ev = new Event(time[0] - (time[0] - time[1]) / 2, (EventType)light[i], EventLightValue.Off);
-                                events.Add(ev);
-                            }
-                            light[i] = 0;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < 3; i++)
-                        {
-                            if (light[i] != 0 && GenerateAllStrobe && time[0] - time[1] <= 2.5)
-                            {
-                                ev = new Event(time[0] - (time[0] - time[1]) / 2, (EventType)light[i], EventLightValue.Off);
-                                events.Add(ev);
-                            }
-                            if (light[i] == 4)
-                            {
-                                ev = new Event(time[0] - (time[0] - time[1]) / 2, (EventType)0, EventLightValue.Off);
-                                events.Add(ev);
-                                ev = new Event(time[0] - (time[0] - time[1]) / 2, (EventType)1, EventLightValue.Off);
-                                events.Add(ev);
-                            }
-                            light[i] = 0;
-                        }
-                    }
-                }
-
-                if (count == maximum)
-                {
-                    return;
-                }
-
-                if(light[0] != 0)
-                {
-                    light[1] = light[0];
-                }
-
-                if(isMania)
-                {
-                    if (lastLight == 2)
-                    {
-                        light[0] = 3;
-                    }
-                    else
-                    {
-                        light[0] = 2;
-                    }
-                }
-                else
-                {
-                    light[0] = RandNumber(2, 5);
-                }
-
-                switch (light[0]) //Add light
-                {
-                    case 2:
-                        ev = new Event(time[0], EventType.LightLeftLasers, color);
-                        events.Add(ev);
-                        ev = new Event(time[0] + 0.05, EventType.RotatingLeftLasers, RandNumber(min, max));
-                        events.Add(ev);
-                        break;
-                    case 3:
-                        ev = new Event(time[0], EventType.LightRightLasers, color);
-                        events.Add(ev);
-                        ev = new Event(time[0] + 0.05, EventType.RotatingRightLasers, RandNumber(min, max));
-                        events.Add(ev);
-                        break;
-                    case 4:
-                        ev = new Event(time[0], EventType.LightBackTopLasers, color);
-                        events.Add(ev);
-                        ev = new Event(time[0], EventType.LightTrackRingNeons, color);
-                        events.Add(ev);
-                        ev = new Event(time[0], EventType.LightBottomBackSideLasers, color);
-                        events.Add(ev);
-                        break;
-                }
-
-                lastLight = light[0];
-            }
-
-            if (isMania)
-            {
-                ResetTimer();
-                maximum = 2;
-
-                foreach (var obj in org.HitObjects) //Process specific light (Side/Neon) using time.
-                {
-                    time[0] = ConvertTime(obj.Time);
-
-                    if (time[0] == notes[0]._time && time[1] == 0.0D)
-                    {
-                        ev = new Event(time[0], EventType.RotationAllTrackRings, 0);
-                        events.Add(ev);
-                        ev = new Event(time[0], EventType.RotationSmallTrackRings, 0);
-                        events.Add(ev);
-                    }
-
-                    if (time[0] >= offset && offset > notes[0]._time)
-                    {
-                        ev = new Event(offset, EventType.RotationAllTrackRings, 0); //Add a spin at timer.
-                        events.Add(ev);
-                        if (count == 0) //Only add zoom every 2.
-                        {
-                            ev = new Event(offset, EventType.RotationSmallTrackRings, 0); 
-                            events.Add(ev);
-                            count = 1;
-                        }
-                        else
-                        {
-                            count--;
-                        }
-                    }
-                    //If there's a quarter between two double parallel notes and timer didn't pass the check.
-                    else if (time[1] - time[2] == 0.25 && time[3] == time[2] && time[1] == time[0] && timer < offset) 
-                    {
-                        ev = new Event(time[0], EventType.RotationAllTrackRings, 0);
-                        events.Add(ev);
-                    }
-
-                    TimerDuration();
-
-                    if ((time[0] == time[1]) && (time[1] != 0.0D && time[0] != lastSpin)) 
-                    {
-                        if (lastSpin != 0.0D && time[0] - lastSpin <= 2.5)
-                        {
-                            ev = new Event(time[0] - (time[0] - lastSpin) / 2, EventType.LightBackTopLasers, (EventLightValue.Off));
-                            events.Add(ev);
-                            if(time[0] - lastSide >= 0.25)
-                            {
-                                ev = new Event(time[0] - (time[0] - lastSpin) / 2, EventType.LightBottomBackSideLasers, (EventLightValue.Off));
-                                events.Add(ev);
-                            }
-                            ev = new Event(time[0] - (time[0] - lastSpin) / 2, EventType.LightTrackRingNeons, (EventLightValue.Off));
-                            events.Add(ev);
-                        }
-                        lastSpin = time[0];
-                        ev = new Event(time[0], EventType.LightBackTopLasers, color);
-                        events.Add(ev);
-                        if(time[0] - lastSide >= 0.25) //Limit Side-laser to 1/4 beat spam
-                        {
-                            ev = new Event(time[0], EventType.LightBottomBackSideLasers, color);
-                            events.Add(ev);
-                            lastSide = time[0];
-                        }
-                        ev = new Event(time[0], EventType.LightTrackRingNeons, color);
-                        events.Add(ev);
-                    }
-
-                    for (int i = 3; i > 0; i--)
-                    {
-                        time[i] = time[i - 1];
-                    }
-                }
-
-                ResetTimer();
-               
-                foreach (var obj in org.HitObjects) //Process all HitObjects using time.
-                {
-                    time[0] = ConvertTime(obj.Time);
-
-                    TimerDuration();
-
-                    if (time[0] - time[1] < 0.25) //Lower than fourth
-                    {
-                        if (time[0] != lastSpin && time[0] != time[1])
-                        {
-                            lastSpin = time[0];
-                            ev = new Event(time[0], EventType.RotationAllTrackRings, 0);
-                            events.Add(ev);
-                            for (int i = 0; i < 8; i++)
-                            {
-                                ev = new Event(time[0] - ((time[0] - time[1]) / 8 * i), EventType.RotationAllTrackRings, 0);
-                                events.Add(ev);
-                            }
-                        }
-
-                        CreateGenericLight(10, 15);
-                    }
-                    else if (time[0] - time[1] >= 0.25 || time[0] - time[1] < 0.5) //Quarter to half
-                    {
-                        CreateGenericLight(5, 10);
-                    }
-                    else if (time[0] - time[1] == 0.5) //Half and above
-                    {
-                        CreateGenericLight(0, 5);
-                    }
-
-                    time[1] = time[0];
-                }
-            }
-            else //Is not osu!mania, could use some love.
-            {
-                ResetTimer();
-                maximum = 3;
-
-                foreach (var obj in org.HitObjects)
-                {
-                    time[0] = ConvertTime(obj.Time);
-
-                    if (time[0] == notes[0]._time && time[1] == 0.0D)
-                    {
-                        ev = new Event(time[0], EventType.RotationAllTrackRings, 0);
-                        events.Add(ev);
-                        ev = new Event(time[0], EventType.RotationSmallTrackRings, 0);
-                        events.Add(ev);
-                    }
-
-                    if (time[0] >= offset && offset > notes[0]._time)
-                    {
-                        ev = new Event(offset, EventType.RotationAllTrackRings, 0); //Add a spin at timer.
-                        events.Add(ev);
-                        if (count == 0) //Only add zoom every 2.
-                        {
-                            ev = new Event(offset, EventType.RotationSmallTrackRings, 0);
-                            events.Add(ev);
-                            count = 1;
-                        }
-                        else
-                        {
-                            count--;
-                        }
-                    }
-
-                    TimerDuration();
-                }
-
-                ResetTimer();
-
-                foreach (var obj in org.HitObjects) //Process all HitObjects using time.
-                {
-                    time[0] = ConvertTime(obj.Time);
-
-                    TimerDuration();
-
-                    if (time[0] - time[1] < 0.25) //Lower than fourth
-                    {
-                        if (time[0] != lastSpin && time[0] != time[1])
-                        {
-                            lastSpin = time[0];
-                            ev = new Event(time[0], EventType.RotationAllTrackRings, 0);
-                            events.Add(ev);
-                            for (int i = 0; i < 8; i++)
-                            {
-                                ev = new Event(time[0] - ((time[0] - time[1]) / 8 * i), EventType.RotationAllTrackRings, 0);
-                                events.Add(ev);
-                            }
-                        }
-
-                        CreateGenericLight(10, 15);
-                    }
-                    else if (time[0] - time[1] >= 0.25 && time[0] - time[1] < 0.5) //Quarter to half
-                    {
-                        CreateGenericLight(5, 10);
-                    }
-                    else if (time[0] - time[1] >= 0.5) //Half and above
-                    {
-                        CreateGenericLight(0, 5);
-                    }
-
-                    time[1] = time[0];
-                }
-            }
-
-            events = events.OrderBy(ev => ev._time).ToList();
-        }
-        #endregion
-
-        #region Process for obstacles
-        private void AddObstacles()
-        {
-            double lastBottomBeat = 0, latestBottomBeat = 0;
-            double lastUpperBeat = 0, latestUpperBeat = 0;
-            double beforeLatestBottomBeat = 0;
-            bool isDuringBottom = false;
-            //for (var i = 0; i < notes.Count; i++)
-            foreach (var note in notes)
-            {
-                if (isDuringBottom)
-                {
-                    if (IsOnUpper(note))
-                    {
-                        isDuringBottom = false;
-                        latestUpperBeat = note._time;
-                    }
-                    else
-                    {
-                        beforeLatestBottomBeat = latestBottomBeat;
-                        latestBottomBeat = note._time;
-                    }
-                }
-                else
-                {
-                    if (IsOnUpper(note))
-                    {
-                        lastUpperBeat = note._time;
-                    }
-                    else
-                    {
-                        isDuringBottom = true;
-                        lastBottomBeat = note._time;
-                    }
-                }
-
-                if (isDuringBottom) continue;
-                if (latestUpperBeat < latestBottomBeat) continue;
-                if (lastUpperBeat > lastBottomBeat) continue;
-
-                var timeDiff = latestBottomBeat - lastBottomBeat;
-                if (timeDiff > 3 && timeDiff < 8)
-                {
-                    AddCeiling((lastBottomBeat + lastUpperBeat) / 2, (latestBottomBeat * 0.1 + beforeLatestBottomBeat * 1.9) / 2);
-                }
-                latestBottomBeat = 0;
-            }
-        }
-
-        private bool IsOnUpper(Note note)
-        {
-            if (note._lineLayer > 0) return true;
-            return false;
-        }
-
-        private void AddCeiling(double beginBeat, double endBeat)
-        {
-            var obs = new Obstacle(beginBeat, Line.Left, ObstacleType.Ceiling, endBeat - beginBeat, (int)Line.MaxNum);
-            Obstacles.Add(obs);
-        }
-        #endregion
-
         #region Process for logic
-
-        void FixOffset()
-        {
-            foreach (Note n in notes)
-            {
-                n._time += 0.15; // Offset fix
-            }
-        }
 
         void LogicChecker()
         {
@@ -1247,18 +827,24 @@ namespace Osu2Saber.Model.Algorithm
                             notes[i]._lineLayer--;
                         }
                     }
+                }
+            }
 
-                    if((n._lineIndex > notes[i + 1]._lineIndex + 1 && n._type == 0) || (n._lineIndex < notes[i + 1]._lineIndex - 1 && n._type == 1))
+            for (int i = 0; i < notes.Count() - 1; i++)
+            {
+                if (notes[i + 1]._time - notes[i]._time <= 0.02 && notes[i + 1]._time - notes[i]._time >= -0.02)
+                {
+                    if ((notes[i]._lineIndex > notes[i + 1]._lineIndex + 1 && notes[i]._type == 0) || (notes[i]._lineIndex < notes[i + 1]._lineIndex - 1 && notes[i]._type == 1))
                     {
                         int tempo;
-                        tempo = n._lineIndex;
-                        n._lineIndex = notes[i + 1]._lineIndex;
+                        tempo = notes[i]._lineIndex;
+                        notes[i]._lineIndex = notes[i + 1]._lineIndex;
                         notes[i + 1]._lineIndex = tempo;
                     }
                 }
             }
 
-            //Fix hitbox issue
+                    //Fix hitbox issue
             for (int i = 0; i < notes.Count() - 1; i++)
             {
                 Note n = notes[i];
@@ -2169,7 +1755,7 @@ namespace Osu2Saber.Model.Algorithm
         {
             foreach (var note in Notes)
             {
-                if ((note._lineLayer == 0 || note._lineLayer == 1) && note._cutDirection == (int)CutDirection.Up)
+                if ((note._lineLayer == 0 || note._lineLayer == 1) && (note._cutDirection == (int)CutDirection.Up || note._cutDirection == (int)CutDirection.UpLeft || note._cutDirection == (int)CutDirection.UpRight))
                 {
                     note._lineLayer = 2;
                 }

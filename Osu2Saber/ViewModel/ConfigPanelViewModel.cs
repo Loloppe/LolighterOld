@@ -61,6 +61,12 @@ namespace Osu2Saber.ViewModel
             get => ConvertAlgorithm.AllUpDown;
         }
 
+        public bool AllTopUp
+        {
+            set { ConvertAlgorithm.AllTopUp = value; }
+            get => ConvertAlgorithm.AllTopUp;
+        }
+
         public bool AllBottom
         {
             set { ConvertAlgorithm.AllBottom = value; }
@@ -79,6 +85,12 @@ namespace Osu2Saber.ViewModel
             get => ConvertAlgorithm.GenerateAllStrobe;
         }
 
+        public bool GenerateGallops
+        {
+            set { ConvertAlgorithm.GenerateGallops = value; }
+            get => ConvertAlgorithm.GenerateGallops;
+        }
+        
         public bool GenerateAudio
         {
             set { Mp3toOggConverter.GenerateAudio = value; }
