@@ -23,15 +23,7 @@ namespace Osu2Saber.Model.Algorithm
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
-        int NegligibleTimeDiffMs = 500; //is used for the first note and event time gap
-        int EnoughIntervalMs = 1500;  //is used to determine whether to reset cut direction
-        int EnoughIntervalForSymMs = 800; //is used to determine to set a symmetric note
-        float EnoughInterval = 3f;  //is used to determine whether to reset cut direction
-        float EnoughIntervalForSym = 2f; //is used to determine to set a symmetric note
-        public static float EnoughIntervalBetweenNotes = 0.250f;
-        public static int Mix = 2;
-        public static double LightOffset = 0.0D;
-        public static double LimitStacked = 2;
+        public static double EnoughIntervalBetweenNotes = 0.250f;
         public static string PatternToUse = "All";
 
         protected Beatmap org;
@@ -51,7 +43,9 @@ namespace Osu2Saber.Model.Algorithm
         public List<Event> Events => events;
         public List<Obstacle> Obstacles => obstacles;
         public List<Note> Notes => notes;
-        
+
+        public List<int> UpCut = new List<int>() { 0, 4, 5 };
+        public List<int> DownCut = new List<int>() { 1, 6, 7 };
 
         public ConvertAlgorithm(Beatmap osu, SaberBeatmap bs)
         {
@@ -60,9 +54,6 @@ namespace Osu2Saber.Model.Algorithm
             bpm = dst._beatsPerMinute;
             offset = osu.TimingPoints[0].Offset;
             isMania = org.Mode == 3;
-
-            EnoughIntervalMs = Math.Min(EnoughIntervalMs, ConvertBeat(EnoughInterval));
-            EnoughIntervalForSym = Math.Min(EnoughIntervalForSym, ConvertBeat(EnoughInterval));
         }
 
         // You may override this method for better map generation
@@ -72,10 +63,7 @@ namespace Osu2Saber.Model.Algorithm
             if (!OnlyMakeTimingNote)
             {
                 RemoveExcessNotes();
-                SetCutDirection();
-                AddSymmetryNotes();
                 MapReader();
-                LogicChecker();
                 LogicChecker();
             }
             if(AllTopUp)
@@ -97,7 +85,7 @@ namespace Osu2Saber.Model.Algorithm
         {
             foreach (var obj in org.HitObjects)
             {
-                if (obj.Time < NegligibleTimeDiffMs) continue;
+                if (obj.Time < EnoughIntervalBetweenNotes) continue;
                 if(obj is HoldNote && !IgnoreHitSlider)
                 {
                     var temp = (HoldNote)obj;
@@ -149,7 +137,7 @@ namespace Osu2Saber.Model.Algorithm
         void AddNote(int timeMs, float posx, float posy)
         {
             var (line, layer) = DeterminePosition(posx, posy);
-            var note = new Note(ConvertTime(timeMs), line, layer, DetermineColor(line, layer), CutDirection.Any);
+            var note = new Note(ConvertTime(timeMs), line, layer, 0, CutDirection.Any);
             notes.Add(note);
         }
 
@@ -196,7 +184,7 @@ namespace Osu2Saber.Model.Algorithm
             {
                 diff = RandNumber(-1, 2);
             }
-            if (DetermineColor(line, 0) == NoteType.Red)
+            if (DetermineColor(line) == NoteType.Red)
             {
                 beforeLayerLeft += diff;
                 beforeLayerLeft = beforeLayerLeft >= (int)Layer.MaxNum ? (int)Layer.Top : beforeLayerLeft;
@@ -227,7 +215,7 @@ namespace Osu2Saber.Model.Algorithm
             return (int)Layer.Top;
         }
 
-        NoteType DetermineColor(int line, int layer)
+        NoteType DetermineColor(int line)
         {
             if (line < 2)
             {
@@ -250,81 +238,55 @@ namespace Osu2Saber.Model.Algorithm
 
         void RemoveExcessNotes()
         {
-            var rightNotes = Notes.Where(note => note._type == (int)(NoteType.Blue)).ToList();
-            var leftNotes = Notes.Where(note => note._type == (int)(NoteType.Red)).ToList();
+            notes = notes.OrderBy(note => note._time).ToList();
 
-            var newRight = RemoveExcessNotes(rightNotes);
-            var newLeft = RemoveExcessNotes(leftNotes);
-
-            foreach (var note in newLeft)
-            {
-                newRight.Add(note);
-            }
-
-            newRight = newRight.OrderBy(note => note._time).ToList();
-
+            notes = RemoveExcessNotes(notes);
+            
             if (CreateDouble && !GenerateGallops) // Stream + Double
             {
-                for (int i = newRight.Count() - 1; i > 2; i--)
+                for (int i = notes.Count() - 1; i > 1; i--)
                 {
-                    if (newRight[i]._time - newRight[i - 1]._time >= -0.01 && newRight[i]._time - newRight[i - 1]._time <= 0.01 && newRight[i - 2]._time - newRight[i - 3]._time >= 0.1)
+                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i - 1]._time - notes[i - 2]._time <= EnoughIntervalBetweenNotes)
                     {
-                        // Gallops
-                        if (newRight[i - 2]._type == newRight[i - 1]._type)
-                        {
-                            newRight.Remove(newRight[i - 1]);
-                        }
-                        else if (newRight[i - 2]._type == newRight[i]._type)
-                        {
-                            newRight.Remove(newRight[i]);
-                        }
+                        notes.Remove(notes[i]);
+                    }
+                }
+                for (int i = notes.Count() - 2; i > 0; i--)
+                {
+                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i + 1]._time - notes[i]._time <= EnoughIntervalBetweenNotes)
+                    {
+                        notes.Remove(notes[i]);
                     }
                 }
             }
-            else if (!CreateDouble) // Stream
-            {
-                for (int i = newRight.Count() - 1; i > 0; i--)
-                {
-                    if (newRight[i]._time - newRight[i - 1]._time >= -0.01 && newRight[i]._time - newRight[i - 1]._time <= 0.01)
-                    {
-                        newRight.Remove(newRight[i]); // Doesn't matter between i or i - 1 since the Automapper will overwrite it anyway.
-                    }
-                }
-            }
-
-            notes = newRight.OrderBy(note => note._time).ToList();
         }
 
         List<Note> RemoveExcessNotes(List<Note> notes)
         {
             double lastTime = -100;
-            var newNotes = new List<Note>();
-            var rushCount = 0;
-            Note savedNote = null;
+            var keepNotes = new List<Note>();
+            var dbl = false;
 
             foreach (var note in notes)
             {
-                var timeGap = note._time - lastTime;
-                if (timeGap >= EnoughIntervalBetweenNotes)
+                double timeGap = note._time - lastTime;
+                if(timeGap <= 0.01 && timeGap >= -0.01 && CreateDouble && dbl == false)
                 {
-                    // the timeGap is long enough
-                    rushCount = 0;
-
-                    newNotes.Add(note);
-
-                    lastTime = note._time;
+                    dbl = true;
+                    keepNotes.Add(note);
                 }
-                else
+                else if (timeGap <= 0.01 && timeGap >= -0.01 && CreateDouble && dbl == true)
                 {
-                    if (savedNote == null)
-                    {
-                        savedNote = note;
-                        rushCount = 0;
-                    }
-                    rushCount++;
+                    continue;
+                }
+                else if (timeGap >= EnoughIntervalBetweenNotes)
+                {
+                    keepNotes.Add(note);
+                    lastTime = note._time;
+                    dbl = false;
                 }
             }
-            return newNotes;
+            return keepNotes;
         }
 
         double GetBeatDurationIn(int timeMs)
@@ -371,258 +333,44 @@ namespace Osu2Saber.Model.Algorithm
 
         #endregion
 
-        #region Process for cut direction
-        void SetCutDirection()
-        {
-            if (NoDirectionAndPlacement) return;
-            var n = Notes.Count;
-            if (n == 0) return;
-            var rightNotes = Notes.Where(note => note._type == (int)(NoteType.Blue)).ToList();
-            var leftNotes = Notes.Where(note => note._type == (int)(NoteType.Red)).ToList();
-
-            SetCutDirection(rightNotes);
-            SetCutDirection(leftNotes);
-        }
-
-        void SetCutDirection(List<Note> notes)
-        {
-            var n = notes.Count;
-            if (n < 1) return;
-
-            // the first cut direction can be determined independently
-            notes[0]._cutDirection = (int)PickBestDirectionSingle(notes[0]._lineIndex, notes[0]._lineLayer);
-            // the other notes should be determined depending on one before note.
-            for (var i = 1; i < n; i++)
-            {
-                SetCutDirection(notes[i - 1], notes[i]);
-            }
-        }
-
-        void SetCutDirection(Note before, Note now)
-        {
-            var swingFac = Math.Pow(ConvertBeat(now._time - before._time) * 1.0 / EnoughIntervalMs, 1.0 / 2);
-            if (swingFac > 1)
-            {
-                now._cutDirection = (int)PickBestDirectionSingle(now._lineIndex, now._lineLayer);
-                now._cutDirection = (int)PickBestDirectionCont(now, before, swingFac);
-            }
-            else
-            {
-                now._cutDirection = (int)PickBestDirectionCont(now, before, swingFac);
-            }
-        }
-
-        // the best cut direction for each section below
-        //  8  9 10 11
-        //  4  5  6  7
-        //  0  1  2  3 
-        int[] bestDir = new int[] { 6, 1, 1, 7, 2, 8, 8, 3, 4, 0, 0, 5 };
-        CutDirection PickBestDirectionSingle(int line, int layer)
-        {
-            var idx = (int)Line.MaxNum * layer + line;
-            var best = (CutDirection)bestDir[idx];
-            if (best == CutDirection.Any) return PickRandomDirection();
-            return CutDirection.Down;
-        }
-
-        CutDirection PickRandomDirection(DirectionRandomMode mode = DirectionRandomMode.Any)
-        {
-            int min = 0, max = (int)CutDirection.Any;
-            switch (mode)
-            {
-                case DirectionRandomMode.OnlyNormal:
-                    max = (int)CutDirection.Left + 1;
-                    break;
-                case DirectionRandomMode.OnlyDiagonal:
-                    min = (int)CutDirection.DownRight;
-                    break;
-            }
-            return (CutDirection)RandNumber(min, max);
-        }
-
-        // positon difference in each axis after the specified direction of cut
-        static float Sqr2 = (float)Math.Sqrt(2) / 2;
-        float[] lineDiff = new float[] { 0, 0, -1, 1, -Sqr2, Sqr2, -Sqr2, Sqr2 };
-        float[] layerDiff = new float[] { 1, -1, 0, 0, Sqr2, Sqr2, -Sqr2, -Sqr2 };
-
-        CutDirection PickBestDirectionCont(Note now, Note before, double swingAmount)
-        {
-            var lastcut = before._cutDirection;
-            if (lastcut == (int)CutDirection.Any)
-                lastcut = (int)PickRandomDirection();
-
-            // limit factor
-            swingAmount = Math.Max(swingAmount, 1.5);
-
-            // this is where player's hand supposed to be
-            var nowline = before._lineIndex + lineDiff[lastcut] * swingAmount;
-            var nowlayer = before._lineLayer + layerDiff[lastcut] * swingAmount;
-
-            var linegap = now._lineIndex - nowline;
-            var layergap = now._lineLayer - nowlayer;
-            var deg = Math.Atan2(layergap, linegap * 3.0 / 4) * 180 / Math.PI;
-
-            CutDirection i;
-
-            if (now._type == 0)
-            {
-                i = PickDirectionFromDegRed(deg);
-            }
-            else
-            {
-                i = PickDirectionFromDegBlue(deg);
-            }
-
-            //i = PickDirectionFromDeg(deg);
-
-            if(before != null) //This will place notes in a way that we like, the converter will automatically give us the best next direction.
-            {
-                i = LogicChecker(now, before, i);
-            }
-
-            return i;
-        }
-
-        CutDirection PickDirectionFromDeg(double deg)
-        {
-            const double Div = 45;
-            if (deg >= 180 - Div / 2) return CutDirection.Left;
-            if (deg >= 180 - Div * 3 / 2) return CutDirection.UpLeft;
-            if (deg >= 180 - Div * 5 / 2) return CutDirection.Up;
-            if (deg >= 180 - Div * 7 / 2) return CutDirection.UpRight;
-            if (deg >= 180 - Div * 9 / 2) return CutDirection.Right;
-            if (deg >= 180 - Div * 11 / 2) return CutDirection.DownRight;
-            if (deg >= 180 - Div * 13 / 2) return CutDirection.Down;
-            if (deg >= 180 - Div * 15 / 2) return CutDirection.DownLeft;
-            return CutDirection.Left;
-        }
-
-        CutDirection PickDirectionFromDegRed(double deg)
-        {
-            const double Div = 45;
-            if (deg >= 180 - Div / 2) return CutDirection.UpLeft;
-            if (deg >= 180 - Div * 3 / 2) return CutDirection.UpLeft;
-            if (deg >= 180 - Div * 5 / 2) return CutDirection.Up;
-            if (deg >= 180 - Div * 7 / 2) return CutDirection.Up;
-            if (deg >= 180 - Div * 9 / 2) return CutDirection.DownRight;
-            if (deg >= 180 - Div * 11 / 2) return CutDirection.DownRight;
-            if (deg >= 180 - Div * 13 / 2) return CutDirection.Down;
-            if (deg >= 180 - Div * 15 / 2) return CutDirection.Down;
-            return CutDirection.UpLeft;
-        }
-
-        CutDirection PickDirectionFromDegBlue(double deg)
-        {
-            const double Div = 45;
-            if (deg >= 180 - Div / 2) return CutDirection.DownLeft;
-            if (deg >= 180 - Div * 3 / 2) return CutDirection.Up;
-            if (deg >= 180 - Div * 5 / 2) return CutDirection.Up;
-            if (deg >= 180 - Div * 7 / 2) return CutDirection.UpRight;
-            if (deg >= 180 - Div * 9 / 2) return CutDirection.UpRight;
-            if (deg >= 180 - Div * 11 / 2) return CutDirection.Down;
-            if (deg >= 180 - Div * 13 / 2) return CutDirection.Down;
-            if (deg >= 180 - Div * 15 / 2) return CutDirection.DownLeft;
-            return CutDirection.DownLeft;
-        }
-
-        #endregion
-
-        #region Process for adding symmetry notes
-        void AddSymmetryNotes()
-        {
-            var n = Notes.Count;
-            if (n < 2) return;
-
-            var addingNotes = new List<Note>();
-            SymmetryMode symmode = SymmetryMode.Line;
-
-            AddSymmetryNote(null, Notes[0], Notes[1], addingNotes, symmode);
-            for (var i = 1; i < Notes.Count - 1; i++)
-            {
-                var now = Notes[i];
-                AddSymmetryNote(Notes[i - 1], now, Notes[i + 1], addingNotes, symmode);
-            }
-            AddSymmetryNote(Notes[n - 2], Notes[n - 1], null, addingNotes, symmode);
-
-            foreach (var note in addingNotes)
-            {
-                notes.Add(note);
-            }
-            notes = Notes.OrderBy(note => note._time).ToList();
-        }
-
-        void AddSymmetryNote(Note before, Note now, Note after, List<Note> addition, SymmetryMode symmode)
-        {
-            double lastInterval = 0, nextInterval = 0;
-            if (before == null)
-                lastInterval = EnoughIntervalForSymMs * 2;
-            else
-                lastInterval = ConvertBeat(now._time - before._time);
-
-            if (after == null)
-                nextInterval = EnoughIntervalForSymMs * 2;
-            else
-                nextInterval = ConvertBeat(after._time - now._time);
-
-            if (nextInterval > EnoughIntervalForSymMs && lastInterval > EnoughIntervalForSymMs)
-            {
-                var note = GetMirrorNote(now, symmode);
-                if (before != null)
-                {
-                    note._cutDirection = (int)LogicChecker(note, before, (CutDirection)note._cutDirection);
-                }
-                addition.Add(note);
-            }
-        }
-
-        Note GetMirrorNote(Note note, SymmetryMode mode)
-        {
-            int line = 0, layer = 0;
-            switch (mode)
-            {
-                case SymmetryMode.Line:
-                    line = (int)(-note._lineIndex + (int)Line.Right);
-                    layer = note._lineLayer;
-                    break;
-                default:
-                    line = (int)(-note._lineIndex + (int)Line.Right);
-                    layer = (int)(-note._lineLayer + (int)Layer.Top);
-                    break;
-            }
-            var dir = PickOppositeDirection(note._cutDirection, mode);
-            var type = note._type == (int)NoteType.Blue ? NoteType.Red : NoteType.Blue;
-            return new Note(note._time, line, layer, type, dir);
-        }
-
-        // the cut direction for symmetrically placed note
-        int[] lineSym = new int[] { 0, 1, 3, 2, 5, 4, 7, 6 };
-        int[] pointSym = new int[] { 1, 0, 3, 2, 7, 6, 5, 4 };
-        CutDirection PickOppositeDirection(int dir, SymmetryMode mode)
-        {
-            if (dir < 0 || dir >= (int)CutDirection.Any)
-                return CutDirection.Any;
-
-            switch (mode)
-            {
-                case SymmetryMode.Line:
-                    return (CutDirection)lineSym[dir];
-                default:
-                    return (CutDirection)pointSym[dir];
-            }
-        }
-        #endregion
-
         #region Process for logic
 
         void LogicChecker()
         {
-            notes = Notes.OrderBy(note => note._time).ToList();
+            notes = notes.OrderBy(note => note._time).ToList();
 
+            //Fix fused hitbox issue
             for (int i = 0; i < notes.Count() - 1; i++)
             {
                 Note n = notes[i];
 
-                if (notes[i + 1]._time - notes[i]._time <= 0.02 && notes[i + 1]._time - notes[i]._time >= -0.02)
+                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02 && (n._lineLayer == notes[i + 1]._lineLayer || n._lineLayer == notes[i + 1]._lineLayer - 1 || n._lineLayer == notes[i + 1]._lineLayer + 1) && (n._lineIndex == notes[i + 1]._lineIndex || n._lineIndex == notes[i + 1]._lineIndex + 1 || n._lineIndex == notes[i + 1]._lineIndex - 1))
+                {
+                    if (n._type == 0 && n._lineIndex <= 1)
+                    {
+                        notes[i + 1]._lineIndex = n._lineIndex + 2;
+                    }
+                    else if (n._type == 1 && n._lineIndex >= 2)
+                    {
+                        notes[i + 1]._lineIndex = n._lineIndex - 2;
+                    }
+                    else if (n._type == 1 && notes[i + 1]._lineIndex <= 1)
+                    {
+                        n._lineIndex = notes[i + 1]._lineIndex + 2;
+                    }
+                    else if (n._type == 0 && notes[i + 1]._lineIndex >= 2)
+                    {
+                        n._lineIndex = notes[i + 1]._lineIndex - 2;
+                    }
+                }
+            }
+
+            // Make the map flow better
+            for (int i = 0; i < notes.Count() - 1; i++)
+            {
+                Note n = notes[i];
+
+                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02)
                 {
                     switch (n._cutDirection)
                     {
@@ -631,19 +379,19 @@ namespace Osu2Saber.Model.Algorithm
                             {
                                 if (n._type == 0 && n._lineIndex != 0 && n._lineLayer != 1)
                                 {
-                                    notes[i]._lineIndex--;
+                                    n._lineIndex--;
                                 }
                                 else if (n._type == 1 && n._lineIndex != 3 && n._lineLayer != 1)
                                 {
-                                    notes[i]._lineIndex++;
+                                    n._lineIndex++;
                                 }
                                 else if(n._type == 0 && n._lineIndex == 0 && notes[i + 1]._lineLayer != 1)
                                 {
                                     notes[i + 1]._lineIndex++;
                                 }
-                                else if(n._type == 1 && n._lineIndex == 3 && notes[i+1]._lineLayer != 1)
+                                else if(n._type == 1 && n._lineIndex == 3 && notes[i + 1]._lineLayer != 1)
                                 {
-                                    notes[1 + 1]._lineIndex--;
+                                    notes[i + 1]._lineIndex--;
                                 }
                             }
                             break;
@@ -652,11 +400,11 @@ namespace Osu2Saber.Model.Algorithm
                             {
                                 if (n._type == 0 && n._lineIndex != 0 && n._lineLayer != 1)
                                 {
-                                    notes[i]._lineIndex--;
+                                    n._lineIndex--;
                                 }
                                 else if (n._type == 1 && n._lineIndex != 3 && n._lineLayer != 1)
                                 {
-                                    notes[i]._lineIndex++;
+                                    n._lineIndex++;
                                 }
                                 else if (n._type == 0 && n._lineIndex == 0 && notes[i + 1]._lineLayer != 1)
                                 {
@@ -664,7 +412,7 @@ namespace Osu2Saber.Model.Algorithm
                                 }
                                 else if (n._type == 1 && n._lineIndex == 3 && notes[i + 1]._lineLayer != 1)
                                 {
-                                    notes[1 + 1]._lineIndex--;
+                                    notes[i + 1]._lineIndex--;
                                 }
                             }
                             break;
@@ -673,11 +421,11 @@ namespace Osu2Saber.Model.Algorithm
                             {
                                 if(n._lineLayer == 2 || n._lineLayer == 1)
                                 {
-                                    notes[i]._lineLayer--;
+                                    n._lineLayer--;
                                 }
                                 else
                                 {
-                                    notes[i]._lineLayer++;
+                                    n._lineLayer++;
                                 }
                             }
                             break;
@@ -686,11 +434,11 @@ namespace Osu2Saber.Model.Algorithm
                             {
                                 if (n._lineLayer == 2 || n._lineLayer == 1)
                                 {
-                                    notes[i]._lineLayer--;
+                                    n._lineLayer--;
                                 }
                                 else
                                 {
-                                    notes[i]._lineLayer++;
+                                    n._lineLayer++;
                                 }
                             }
                             break;
@@ -701,15 +449,23 @@ namespace Osu2Saber.Model.Algorithm
                                 {
                                     notes[i + 1]._lineIndex = n._lineIndex - 1;
                                     notes[i + 1]._lineLayer = n._lineLayer - 1;
+                                    if(notes[i + 1]._lineLayer == 1)
+                                    {
+                                        notes[i + 1]._lineLayer--;
+                                    }
                                 }
                                 else if ((notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 6) && notes[i + 1]._lineLayer != 2 && notes[i + 1]._lineIndex != 3)
                                 {
-                                    notes[i]._lineIndex = notes[i + 1]._lineIndex + 1;
-                                    notes[i]._lineLayer = notes[i + 1]._lineLayer + 1;
+                                    n._lineIndex = notes[i + 1]._lineIndex + 1;
+                                    n._lineLayer = notes[i + 1]._lineLayer + 1;
+                                    if (n._lineLayer == 1)
+                                    {
+                                        n._lineLayer++;
+                                    }
                                 }
                                 else if(n._type == 1 && n._lineIndex != 3)
                                 {
-                                    notes[i]._lineIndex++;
+                                    n._lineIndex++;
                                 }
                                 else if (notes[i + 1]._type == 0 && notes[i + 1]._lineIndex != 0)
                                 {
@@ -717,7 +473,7 @@ namespace Osu2Saber.Model.Algorithm
                                 }
                                 else if(n._type == 0 && n._lineIndex != 0)
                                 {
-                                    notes[i]._lineIndex--;
+                                    n._lineIndex--;
                                 }
                             }
                             break;
@@ -728,15 +484,23 @@ namespace Osu2Saber.Model.Algorithm
                                 {
                                     notes[i + 1]._lineIndex = n._lineIndex - 1;
                                     notes[i + 1]._lineLayer = n._lineLayer - 1;
+                                    if (notes[i + 1]._lineLayer == 1)
+                                    {
+                                        notes[i + 1]._lineLayer--;
+                                    }
                                 }
                                 else if ((notes[i + 1]._cutDirection == 5 || notes[i + 1]._cutDirection == 7) && notes[i + 1]._lineLayer != 2 && notes[i + 1]._lineIndex != 3)
                                 {
-                                    notes[i]._lineIndex = notes[i + 1]._lineIndex + 1;
-                                    notes[i]._lineLayer = notes[i + 1]._lineLayer + 1;
+                                    n._lineIndex = notes[i + 1]._lineIndex + 1;
+                                    n._lineLayer = notes[i + 1]._lineLayer + 1;
+                                    if (n._lineLayer == 1)
+                                    {
+                                        n._lineLayer++;
+                                    }
                                 }
                                 else if (n._type == 1 && n._lineIndex != 3)
                                 {
-                                    notes[i]._lineIndex++;
+                                    n._lineIndex++;
                                 }
                                 else if (notes[i + 1]._type == 0 && notes[i + 1]._lineIndex != 0)
                                 {
@@ -744,7 +508,7 @@ namespace Osu2Saber.Model.Algorithm
                                 }
                                 else if (n._type == 0 && n._lineIndex != 0)
                                 {
-                                    notes[i]._lineIndex--;
+                                    n._lineIndex--;
                                 }
                             }
                             break;
@@ -755,15 +519,23 @@ namespace Osu2Saber.Model.Algorithm
                                 {
                                     notes[i + 1]._lineIndex = n._lineIndex - 1;
                                     notes[i + 1]._lineLayer = n._lineLayer - 1;
+                                    if (notes[i + 1]._lineLayer == 1)
+                                    {
+                                        notes[i + 1]._lineLayer--;
+                                    }
                                 }
                                 else if ((notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 6) && notes[i + 1]._lineLayer != 2 && notes[i + 1]._lineIndex != 3)
                                 {
-                                    notes[i]._lineIndex = notes[i + 1]._lineIndex + 1;
-                                    notes[i]._lineLayer = notes[i + 1]._lineLayer + 1;
+                                    n._lineIndex = notes[i + 1]._lineIndex + 1;
+                                    n._lineLayer = notes[i + 1]._lineLayer + 1;
+                                    if (n._lineLayer == 1)
+                                    {
+                                        n._lineLayer++;
+                                    }
                                 }
                                 else if (n._type == 1 && n._lineIndex != 3)
                                 {
-                                    notes[i]._lineIndex++;
+                                    n._lineIndex++;
                                 }
                                 else if (notes[i + 1]._type == 0 && notes[i + 1]._lineIndex != 0)
                                 {
@@ -771,7 +543,7 @@ namespace Osu2Saber.Model.Algorithm
                                 }
                                 else if (n._type == 0 && n._lineIndex != 0)
                                 {
-                                    notes[i]._lineIndex--;
+                                    n._lineIndex--;
                                 }
                             }
                             break;
@@ -782,15 +554,23 @@ namespace Osu2Saber.Model.Algorithm
                                 {
                                     notes[i + 1]._lineIndex = n._lineIndex - 1;
                                     notes[i + 1]._lineLayer = n._lineLayer - 1;
+                                    if (notes[i + 1]._lineLayer == 1)
+                                    {
+                                        notes[i + 1]._lineLayer--;
+                                    }
                                 }
                                 else if ((notes[i + 1]._cutDirection == 5 || notes[i + 1]._cutDirection == 7) && notes[i + 1]._lineLayer != 2 && notes[i + 1]._lineIndex != 3)
                                 {
-                                    notes[i]._lineIndex = notes[i + 1]._lineIndex + 1;
-                                    notes[i]._lineLayer = notes[i + 1]._lineLayer + 1;
+                                    n._lineIndex = notes[i + 1]._lineIndex + 1;
+                                    n._lineLayer = notes[i + 1]._lineLayer + 1;
+                                    if (n._lineLayer == 1)
+                                    {
+                                        n._lineLayer++;
+                                    }
                                 }
                                 else if (n._type == 1 && n._lineIndex != 3)
                                 {
-                                    notes[i]._lineIndex++;
+                                    n._lineIndex++;
                                 }
                                 else if (notes[i + 1]._type == 0 && notes[i + 1]._lineIndex != 0)
                                 {
@@ -798,68 +578,52 @@ namespace Osu2Saber.Model.Algorithm
                                 }
                                 else if (n._type == 0 && n._lineIndex != 0)
                                 {
-                                    notes[i]._lineIndex--;
+                                    n._lineIndex--;
                                 }
                             }
                             break;
                         case 8:
                             break;
                     }
-
-                    if((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 1)
-                    {
-                        if(n._cutDirection == 0 || n._cutDirection == 4 || n._cutDirection == 5)
-                        {
-                            notes[i]._lineLayer++;
-                        }
-                        else if(n._cutDirection == 1 || n._cutDirection == 6 || n._cutDirection == 7)
-                        {
-                            notes[i]._lineLayer--;
-                        }
-                        else
-                        {
-                            notes[i]._lineLayer--;
-                        }
-                    }
                 }
             }
 
-            for (int i = 0; i < notes.Count() - 1; i++)
-            {
-                if (notes[i + 1]._time - notes[i]._time <= 0.02 && notes[i + 1]._time - notes[i]._time >= -0.02)
-                {
-                    if ((notes[i]._lineIndex > notes[i + 1]._lineIndex + 1 && notes[i]._type == 0) || (notes[i]._lineIndex < notes[i + 1]._lineIndex - 1 && notes[i]._type == 1))
-                    {
-                        int tempo;
-                        tempo = notes[i]._lineIndex;
-                        notes[i]._lineIndex = notes[i + 1]._lineIndex;
-                        notes[i + 1]._lineIndex = tempo;
-                    }
-                }
-            }
-
-                    //Fix hitbox issue
+            //Fix vision
             for (int i = 0; i < notes.Count() - 1; i++)
             {
                 Note n = notes[i];
 
-                if (n._time == notes[i + 1]._time && (n._lineLayer == notes[i + 1]._lineLayer || n._lineLayer == notes[i + 1]._lineLayer - 1 || n._lineLayer == notes[i + 1]._lineLayer + 1) && (n._lineIndex == notes[i + 1]._lineIndex || n._lineIndex == notes[i + 1]._lineIndex + 1 || n._lineIndex == notes[i + 1]._lineIndex - 1))
+                if ((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 1)
                 {
-                    if(n._type == 0 && n._lineIndex <= 1)
+                    if (n._cutDirection == 0 || n._cutDirection == 4 || n._cutDirection == 5)
                     {
-                        notes[i + 1]._lineIndex = n._lineIndex + 2;
+                        n._lineLayer = 2;
                     }
-                    else if (n._type == 1 && n._lineIndex >= 2)
+                    else if (n._cutDirection == 1 || n._cutDirection == 6 || n._cutDirection == 7)
                     {
-                        notes[i + 1]._lineIndex = n._lineIndex - 2;
+                        n._lineLayer = 0;
                     }
-                    else if (n._type == 1 && n._lineIndex <= 1)
+                    else
                     {
-                        notes[i]._lineIndex = notes[i + 1]._lineIndex + 2;
+                        n._lineLayer = 0;
                     }
-                    else if (n._type == 0 && n._lineIndex >= 2)
+                }
+            }
+
+            //Swap pickles
+            for (int i = 0; i < notes.Count() - 1; i++)
+            {
+                if (notes[i + 1]._time - notes[i]._time <= 0.01 && notes[i + 1]._time - notes[i]._time >= -0.01)
+                {
+                    if ((notes[i]._lineIndex > notes[i + 1]._lineIndex + 1 && notes[i]._type == 0) || (notes[i]._lineIndex < notes[i + 1]._lineIndex - 1 && notes[i]._type == 1))
                     {
-                        notes[i]._lineIndex = notes[i + 1]._lineIndex - 2;
+                        int tempo = notes[i]._lineIndex;
+                        notes[i]._lineIndex = notes[i + 1]._lineIndex;
+                        notes[i + 1]._lineIndex = tempo;
+
+                        tempo = notes[i]._lineLayer;
+                        notes[i]._lineLayer = notes[i + 1]._lineLayer;
+                        notes[i + 1]._lineLayer = tempo;
                     }
                 }
             }
@@ -867,62 +631,187 @@ namespace Osu2Saber.Model.Algorithm
             Note lastBlue = new Note(0, 0, 0, 0, 0);
             Note lastRed = new Note(0, 0, 0, 0, 0);
 
+            //Fix fused hitbox issue again
+            for (int i = 0; i < notes.Count() - 1; i++)
+            {
+                Note n = notes[i];
+
+                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02 && n._lineLayer == notes[i + 1]._lineLayer && n._lineIndex == notes[i + 1]._lineIndex)
+                {
+                    if(n._type == 0 && n._lineIndex >= 2)
+                    {
+                        n._lineIndex -= 2;
+                    }
+                    else if(n._type == 1 && n._lineIndex <= 1)
+                    {
+                        n._lineIndex += 2;
+                    }
+                    else if (notes[i + 1]._type == 0 && notes[i + 1]._lineIndex >= 2)
+                    {
+                        notes[i + 1]._lineIndex -= 2;
+                    }
+                    else if (notes[i + 1]._type == 1 && notes[i + 1]._lineIndex <= 1)
+                    {
+                        notes[i + 1]._lineIndex += 2;
+                    }
+                }
+            }
+
+            //Fix new pickles hitbox angle issue
+            for (int i = 0; i < notes.Count() - 1; i++)
+            {
+                Note n = notes[i];
+
+                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02 && n._lineLayer == notes[i + 1]._lineLayer && (n._lineIndex == notes[i + 1]._lineIndex - 1 || n._lineIndex == notes[i + 1]._lineIndex + 1))
+                {
+                    if(n._cutDirection == 4 || n._cutDirection == 5)
+                    {
+                        n._cutDirection = 0;
+                    }
+                    else if (n._cutDirection == 6 || n._cutDirection == 7)
+                    {
+                        n._cutDirection = 1;
+                    }
+                    if (notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 5)
+                    {
+                        notes[i + 1]._cutDirection = 0;
+                    }
+                    else if (notes[i + 1]._cutDirection == 6 || notes[i + 1]._cutDirection == 7)
+                    {
+                        notes[i + 1]._cutDirection = 1;
+                    }
+                }
+            }
+
+            //Fix same laneIndex hitbox issue
+            for (int i = 0; i < notes.Count() - 1; i++)
+            {
+                Note n = notes[i];
+
+                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02 && n._lineIndex == notes[i + 1]._lineIndex)
+                {
+                    if ((n._cutDirection == 0 || n._cutDirection == 1 || n._cutDirection == 4 || n._cutDirection == 5 || n._cutDirection == 6 || n._cutDirection == 7) && n._type == 0 && n._lineIndex != 0)
+                    {
+                        n._lineIndex--;
+                    }
+                    else if ((n._cutDirection == 0 || n._cutDirection == 1 || n._cutDirection == 4 || n._cutDirection == 5 || n._cutDirection == 6 || n._cutDirection == 7) && n._type == 1 && n._lineIndex != 3)
+                    {
+                        n._lineIndex++;
+                    }
+                    else if ((notes[i + 1]._cutDirection == 0 || notes[i + 1]._cutDirection == 1 || notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 5 || notes[i + 1]._cutDirection == 6 || notes[i + 1]._cutDirection == 7) && notes[i + 1]._type == 0 && notes[i + 1]._lineIndex != 0)
+                    {
+                        notes[i + 1]._lineIndex--;
+                    }
+                    else if ((notes[i + 1]._cutDirection == 0 || notes[i + 1]._cutDirection == 1 || notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 5 || notes[i + 1]._cutDirection == 6 || notes[i + 1]._cutDirection == 7) && notes[i + 1]._type == 1 && notes[i + 1]._lineIndex != 3)
+                    {
+                        notes[i + 1]._lineIndex++;
+                    }
+                }
+            }
+
             //Fix shit-flow
             for (int i = 0; i < notes.Count() - 1; i++)
             {
                 Note n = notes[i];
 
-                if(lastBlue._cutDirection == 4 && n._cutDirection == 6 && n._type == 1)
+                if (lastBlue._cutDirection == 4 && n._cutDirection == 6 && n._type == 1)
                 {
-                    notes[i]._cutDirection = 1;
+                    n._cutDirection = 1;
                 }
                 else if (lastBlue._cutDirection == 5 && n._cutDirection == 7 && n._type == 1)
                 {
-                    notes[i]._cutDirection = 1;
+                    n._cutDirection = 1;
                 }
                 else if (lastBlue._cutDirection == 6 && n._cutDirection == 4 && n._type == 1)
                 {
-                    notes[i]._cutDirection = 0;
+                    n._cutDirection = 0;
                 }
                 else if (lastBlue._cutDirection == 7 && n._cutDirection == 5 && n._type == 1)
                 {
-                    notes[i]._cutDirection = 0;
+                    n._cutDirection = 0;
                 }
                 else if (lastRed._cutDirection == 5 && n._cutDirection == 7 && n._type == 0)
                 {
-                    notes[i]._cutDirection = 1;
+                    n._cutDirection = 1;
                 }
                 else if (lastRed._cutDirection == 6 && n._cutDirection == 4 && n._type == 0)
                 {
-                    notes[i]._cutDirection = 0;
+                    n._cutDirection = 0;
                 }
                 else if (lastRed._cutDirection == 7 && n._cutDirection == 5 && n._type == 0)
                 {
-                    notes[i]._cutDirection = 0;
+                    n._cutDirection = 0;
                 }
                 else if (lastRed._cutDirection == 7 && n._cutDirection == 5 && n._type == 0)
                 {
-                    notes[i]._cutDirection = 0;
+                    n._cutDirection = 0;
                 }
 
-                if (n._cutDirection == 5 && n._lineIndex == 0)
+                if ((n._cutDirection == 4 || n._cutDirection == 5) && n._lineIndex == 0)
                 {
-                    notes[i]._cutDirection = 0;
+                    n._cutDirection = 0;
                 }
-                else if (n._cutDirection == 4 && n._lineIndex == 3)
+                else if ((n._cutDirection == 4 || n._cutDirection == 5) && n._lineIndex == 3)
                 {
-                    notes[i]._cutDirection = 0;
+                    n._cutDirection = 0;
                 }
-                else if (n._cutDirection == 6 && n._lineIndex == 3)
+                else if ((n._cutDirection == 6 || n._cutDirection == 7) && n._lineIndex == 3)
                 {
-                    notes[i]._cutDirection = 1;
+                    n._cutDirection = 1;
                 }
-                else if (n._cutDirection == 7 && n._lineIndex == 0)
+                else if ((n._cutDirection == 6 || n._cutDirection == 7) && n._lineIndex == 0)
                 {
-                    notes[i]._cutDirection = 1;
+                    n._cutDirection = 1;
                 }
 
-                if(n._type == 0)
+                if (lastRed._lineIndex == 0 && n._lineIndex > 0 && (n._cutDirection == 4 || n._cutDirection == 6))
+                {
+                    if (n._cutDirection == 4)
+                    {
+                        n._cutDirection = 0;
+                    }
+                    else if (n._cutDirection == 6)
+                    {
+                        n._cutDirection = 1;
+                    }
+                }
+
+                if (lastBlue._lineIndex == 3 && n._lineIndex < 3 && (n._cutDirection == 5 || n._cutDirection == 7))
+                {
+                    if (n._cutDirection == 5)
+                    {
+                        n._cutDirection = 0;
+                    }
+                    else if (n._cutDirection == 7)
+                    {
+                        n._cutDirection = 1;
+                    }
+                }
+                
+                if(n._type == 0 && n._lineIndex >= 2)
+                {
+                    if (n._cutDirection == 4)
+                    {
+                        n._cutDirection = 0;
+                    }
+                    else if (n._cutDirection == 6)
+                    {
+                        n._cutDirection = 1;
+                    }
+                }
+                else if (n._type == 1 && n._lineIndex <= 1)
+                {
+                    if (n._cutDirection == 5)
+                    {
+                        n._cutDirection = 0;
+                    }
+                    else if (n._cutDirection == 7)
+                    {
+                        n._cutDirection = 1;
+                    }
+                }
+
+                if (n._type == 0)
                 {
                     lastRed = notes[i];
                 }
@@ -931,246 +820,6 @@ namespace Osu2Saber.Model.Algorithm
                     lastBlue = notes[i];
                 }
             }
-        }
-
-        CutDirection LogicChecker(Note now, Note before, CutDirection i)
-        {
-            if(now._lineLayer == 2 && now._type == 0 && now._lineIndex == 2)
-            {
-                now._lineLayer = 0;
-            }
-            else if (now._lineLayer == 2 && now._type == 1 && now._lineIndex == 1)
-            {
-                now._lineLayer = 0;
-            }
-            //To make left/right notes bearable
-            if (now._lineIndex == 0 && i == CutDirection.Right)
-            {
-                now._lineLayer = 0;
-                now._lineIndex = 1;
-                i = CutDirection.DownRight;
-            }
-            else if (now._lineIndex == 3 && i == CutDirection.Left)
-            {
-                now._lineLayer = 0;
-                now._lineIndex = 2;
-                i = CutDirection.DownLeft;
-            }
-            else if (now._lineIndex == 3 && i == CutDirection.Right && now._lineLayer != 1)
-            {
-                now._lineLayer = 1;
-            }
-            else if (now._lineIndex == 0 && i == CutDirection.Left && now._lineLayer != 1)
-            {
-                now._lineLayer = 1;
-            }
-            else if (now._lineIndex == 2 && i == CutDirection.Right && now._type == 1)
-            {
-                now._lineLayer = 1;
-                now._lineIndex = 3;
-            }
-            else if (now._lineIndex == 1 && i == CutDirection.Left && now._type == 0)
-            {
-                now._lineLayer = 1;
-                now._lineIndex = 0;
-            }
-            else if (now._lineIndex == 1 && i == CutDirection.Right && now._type == 0)
-            {
-                i = CutDirection.DownRight;
-            }
-            else if (now._lineIndex == 2 && i == CutDirection.Left && now._type == 1)
-            {
-                i = CutDirection.DownLeft;
-            }
-
-            //Rough Angle check
-            if (before._cutDirection == (int)CutDirection.UpLeft && i == CutDirection.UpRight)
-            {
-                i = CutDirection.Down;
-            }
-            else if (before._cutDirection == (int)CutDirection.UpRight && i == CutDirection.UpLeft)
-            {
-                i = CutDirection.Down;
-            }
-            else if (before._cutDirection == (int)CutDirection.DownRight && i == CutDirection.DownLeft)
-            {
-                i = CutDirection.Up;
-            }
-            else if (before._cutDirection == (int)CutDirection.DownLeft && i == CutDirection.DownRight)
-            {
-                i = CutDirection.Up;
-            }
-            else if (before._cutDirection == (int)CutDirection.Up && i == CutDirection.UpLeft)
-            {
-                i = CutDirection.Down;
-            }
-            else if (before._cutDirection == (int)CutDirection.Up && i == CutDirection.UpRight)
-            {
-                i = CutDirection.Down;
-            }
-            else if (before._cutDirection == (int)CutDirection.Down && i == CutDirection.DownLeft)
-            {
-                i = CutDirection.Up;
-            }
-            else if (before._cutDirection == (int)CutDirection.Down && i == CutDirection.DownRight)
-            {
-                i = CutDirection.Up;
-            }
-            else if (before._cutDirection == (int)CutDirection.DownRight && i == CutDirection.Left)
-            {
-                i = CutDirection.Up;
-            }
-            else if (before._cutDirection == (int)CutDirection.DownLeft && i == CutDirection.Right)
-            {
-                i = CutDirection.Up;
-            }
-            else if (before._cutDirection == (int)CutDirection.Left && i == CutDirection.Up)
-            {
-                i = CutDirection.Down;
-            }
-            else if (before._cutDirection == (int)CutDirection.Right && i == CutDirection.Up)
-            {
-                i = CutDirection.Down;
-            }
-            else if(before._cutDirection == (int)CutDirection.UpRight && i == CutDirection.Up)
-            {
-                i = CutDirection.Down;
-            }
-
-            //Bad placement fixes
-            if ((i == CutDirection.DownRight && now._lineLayer == 2) || (i == CutDirection.DownRight && now._lineLayer == 1))
-            {
-                now._lineLayer = 0;
-            }
-            else if ((i == CutDirection.DownLeft && now._lineLayer == 2) || (i == CutDirection.DownLeft && now._lineLayer == 1))
-            {
-                now._lineLayer = 0;
-            }
-            else if ((i == CutDirection.Down && now._lineLayer == 2) || (i == CutDirection.Down && now._lineLayer == 1))
-            {
-                now._lineLayer = 0;
-            }
-            else if (i == CutDirection.UpLeft && now._type == 1 && now._lineIndex == 3)
-            {
-                i = CutDirection.Up;
-            }
-            else if (i == CutDirection.UpRight && now._type == 0 && now._lineIndex == 0)
-            {
-                i = CutDirection.Up;
-            }
-            else if (i == CutDirection.UpRight && now._type == 1 && now._lineIndex == 3)
-            {
-                now._lineLayer = 1;
-            }
-            else if (i == CutDirection.UpRight && now._type == 1 && now._lineIndex == 2)
-            {
-                now._lineLayer = 2;
-                now._lineIndex = 3;
-            }
-            else if (i == CutDirection.UpLeft && now._type == 0 && now._lineIndex == 0)
-            {
-                now._lineLayer = 1;
-            }
-            else if (i == CutDirection.UpLeft && now._type == 0 && now._lineIndex == 1)
-            {
-                now._lineLayer = 2;
-                now._lineIndex = 0;
-            }
-            if (i == CutDirection.DownRight && now._type == 0 && now._lineIndex == 0 && before._lineIndex != 1)
-            {
-                now._lineIndex = 1;
-            }
-            else if (i == CutDirection.DownLeft && now._type == 1 && now._lineIndex == 3 && before._lineIndex != 2)
-            {
-                now._lineIndex = 2;
-            }
-
-            //Double directional fixes
-            if (before._cutDirection == (int)i)
-            {
-                if (i == CutDirection.UpLeft)
-                {
-                    i = CutDirection.Down;
-                }
-                else if (i == CutDirection.DownRight)
-                {
-                    i = CutDirection.Up;
-                }
-                else if (i == CutDirection.DownLeft)
-                {
-                    i = CutDirection.Up;
-                }
-                else if (i == CutDirection.UpRight)
-                {
-                    i = CutDirection.Down;
-                }
-                else if (i == CutDirection.Down)
-                {
-                    i = CutDirection.Up;
-                }
-                else if (i == CutDirection.Up)
-                {
-                    i = CutDirection.Down;
-                }
-                else if (i == CutDirection.Left)
-                {
-                   i = CutDirection.Right;
-                }
-                else if (i == CutDirection.Right)
-                {
-                    i = CutDirection.Left;
-                }
-            }
-            
-            switch (now._type)
-            {
-                case 0:
-                    if (before._cutDirection == (int)CutDirection.UpLeft && i == CutDirection.Up)
-                    {
-                        i = CutDirection.Down;
-                    }
-                    else if (before._cutDirection == (int)CutDirection.Up && i == CutDirection.UpLeft)
-                    {
-                        i = CutDirection.Down;
-                    }
-                    else if (before._cutDirection == (int)CutDirection.DownLeft && i == CutDirection.Down)
-                    {
-                        i = CutDirection.Up;
-                    }
-                    else if (before._cutDirection == (int)CutDirection.Down && i == CutDirection.Down)
-                    {
-                        i = CutDirection.Up;
-                    }
-                    else if(before._cutDirection == (int)CutDirection.Left && i == CutDirection.DownLeft)
-                    {
-                        i = CutDirection.Right;
-                    }
-                    break;
-                case 1:
-                    if (before._cutDirection == (int)CutDirection.DownRight && i == CutDirection.Down)
-                    {
-                        i = CutDirection.Up;
-                    }
-                    else if (before._cutDirection == (int)CutDirection.UpRight && i == CutDirection.Up)
-                    {
-                        i = CutDirection.Down;
-                    }
-                    else if (before._cutDirection == (int)CutDirection.Down && i == CutDirection.DownRight)
-                    {
-                        i = CutDirection.Up;
-                    }
-                    else if (before._cutDirection == (int)CutDirection.Down && i == CutDirection.Down)
-                    {
-                        i = CutDirection.Up;
-                    }
-                    else if (before._cutDirection == (int)CutDirection.Right && i == CutDirection.DownRight)
-                    {
-                        i = CutDirection.Left;
-                    }
-                    break;
-            }
-
-            return i;
         }
 
         #endregion
@@ -1196,8 +845,6 @@ namespace Osu2Saber.Model.Algorithm
             Note before = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
             bool fixedPattern = false;
             List<Note> swapTime = new List<Note>();
-            double tempTime;
-            bool jumpTime = false;
             Note lastAddedNote = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
 
             if (pattern != "All" && pattern != "Random")
@@ -1221,8 +868,6 @@ namespace Osu2Saber.Model.Algorithm
                 }
                 else if(i != 0)
                 {
-                    jumpTime = false;
-
                     if(i == notes.Count - 3)
                     {
                         available += 2;
@@ -1279,7 +924,6 @@ namespace Osu2Saber.Model.Algorithm
                                 patternLoop = Pattern.GetNewPattern("Jump", 999);
                             } while (patternLoop[looper]._lineIndex == notes[patternStart - 1]._lineIndex && patternLoop[looper]._lineLayer == notes[patternStart - 1]._lineLayer);
                         }
-                        jumpTime = true;
                     }
                     Note note = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
 
@@ -1305,7 +949,6 @@ namespace Osu2Saber.Model.Algorithm
                                     {
                                         patternLoop = Pattern.GetNewPattern("Jump", 999);
                                     } while (patternLoop[looper]._lineIndex == notes[patternStart + j - 1]._lineIndex && patternLoop[looper]._lineLayer == notes[patternStart + j - 1]._lineLayer);
-                                    jumpTime = true;
                                     break;
                                 }
                                 else if (pattern == "Complex" && 0 == RandNumber(0, 2))
@@ -1341,46 +984,7 @@ namespace Osu2Saber.Model.Algorithm
                         note._cutDirection = patternLoop[looper]._cutDirection;
                         note._type = patternLoop[looper]._type;
 
-                        /*if (j > 1 && RandNumber(0, 2) == 0 && patternStart != 0 && jumpTime == true && notes[patternStart + j - 1] != lastAddedNote && note._type != notes[patternStart + j - 1]._type && note._time - notes[patternStart + j - 1]._time > 0.50 && j != available - 1 && notes[patternStart + j + 1]._time - note._time > 0.25)
-                        {
-                            swapTime.Add(notes[patternStart + j - 1]);
-                            swapTime.Add(note);
-                            lastAddedNote = note;
-                        }*/
-
                         notes[patternStart + j] = note;
-                        
-                        /*if (note._time - before._time <= 0.01)
-                        {
-                            note._lineLayer = 0;
-                            before._lineLayer = 0;
-                            if (before._cutDirection == 6 || before._cutDirection == 7)
-                            {
-                                before._cutDirection = 1;
-                            }
-                            else if (before._cutDirection == 4 || before._cutDirection == 5)
-                            {
-                                before._cutDirection = 0;
-                            }
-                            if (note._cutDirection == 6 || note._cutDirection == 7)
-                            {
-                                note._cutDirection = 1;
-                            }
-                            else if (note._cutDirection == 4 || note._cutDirection == 5)
-                            {
-                                note._cutDirection = 0;
-                            }
-                            if (note._type == 1)
-                            {
-                                note._lineIndex = 2;
-                                before._lineIndex = 1;
-                            }
-                            else
-                            {
-                                note._lineIndex = 1;
-                                before._lineIndex = 2;
-                            }
-                        }*/
 
                         countFix++;
                         looper++;
@@ -1391,7 +995,6 @@ namespace Osu2Saber.Model.Algorithm
 
                         before = note;
                     }
-                    jumpTime = false;
                     available = 1;
                     patternStart = -1;
                     duration = next - now;
@@ -1406,53 +1009,33 @@ namespace Osu2Saber.Model.Algorithm
 
             notes = Notes.OrderBy(note => note._time).ToList();
 
-            /*Note temp;
-            List<Note> tempo = new List<Note>();
-
-            if (swapTime.Any())
+            if(notes.Any() && notes.Count() > 3) // Fix last note
             {
-                for (int j = 0; j < swapTime.Count; j = j + 2)
+                notes[notes.Count() - 1]._type = notes[notes.Count() - 3]._type;
+                if(UpCut.Contains(notes[notes.Count() - 3]._cutDirection))
                 {
-                    tempTime = swapTime[j]._time;
-                    swapTime[j]._time = swapTime[j + 1]._time;
-                    swapTime[j + 1]._time = tempTime;
+                    notes[notes.Count() - 1]._cutDirection = 1;
+                    notes[notes.Count() - 1]._lineIndex = notes[notes.Count() - 3]._lineIndex;
+                    notes[notes.Count() - 1]._lineLayer = 0;
                 }
-            }
-
-            notes = Notes.OrderBy(note => note._time).ToList();
-            bool find = false;
-
-            for (int i = 2; i < notes.Count; i++)
-            {
-                if(notes[i]._time - notes[i - 1]._time > LimitStacked)
+                else if (DownCut.Contains(notes[notes.Count() - 3]._cutDirection))
                 {
-                    temp = new Note(notes[i - 1]);
-                    for(int j = 0; j < swapTime.Count; j++)
-                    {
-                        if(temp == swapTime[j])
-                        {
-                            find = true;
-                        }
-                    }
-
-                    if(find == false)
-                    {
-                        tempo.Add(AddStackedNote(notes[i - 1], temp));
-                    }
-                    find = false;
+                    notes[notes.Count() - 1]._cutDirection = 0;
+                    notes[notes.Count() - 1]._lineIndex = notes[notes.Count() - 3]._lineIndex;
+                    notes[notes.Count() - 1]._lineLayer = 2;
                 }
-            }
-
-            for(int i = 0; i < tempo.Count; i++)
-            {
-                notes.Add(tempo[i]);
-            }
-
-            notes = Notes.OrderBy(note => note._time).ToList();*/
-
-            if(notes.Any())
-            {
-                notes.RemoveAt(notes.Count() - 1);
+                else if (notes[notes.Count() - 3]._cutDirection == 2)
+                {
+                    notes[notes.Count() - 1]._cutDirection = 3;
+                    notes[notes.Count() - 1]._lineIndex = 3;
+                    notes[notes.Count() - 1]._lineLayer = notes[notes.Count() - 3]._lineLayer;
+                }
+                else if (notes[notes.Count() - 3]._cutDirection == 3)
+                {
+                    notes[notes.Count() - 1]._cutDirection = 2;
+                    notes[notes.Count() - 1]._lineIndex = 0;
+                    notes[notes.Count() - 1]._lineLayer = notes[notes.Count() - 3]._lineLayer;
+                }
             }
         }
 
@@ -1527,209 +1110,6 @@ namespace Osu2Saber.Model.Algorithm
             return newLoop;
         }
 
-        Note AddStackedNote(Note before, Note temp)
-        {
-            if (temp._cutDirection == 0 || temp._cutDirection == 1)
-            {
-                if (temp._lineLayer == 0 || temp._lineLayer == 1)
-                {
-                    temp._lineLayer++;
-                }
-                else
-                {
-                    temp._lineLayer--;
-                }
-            }
-            else if (temp._cutDirection == 6)
-            {
-                if (temp._lineIndex == 0)
-                {
-                    if (temp._lineLayer == 1 || temp._lineLayer == 0)
-                    {
-                        temp._lineLayer++;
-                        temp._lineIndex++;
-                    }
-                }
-                else
-                {
-                    if (temp._lineLayer == 0)
-                    {
-                        if (temp._lineIndex != 3)
-                        {
-                            temp._lineIndex++;
-                            temp._lineLayer++;
-                        }
-                    }
-                    else
-                    {
-                        temp._lineLayer--;
-                        temp._lineIndex--;
-                    }
-                }
-            }
-            else if (temp._cutDirection == 7)
-            {
-                if (temp._lineIndex == 3)
-                {
-                    if (temp._lineLayer == 1 || temp._lineLayer == 0)
-                    {
-                        temp._lineLayer++;
-                        temp._lineIndex--;
-                    }                
-                }
-                else
-                {
-                    if (temp._lineLayer == 0)
-                    {
-                        if(temp._lineIndex != 0)
-                        {
-                            temp._lineIndex--;
-                            temp._lineLayer++;
-                        }
-                    }
-                    else
-                    {
-                        temp._lineLayer--;
-                        temp._lineIndex++;
-                    }
-                }
-            }
-            else if (temp._cutDirection == 2)
-            {
-                if(temp._lineIndex != 0)
-                {
-                    temp._lineIndex--;
-                }
-                else
-                {
-                    temp._lineIndex++;
-                }
-            }
-            else if (temp._cutDirection == 3)
-            {
-                if (temp._lineIndex != 3)
-                {
-                    temp._lineIndex++;
-                }
-                else
-                {
-                    temp._lineIndex--;
-                }
-            }
-            else if (temp._cutDirection == 4)
-            {
-                if (temp._lineIndex == 0)
-                {
-                    if (temp._lineLayer != 0)
-                    {
-                        temp._lineLayer--;
-                        temp._lineIndex++;
-                    }
-                }
-                else
-                {
-                    if (temp._lineLayer == 0)
-                    {
-                        temp._lineLayer++;
-                        temp._lineIndex--;
-                    }
-                    else
-                    {
-                        temp._lineLayer--;
-                        temp._lineIndex++;
-                    }
-                }
-            }
-            else if (temp._cutDirection == 5)
-            {
-                if (temp._lineIndex == 3)
-                {
-                    if (temp._lineLayer != 0)
-                    {
-                        temp._lineLayer--;
-                        temp._lineIndex--;
-                    }
-                }
-                else
-                {
-                    if (temp._lineLayer == 0)
-                    {
-                        temp._lineLayer++;
-                        temp._lineIndex++;
-                    }
-                    else
-                    {
-                        temp._lineLayer--;
-                        temp._lineIndex--;
-                    }
-                }
-            }
-
-            if((temp._lineIndex == 1 || temp._lineIndex == 2) && temp._lineLayer == 1)
-            {
-                if(before._lineLayer == 0)
-                {
-                    temp._lineLayer = 2;
-                }
-                else
-                {
-                    temp._lineLayer = 0;
-                }
-                if (temp._cutDirection == 6 || temp._cutDirection == 7)
-                {
-                    before._cutDirection = 1;
-                }
-                else if (temp._cutDirection == 4 || temp._cutDirection == 5)
-                {
-                    before._cutDirection = 0;
-                }
-            }
-
-            /*if((temp._cutDirection == 1 || temp._cutDirection == 6 || temp._cutDirection == 7) && temp._lineLayer == 2)
-            {
-                temp._lineLayer = 1;
-            }
-            if((before._cutDirection == 1 || before._cutDirection == 6 || before._cutDirection == 7) && before._lineLayer == 2)
-            {
-                before._lineLayer = 1;
-            }*/
-
-            /*if(temp._lineLayer == 0 && (temp._cutDirection == 1 || temp._cutDirection == 6 || temp._cutDirection == 7))
-            {
-                temp._time += 0.03125;
-            }
-            else if (before._lineLayer == 0 && (before._cutDirection == 1 || before._cutDirection == 6 || before._cutDirection == 7))
-            {
-                before._time += 0.03125;
-            }
-            else if (temp._lineLayer == 2 && (temp._cutDirection == 0 || temp._cutDirection == 4 || temp._cutDirection == 5))
-            {
-                temp._time += 0.03125;
-            }
-            else if (before._lineLayer == 2 && (before._cutDirection == 0 || before._cutDirection == 4 || before._cutDirection == 5))
-            {
-                before._time += 0.03125;
-            }
-            else if (temp._lineIndex == 0 && (temp._cutDirection == 2 || temp._cutDirection == 4 || temp._cutDirection == 6))
-            {
-                temp._time += 0.03125;
-            }
-            else if (before._lineIndex == 0 && (before._cutDirection == 2 || before._cutDirection == 4 || before._cutDirection == 6))
-            {
-                before._time += 0.03125;
-            }
-            else if (temp._lineIndex == 3 && (temp._cutDirection == 3 || temp._cutDirection == 5 || temp._cutDirection == 7))
-            {
-                temp._time += 0.03125;
-            }
-            else if (before._lineIndex == 3 && (before._cutDirection == 3 || before._cutDirection == 5 || before._cutDirection == 7))
-            {
-                before._time += 0.03125;
-            }*/
-
-            return temp;
-        }
-
         #endregion
 
         #region Process for map modification
@@ -1780,18 +1160,5 @@ namespace Osu2Saber.Model.Algorithm
         }
 
         #endregion
-    }
-
-    enum DirectionRandomMode
-    {
-        Any,
-        OnlyNormal,
-        OnlyDiagonal
-    }
-
-    enum SymmetryMode
-    {
-        Line,
-        Point
     }
 }

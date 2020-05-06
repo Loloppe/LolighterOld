@@ -93,12 +93,6 @@ namespace Osu2Saber.Model
         {
             var org = beatmaps[index];
             map = GenerateMap(org);
-            //var jsonPath = AddDifficulty(index);
-            //var mapPath = Path.Combine(OutDir, jsonPath);
-            //using (var sw = new StreamWriter(mapPath, false, Encoding.UTF8))
-            //{
-            //    sw.Write(map);
-            //}
         }
 
         void InitializeInfo(Beatmap org)
@@ -116,25 +110,12 @@ namespace Osu2Saber.Model
                 beatsPerMinute = CalcOriginalBPM(org),
                 previewStartTime = org.PreviewTime / 1000,
                 previewDuration = 10,
-                coverImagePath = Path.ChangeExtension(org.ImageFileName, ThumbnailGenerator.DefaultExtension),
-                //environmentName = "DefaultEnvironment",
-                environmentName = "NiceEnvironment", // I personally prefer this
+                coverImagePath = Path.ChangeExtension(org.ImageFileName, ".jpg"),
+                environmentName = "NiceEnvironment",
             };
 
             AudioPath = Path.Combine(OrgDir, org.AudioFileName);
             ImagePath = Path.Combine(OrgDir, org.ImageFileName);
-        }
-
-        string AddDifficulty(int index)
-        {
-            var (diff, rank) = DetermineMapDifficulty(index);
-            var difficulty = diff;
-            var difficultyRank = rank;
-            var audioPath = "";  // determined later
-            var jsonPath = diff + ".json";
-            var offset = 0;
-            info.AddDifficultyLevels(difficulty, difficultyRank, audioPath, jsonPath, offset);
-            return jsonPath;
         }
 
         SaberBeatmap GenerateMap(Beatmap org)
@@ -163,18 +144,6 @@ namespace Osu2Saber.Model
             var tp = org.TimingPoints[0];
             var mpb = tp.MsPerBeat;
             return (int)Math.Round(1000.0 / mpb * 60);
-        }
-
-        (string str, int rank) DetermineMapDifficulty(int idx)
-        {
-            // prefer harder difficulty for display, cuz it looks more cool!
-            idx += MaxNumOfBeatmap - beatmaps.Count;
-            if (idx == 4) return ("ExpertPlus", 1);
-            if (idx == 3) return ("Expert", 2);
-            if (idx == 2) return ("Hard", 3);
-            if (idx == 1) return ("Normal", 4);
-            if (idx == 0) return ("Easy", 5);
-            return ("ExpertPlus", 1);
         }
     }
 }

@@ -1,34 +1,21 @@
-﻿using Prism.Mvvm;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Osu2Saber.Model
 {
-    public class BatchProcessor : BindableBase
+    public class BatchProcessor
     {
         public static bool IncludeTaiko { set; get; } = false;
         public static bool IncludeCtB { set; get; } = true;
         public static bool IncludeMania { set; get; } = true;
 
-        object progressLock = new object();
-        double progress;
         Logger logger;
 
         public string[] TargetFiles { private set; get; }
         public string WorkDir { private set; get; }
         public string OutputDir { private set; get; }
 
-        public double Progress
-        {
-            private set
-            {
-                progress = value;
-                RaisePropertyChanged();
-            }
-            get => progress;
-        }
 
         public BatchProcessor(string[] targetFiles, string workDir)
         {
@@ -52,7 +39,6 @@ namespace Osu2Saber.Model
                 if (oszp == null) return;
 
                 var o2b = ConvertBeatmap(oszp);
-                //ConvertImgAudio(o2b);
             }
             catch (Exception e)
             {
@@ -70,7 +56,6 @@ namespace Osu2Saber.Model
             var oszp = new OszProcessor(oszPath);
             if (oszp.OsuFiles.Length == 0) return null;
 
-            ReportProgress(0.3);
             return oszp;
         }
 
@@ -89,25 +74,7 @@ namespace Osu2Saber.Model
 
             o2b.ProcessAll();
 
-            ReportProgress(0.2);
             return o2b;
-        }
-
-        void ConvertImgAudio(Osu2BsConverter o2b)
-        {
-            var audioFileName = Mp3toOggConverter.ConvertToOgg(o2b.AudioPath, o2b.OutDir);
-            ThumbnailGenerator.GenerateThumbnail(o2b.ImagePath, o2b.OutDir);
-            o2b.GenerateInfoFile(audioFileName);
-            ReportProgress(0.5);
-            return;
-        }
-
-        void ReportProgress(double add)
-        {
-            lock (progressLock)
-            {
-                Progress += add;
-            }
         }
     }
 }

@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Prism.Mvvm;
+﻿
 using Osu2Saber.Model;
 using Osu2Saber.Model.Algorithm;
 
 namespace Osu2Saber.ViewModel
 {
-    class ConfigPanelViewModel : BindableBase
+    class ConfigPanelViewModel
     {
         public double MaximumDifficulty
         {
             set
             {
                 Osu2BsConverter.MaximumDifficulty = value;
-                RaisePropertyChanged();
             }
             get => Osu2BsConverter.MaximumDifficulty;
         }
@@ -26,33 +20,14 @@ namespace Osu2Saber.ViewModel
             set
             {
                 Osu2BsConverter.MinimumDifficulty = value;
-                RaisePropertyChanged();
             }
             get => Osu2BsConverter.MinimumDifficulty;
         }
 
-        public float EnoughIntervalBetweenNotes
+        public double EnoughIntervalBetweenNotes
         {
             set { ConvertAlgorithm.EnoughIntervalBetweenNotes = value; }
             get => ConvertAlgorithm.EnoughIntervalBetweenNotes;
-        }
-
-        public double LightOffset
-        {
-            set { ConvertAlgorithm.LightOffset = value; }
-            get => ConvertAlgorithm.LightOffset;
-        }
-
-        public double LimitStacked
-        {
-            set { ConvertAlgorithm.LimitStacked = value; }
-            get => ConvertAlgorithm.LimitStacked;
-        }
-
-        public int Mix
-        {
-            set { ConvertAlgorithm.Mix = value; }
-            get => ConvertAlgorithm.Mix;
         }
 
         public bool AllUpDown
@@ -89,12 +64,6 @@ namespace Osu2Saber.ViewModel
         {
             set { ConvertAlgorithm.GenerateGallops = value; }
             get => ConvertAlgorithm.GenerateGallops;
-        }
-        
-        public bool GenerateAudio
-        {
-            set { Mp3toOggConverter.GenerateAudio = value; }
-            get => Mp3toOggConverter.GenerateAudio;
         }
 
         public string PatternToUse

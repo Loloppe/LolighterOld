@@ -21,7 +21,6 @@ namespace Lolighter
         public static Rootobject map = new Rootobject();
         public static MainWindow window;
         private String extension;
-        public static readonly MainWindowViewModel Osu2BS = new MainWindowViewModel();
 
         public MainWindow()
         {
@@ -53,10 +52,9 @@ namespace Lolighter
                 else if (extension == ".osz" || extension == ".zip")
                 {
                     OsuWindow o = new OsuWindow();
+                    o.OszFiles.Clear();
                     o.Show();
-                    Osu2BS.SetPath(AppDomain.CurrentDomain.BaseDirectory);
-                    Osu2BS.OszFiles.Clear();
-                    Osu2BS.OszFiles.Add(file);
+                    o.OszFiles.Add(file);
                 }
 
                 try

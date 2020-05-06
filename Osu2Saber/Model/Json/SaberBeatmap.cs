@@ -6,14 +6,6 @@ using System.Threading.Tasks;
 
 namespace Osu2Saber.Model.Json
 {
-    /// <summary>
-    /// This class contains all the required information for [difficulty].json, namely BS beatmap file.
-    /// The enum definitions are retrieved from some reverse engineering work.
-    /// 
-    /// Reference: 
-    /// https://pastebin.com/cTPGrxWY
-    /// https://docs.google.com/spreadsheets/d/1vCTlDvx0ZW8NkkZBYW6ecvXaVRxDUKX7QIoah9PCp_c/htmlview
-    /// </summary>
     public class SaberBeatmap
     {
         public string origin;

@@ -1,10 +1,6 @@
 ﻿using Osu2Saber.Model.Algorithm;
 using Osu2Saber.Model.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Osu2Saber.Model
 {
@@ -24,7 +20,7 @@ namespace Osu2Saber.Model
             {
                 do
                 {
-                    id = ConvertAlgorithm.RandNumber(1, 17);
+                    id = ConvertAlgorithm.RandNumber(1, 18);
                     
                 } while (id == patternID || id == 10);
 
@@ -345,6 +341,16 @@ namespace Osu2Saber.Model
                     note = new Note(0, Line.Right, lay, NoteType.Blue, CutDirection.Up);
                     Stream.Add(note);
                     note = new Note(0, Line.MiddleRight, lay, NoteType.Red, CutDirection.Up);
+                    Stream.Add(note);
+                    break;
+                case 17: //Inverted piano roll
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Stream.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Stream.Add(note);
+                    note = new Note(0, Line.MiddleRight, lay, NoteType.Blue, CutDirection.Up);
+                    Stream.Add(note);
+                    note = new Note(0, Line.Right, lay, NoteType.Red, CutDirection.Up);
                     Stream.Add(note);
                     break;
             }

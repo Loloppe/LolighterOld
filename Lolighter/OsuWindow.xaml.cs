@@ -1,5 +1,8 @@
 ﻿
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using Lolighter.Items;
@@ -12,6 +15,9 @@ namespace Lolighter
     /// </summary>
     public partial class OsuWindow : Window
     {
+        public string workDir = AppDomain.CurrentDomain.BaseDirectory;
+        public ObservableCollection<string> OszFiles { get; } = new ObservableCollection<string>();
+
         public OsuWindow()
         {
             InitializeComponent();
@@ -21,7 +27,8 @@ namespace Lolighter
         {
             IsEnabled = false;
 
-            await Task.Run(() => MainWindow.Osu2BS.ProcessBatch());
+            BatchProcessor bp = new BatchProcessor(OszFiles.ToArray(), workDir);
+            await bp.BatchProcess();
             MessageBox.Show("Finished parsing notes");
 
             _Notes Note = null;
