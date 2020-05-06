@@ -23,7 +23,7 @@ namespace Osu2Saber.Model
             set
             {
                 workDir = Path.Combine(value, MapDirName);
-                //Directory.CreateDirectory(workDir);
+                Directory.CreateDirectory(workDir);
             }
             get => workDir;
         }

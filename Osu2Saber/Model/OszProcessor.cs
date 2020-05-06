@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Osu2Saber.Model
 {
@@ -17,7 +18,7 @@ namespace Osu2Saber.Model
             set
             {
                 workDir = Path.Combine(value, OszDirName);
-                //Directory.CreateDirectory(workDir);
+                Directory.CreateDirectory(workDir);
             }
             get => workDir;
         }
@@ -46,9 +47,19 @@ namespace Osu2Saber.Model
             OutDir = OutDir.TrimEnd();
             using (var archive = ZipFile.Read(oszPath))
             {
-                foreach (var entry in archive.Entries)
+                if(archive.Any())
                 {
-                    entry.Extract(OutDir, ExtractExistingFileAction.OverwriteSilently);
+                    foreach (var entry in archive.Entries)
+                    {
+                        try
+                        {
+                            entry.Extract(OutDir, ExtractExistingFileAction.OverwriteSilently);
+                        }
+                        catch (Exception)
+                        {
+                            MessageBox.Show(entry.FileName + " skipped. Full path to file is too long. Reduce the file name length or path length to fix.");
+                        }
+                    }
                 }
             }
         }
@@ -59,7 +70,7 @@ namespace Osu2Saber.Model
 
             while (OsuFiles == null)
             {
-                OpenFileDialog open = new OpenFileDialog
+                Microsoft.Win32.OpenFileDialog open = new Microsoft.Win32.OpenFileDialog
                 {
                     Filter = "osu|*.osu",
                     Multiselect = false,
