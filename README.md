@@ -22,6 +22,8 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
+### Version 2.5
+Fixed a crash caused by white space at end of folder path.
 ### Version 2.4
 Removed some of the commented-out codes to clean up a bit. Tried to fix the offset issue with osu and osu!mania chart (they don't have the same timing for some reason).
 Fixed the RemoveExcessNotes() method.
