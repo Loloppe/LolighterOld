@@ -43,5 +43,7 @@ Removed everything in ConvertAlgorithm.cs that Lolighter isn't using (Pretty muc
 ConfigPanel modified to be used with Lolighter with new features.
 Removed the output folder (there's no output anyway).
 Modified the OszProcessor.cs so it only read a single difficulty you can select.
+Added Pattern.cs for the automapper in ConvertAlgorithm.cs.
+Added a lot of code in ConvertAlgorithm.cs, mostly an automapper, a different way to handle notes cleanup, some fixes and new features for the notes output.
 
 Everything else is kept the same to not break something.
