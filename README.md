@@ -22,8 +22,9 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-### Version 3.0
+### Version 3.3
 Massive cleanup of unused codes and dependencies.
+Pattern and algorithm cleanup.
 Fixed most of the bugs with the automapper and a very big bug from the converter.
 Deleted a few unused files from Osu2Saber.
 More...
