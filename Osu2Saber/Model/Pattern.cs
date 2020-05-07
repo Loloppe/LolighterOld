@@ -525,7 +525,7 @@ namespace Osu2Saber.Model
             {
                 do
                 {
-                    id = ConvertAlgorithm.RandNumber(0, 18);
+                    id = ConvertAlgorithm.RandNumber(1, 18);
                 } while (id == patternID || id == 11 || id == 4);
 
                 patternID = id;
@@ -533,7 +533,7 @@ namespace Osu2Saber.Model
 
             switch (patternID)
             {
-                case 0: //Complexification by fraies
+                /*case 0: //Complexification by fraies
                     Note note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Complex.Add(note);
                     note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
@@ -582,9 +582,9 @@ namespace Osu2Saber.Model
                     Complex.Add(note);
                     note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
                     Complex.Add(note);
-                    break;
+                    break;*/
                 case 1: //Aimer with chelly (EGOIST) by Saut
-                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Note note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Complex.Add(note);
                     note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
                     Complex.Add(note);
