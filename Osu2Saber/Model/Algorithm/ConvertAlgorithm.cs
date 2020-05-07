@@ -747,24 +747,24 @@ namespace Osu2Saber.Model.Algorithm
                     n._cutDirection = 0;
                 }
 
-                if ((n._cutDirection == 4 || n._cutDirection == 5) && n._lineIndex == 0)
+                if ((n._cutDirection == 5) && n._lineIndex == 0)
                 {
                     n._cutDirection = 0;
                 }
-                else if ((n._cutDirection == 4 || n._cutDirection == 5) && n._lineIndex == 3)
+                else if ((n._cutDirection == 4) && n._lineIndex == 3)
                 {
                     n._cutDirection = 0;
                 }
-                else if ((n._cutDirection == 6 || n._cutDirection == 7) && n._lineIndex == 3)
+                else if ((n._cutDirection == 6) && n._lineIndex == 3)
                 {
                     n._cutDirection = 1;
                 }
-                else if ((n._cutDirection == 6 || n._cutDirection == 7) && n._lineIndex == 0)
+                else if ((n._cutDirection == 7) && n._lineIndex == 0)
                 {
                     n._cutDirection = 1;
                 }
 
-                if (lastRed._lineIndex == 0 && n._lineIndex > 0 && (n._cutDirection == 4 || n._cutDirection == 6))
+                if (lastRed._lineIndex == 0 && n._lineIndex > 0 && (n._cutDirection == 4 || n._cutDirection == 6) && n._type == 0)
                 {
                     if (n._cutDirection == 4)
                     {
@@ -776,7 +776,7 @@ namespace Osu2Saber.Model.Algorithm
                     }
                 }
 
-                if (lastBlue._lineIndex == 3 && n._lineIndex < 3 && (n._cutDirection == 5 || n._cutDirection == 7))
+                if (lastBlue._lineIndex == 3 && n._lineIndex < 3 && (n._cutDirection == 5 || n._cutDirection == 7) && n._type == 1)
                 {
                     if (n._cutDirection == 5)
                     {
@@ -809,6 +809,15 @@ namespace Osu2Saber.Model.Algorithm
                     {
                         n._cutDirection = 1;
                     }
+                }
+
+                if(n._type == 0 && lastRed._lineIndex == n._lineIndex && (n._cutDirection == 4 || n._cutDirection == 5))
+                {
+                    n._cutDirection = 0;
+                }
+                else if(n._type == 1 && lastBlue._lineIndex == n._lineIndex && (n._cutDirection == 4 || n._cutDirection == 5))
+                {
+                    n._cutDirection = 0;
                 }
 
                 if (n._type == 0)
@@ -859,6 +868,22 @@ namespace Osu2Saber.Model.Algorithm
 
                 if (((now - preceding == duration || notes[i + 1]._time - notes[i]._time == duration || notes[i + 2]._time - notes[i + 1]._time == duration) && i != notes.Count - 3) || fixedPattern == true && i != notes.Count - 3) //Count the amount of notes available for the pattern, save the start location.
                 {
+                    if(duration <= 0.01 || duration >= -0.01)
+                    {
+                        if(now - preceding >= 0.25)
+                        {
+                            duration = now - preceding;
+                        }
+                        else if (notes[i + 1]._time - notes[i]._time >= 0.25)
+                        {
+                            duration = notes[i + 1]._time - notes[i]._time;
+                        }
+                        else if (notes[i + 2]._time - notes[i + 1]._time >= 0.25)
+                        {
+                            duration = notes[i + 2]._time - notes[i + 1]._time;
+                        }
+                    }
+
                     available++;
 
                     if (patternStart == -1)
@@ -882,7 +907,7 @@ namespace Osu2Saber.Model.Algorithm
                     }
                     else if (duration <= 0.25 && fixedPattern == false)
                     {
-                        pattern = "Stream";
+                        pattern = "Complex";
                     }
                     else if (fixedPattern == false)
                     {
@@ -915,13 +940,13 @@ namespace Osu2Saber.Model.Algorithm
                     {
                         if(patternStart == 0)
                         {
-                            patternLoop = Pattern.GetNewPattern("Jump", 999);
+                            patternLoop = Pattern.GetNewPattern("Complex", 999);
                         }
                         else
                         {
                             do
                             {
-                                patternLoop = Pattern.GetNewPattern("Jump", 999);
+                                patternLoop = Pattern.GetNewPattern("Complex", 999);
                             } while (patternLoop[looper]._lineIndex == notes[patternStart - 1]._lineIndex && patternLoop[looper]._lineLayer == notes[patternStart - 1]._lineLayer);
                         }
                     }
@@ -947,13 +972,9 @@ namespace Osu2Saber.Model.Algorithm
                                 {
                                     do
                                     {
-                                        patternLoop = Pattern.GetNewPattern("Jump", 999);
+                                        patternLoop = Pattern.GetNewPattern("Complex", 999);
                                     } while (patternLoop[looper]._lineIndex == notes[patternStart + j - 1]._lineIndex && patternLoop[looper]._lineLayer == notes[patternStart + j - 1]._lineLayer);
                                     break;
-                                }
-                                else if (pattern == "Complex" && 0 == RandNumber(0, 2))
-                                {
-                                    patternLoop = Pattern.GetNewPattern("Jump", 999);
                                 }
                                 else if (pattern == "Random")
                                 {
