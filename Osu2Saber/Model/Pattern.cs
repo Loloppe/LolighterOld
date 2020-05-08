@@ -22,7 +22,7 @@ namespace Osu2Saber.Model
             {
                 do
                 {
-                    id = ConvertAlgorithm.RandNumber(1, 18);
+                    id = ConvertAlgorithm.RandNumber(0, 18);
                     
                 } while (id == patternID);
 
@@ -30,17 +30,30 @@ namespace Osu2Saber.Model
             }
 
             Layer lay = 0;
+            int li;
 
             switch (patternID)
             {
                 case 0: //Generic stream
-                    Note note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    if (ConvertAlgorithm.RandNumber(0, 2) == 0)
+                    {
+                        li = 2;
+                    }
+                    else if(ConvertAlgorithm.RandNumber(0, 2) == 0)
+                    {
+                        li = 3;
+                    }
+                    else
+                    {
+                        li = 1;
+                    }
+                    Note note = new Note(0, (Line)li, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Stream.Add(note);
-                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    note = new Note(0, (Line)(li - 1), Layer.Bottom, NoteType.Red, CutDirection.Down);
                     Stream.Add(note);
-                    note = new Note(0, Line.MiddleRight, lay, NoteType.Blue, CutDirection.Up);
+                    note = new Note(0, (Line)li, lay, NoteType.Blue, CutDirection.Up);
                     Stream.Add(note);
-                    note = new Note(0, Line.MiddleLeft, lay, NoteType.Red, CutDirection.Up);
+                    note = new Note(0, (Line)(li - 1), lay, NoteType.Red, CutDirection.Up);
                     Stream.Add(note);
                     break;
                 case 1: //Piano roll
@@ -419,7 +432,7 @@ namespace Osu2Saber.Model
             {
                 do
                 {
-                    id = ConvertAlgorithm.RandNumber(1, 11);
+                    id = ConvertAlgorithm.RandNumber(0, 18);
                 } while (id == patternID);
 
                 patternID = id;
@@ -427,25 +440,73 @@ namespace Osu2Saber.Model
 
             switch (patternID)
             {
-                case 1: // Wave
+                case 0: //Complexification by fraies
                     Note note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Complex.Add(note);
                     note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
                     Complex.Add(note);
                     note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
                     Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
                     note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
                     Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    break;
+                case 1: //Aimer with chelly (EGOIST) by Saut
                     note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Complex.Add(note);
                     note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
                     Complex.Add(note);
-                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Blue, CutDirection.Up);
                     Complex.Add(note);
-                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Up);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Up);
                     Complex.Add(note);
-                    break;
-                case 2: // Spiral
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
                     note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Complex.Add(note);
                     note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Down);
@@ -463,7 +524,101 @@ namespace Osu2Saber.Model
                     note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Up);
                     Complex.Add(note);
                     break;
-                case 3: // On top
+                case 2: //FIRST - AKI AKANE by Saut
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    break;
+                case 3: //FIRST - AKI AKANE by Saut
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    break;
+                case 4: //FIRST - AKI AKANE by Saut
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    break;
+                case 5: //FIRST - AKI AKANE by Saut
                     note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Complex.Add(note);
                     note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
@@ -480,6 +635,7 @@ namespace Osu2Saber.Model
                     Complex.Add(note);
                     note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
                     Complex.Add(note);
+                    //Not sure if more = better
                     note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Blue, CutDirection.DownLeft);
                     Complex.Add(note);
                     note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.DownRight);
@@ -489,7 +645,83 @@ namespace Osu2Saber.Model
                     note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
                     Complex.Add(note);
                     break;
-                case 4: // Woosh
+                case 6: //FIRST - AKI AKANE by Saut
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    break;
+                case 7: //FIRST - AKI AKANE by Saut
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    break;
+                case 8: //Kodoku no Kakurenbo - Himeringo by Saut
                     note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Complex.Add(note);
                     note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
@@ -507,93 +739,326 @@ namespace Osu2Saber.Model
                     note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
                     Complex.Add(note);
                     break;
-                case 5: //Generic middle stream
+                case 9: //Kodoku no Kakurenbo - Himeringo by Saut
                     note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Complex.Add(note);
                     note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
                     Complex.Add(note);
-                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Up);
                     Complex.Add(note);
-                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Up);
                     Complex.Add(note);
-                    break;
-                case 6: //Diagonal jump stream
-                    CutDirection c1, c2, c3, c4;
-                    if (ConvertAlgorithm.RandNumber(0, 2) == 1)
-                    {
-                        c1 = CutDirection.DownLeft;
-                        c2 = CutDirection.DownRight;
-                        c3 = CutDirection.UpRight;
-                        c4 = CutDirection.UpLeft;
-                    }
-                    else
-                    {
-                        c1 = CutDirection.Down;
-                        c2 = CutDirection.Down;
-                        c3 = CutDirection.Up;
-                        c4 = CutDirection.Up;
-                    }
-                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, c1);
-                    Complex.Add(note);
-                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, c2);
-                    Complex.Add(note);
-                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, c3);
-                    Complex.Add(note);
-                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, c4);
-                    Complex.Add(note);
-                    break;
-                case 7: //Extended diagonal jump stream + middle
-                    if (ConvertAlgorithm.RandNumber(0, 2) == 1)
-                    {
-                        c1 = CutDirection.DownLeft;
-                        c2 = CutDirection.DownRight;
-                        c3 = CutDirection.UpRight;
-                        c4 = CutDirection.UpLeft;
-                    }
-                    else
-                    {
-                        c1 = CutDirection.Down;
-                        c2 = CutDirection.Down;
-                        c3 = CutDirection.Up;
-                        c4 = CutDirection.Up;
-                    }
-                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, c1);
-                    Complex.Add(note);
-                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, c2);
-                    Complex.Add(note);
-                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, c3);
-                    Complex.Add(note);
-                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, c4);
-                    Complex.Add(note);
-                    break;
-                case 8: // Generic side stream
                     note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Complex.Add(note);
-                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
                     Complex.Add(note);
-                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Up);
                     Complex.Add(note);
-                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.Up);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Red, CutDirection.Up);
                     Complex.Add(note);
-                    break;
-                case 9: // Generic right stream
-                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Down);
-                    Complex.Add(note);
-                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
-                    Complex.Add(note);
-                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.Up);
-                    Complex.Add(note);
-                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
-                    Complex.Add(note);
-                    break;
-                case 10: // Generic left stream
                     note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
                     Complex.Add(note);
                     note = new Note(0, Line.Left, Layer.Bottom, NoteType.Red, CutDirection.Down);
                     Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
                     note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Blue, CutDirection.Up);
                     Complex.Add(note);
-                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.Up);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    break;
+                case 10: //Kodoku no Kakurenbo - Himeringo by Saut
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    break;
+                case 11: //Kodoku no Kakurenbo - Himeringo by Saut
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Middle, NoteType.Blue, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Middle, NoteType.Blue, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    break;
+                case 12: //If You Can't Hang - Sleeping With Sirens by Saut
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    break;
+                case 13: //If You Can't Hang - Sleeping With Sirens by Saut
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    break;
+                case 14: //If You Can't Hang - Sleeping With Sirens by Saut
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Bottom, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    break;
+                case 15: //Your voice so... feat. Such - PSYQUI by Saut
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.UpRight);
+                    Complex.Add(note);
+                    break;
+                case 16: //CANDYYYLAND (Pa's Lam System Remix) - tofubeats by Saut
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Blue, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Red, CutDirection.Down);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Blue, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Top, NoteType.Red, CutDirection.Up);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Blue, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Top, NoteType.Blue, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Middle, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Middle, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    break;
+                case 17: // Generic cross-stream
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.UpLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleLeft, Layer.Bottom, NoteType.Blue, CutDirection.DownLeft);
+                    Complex.Add(note);
+                    note = new Note(0, Line.MiddleRight, Layer.Bottom, NoteType.Red, CutDirection.DownRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Right, Layer.Top, NoteType.Blue, CutDirection.UpRight);
+                    Complex.Add(note);
+                    note = new Note(0, Line.Left, Layer.Top, NoteType.Red, CutDirection.UpLeft);
                     Complex.Add(note);
                     break;
             }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Osu2Saber.Model.Algorithm;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -59,6 +60,15 @@ namespace Osu2Saber.Model.Json
             _cutDirection = note._cutDirection;
         }
 
+        public Note(_Notes note)
+        {
+            _time = note._time;
+            _lineIndex = note._lineIndex;
+            _lineLayer = note._lineLayer;
+            _type = note._type;
+            _cutDirection = note._cutDirection;
+        }
+
         public Note(double time, Line line, Layer layer, NoteType type, CutDirection cutDirection)
         {
             _time = time; _lineIndex = (int)line; _lineLayer = (int)layer; _type = (int)type;
@@ -68,6 +78,11 @@ namespace Osu2Saber.Model.Json
         public Note(double time, int line, int layer, NoteType type, CutDirection cutDirection)
         {
             _time = time; _lineIndex = line; _lineLayer = layer; _type = (int)type; _cutDirection = (int)cutDirection;
+        }
+
+        public Note(double time, int line, int layer, int type, int cutDirection)
+        {
+            _time = time; _lineIndex = line; _lineLayer = layer; _type = type; _cutDirection = cutDirection;
         }
     }
 

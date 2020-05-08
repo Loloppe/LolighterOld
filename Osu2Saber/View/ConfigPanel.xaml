@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Osu2Saber.View"
              xmlns:ViewModel="clr-namespace:Osu2Saber.ViewModel"
              mc:Ignorable="d" Height="264" Width="258">
     <UserControl.Resources>
@@ -27,16 +26,17 @@
         <CheckBox IsChecked="{Binding AllUpDown}" Content="All Up-Down" HorizontalAlignment="Left" Margin="15,77,0,0" VerticalAlignment="Top" ToolTip="Make all notes Up or Down"/>
         <TextBlock HorizontalAlignment="Left" Margin="139,19,0,0" TextWrapping="Wrap" Text="Limiter" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Height="18" Margin="190,19,0,0" TextWrapping="Wrap" Text="{Binding EnoughIntervalBetweenNotes}" VerticalAlignment="Top" Width="65" ToolTip="In beat, limit the notes generation to this speed and limit gallops generation"/>
-        <CheckBox IsChecked="{Binding CreateDouble}" Content="Double" HorizontalAlignment="Left" Margin="15,21,0,0" VerticalAlignment="Top" ToolTip="Tick to allow double generation" Checked="CheckBox_Checked"/>
+        <CheckBox IsChecked="{Binding CreateDouble}" Content="Double" HorizontalAlignment="Left" Margin="15,21,0,0" VerticalAlignment="Top" ToolTip="Tick to allow double generation"/>
         <TextBox HorizontalAlignment="Left" Height="18" Margin="102,136,0,0" TextWrapping="Wrap" Text="{Binding PatternToUse}" VerticalAlignment="Top" Width="109"/>
         <TextBlock HorizontalAlignment="Left" Margin="15,135,0,0" TextWrapping="Wrap" Text="Pattern To Use :" VerticalAlignment="Top"/>
-        <TextBlock HorizontalAlignment="Left" Margin="14,155,0,0" TextWrapping="Wrap" Text="(All | Complex | Random | RandomStream)" VerticalAlignment="Top"/>
-        <TextBlock HorizontalAlignment="Left" Margin="14,174,0,0" TextWrapping="Wrap" Text="All: Default, select pattern from timing" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="14,155,0,0" TextWrapping="Wrap" Text="(Pack | Complex | Random | RandomStream)" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="14,174,0,0" TextWrapping="Wrap" Text="Pack: Use a customized pattern pack" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="14,191,0,0" TextWrapping="Wrap" Text="Complex: Complex jumpstream" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="14,207,0,0" TextWrapping="Wrap" Text="Random: Select pattern randomly" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="13,225,0,0" TextWrapping="Wrap" Text="RandomStream: Random bottom row with no pattern" VerticalAlignment="Top"/>
         <CheckBox IsChecked="{Binding GenerateGallops}" Content="Gallops" HorizontalAlignment="Left" Margin="15,39,0,0" VerticalAlignment="Top" ToolTip="If ticked with Double, generate gallops"/>
         <CheckBox IsChecked="{Binding AllTopUp}" Content="All Up-Top" HorizontalAlignment="Left" Margin="115,77,0,0" VerticalAlignment="Top" ToolTip="Make all the Up notes top layer"/>
+        <Button Content="Pattern Creator" HorizontalAlignment="Left" Margin="139,57,0,0" VerticalAlignment="Top" Width="97" Click="Pattern_Click"/>
 
     </Grid>
 </UserControl>

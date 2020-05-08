@@ -1,8 +1,14 @@
-﻿using Osu2Saber.Model.Json;
+﻿using Ionic.Zip;
+using Microsoft.Win32;
+using Newtonsoft.Json;
+using Osu2Saber.Model.Json;
 using osuBMParser;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Windows;
 
 namespace Osu2Saber.Model.Algorithm
 {
@@ -23,8 +29,8 @@ namespace Osu2Saber.Model.Algorithm
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
-        public static double EnoughIntervalBetweenNotes = 0.250f;
-        public static string PatternToUse = "All";
+        public static double EnoughIntervalBetweenNotes = 0.250;
+        public static string PatternToUse = "Pack";
 
         protected Beatmap org;
         protected SaberBeatmap dst;
@@ -40,6 +46,7 @@ namespace Osu2Saber.Model.Algorithm
         protected int first = 0;
         protected List<Note> patternLoop;
 
+        public List<_Pattern> patterns = new List<_Pattern>();
         public List<Event> Events => events;
         public List<Obstacle> Obstacles => obstacles;
         public List<Note> Notes => notes;
@@ -246,14 +253,14 @@ namespace Osu2Saber.Model.Algorithm
             {
                 for (int i = notes.Count() - 1; i > 1; i--)
                 {
-                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i - 1]._time - notes[i - 2]._time <= EnoughIntervalBetweenNotes)
+                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i - 1]._time - notes[i - 2]._time <= 0.25)
                     {
                         notes.Remove(notes[i]);
                     }
                 }
                 for (int i = notes.Count() - 2; i > 0; i--)
                 {
-                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i + 1]._time - notes[i]._time <= EnoughIntervalBetweenNotes)
+                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i + 1]._time - notes[i]._time <= 0.25)
                     {
                         notes.Remove(notes[i]);
                     }
@@ -836,9 +843,31 @@ namespace Osu2Saber.Model.Algorithm
         #region Process for patterns
         private void MapReader()
         {
-            if(PatternToUse != "All" && PatternToUse != "Complex" && PatternToUse != "Random" && PatternToUse != "RandomStream")
+            if(PatternToUse != "Pack" && PatternToUse != "Complex" && PatternToUse != "Random" && PatternToUse != "RandomStream")
             {
-                PatternToUse = "All";
+                PatternToUse = "Pack";
+            }
+            if(PatternToUse == "Pack")
+            {
+                MessageBox.Show("Select the pack to use.");
+                OpenFileDialog open = new OpenFileDialog
+                {
+                    Filter = "pak|*.pak",
+                    InitialDirectory = AppDomain.CurrentDomain.BaseDirectory,
+                    Multiselect = false
+                };
+
+                if (open.ShowDialog() == true)
+                {
+                    string data = File.ReadAllText(open.FileName);
+                    Pack pack = JsonConvert.DeserializeObject<Pack>(data);
+                    patterns.AddRange(pack._pattern);
+                }
+                else
+                {
+                    MessageBox.Show("Error during Pack selection, closing.");
+                    Process.GetCurrentProcess().Kill();
+                }
             }
 
             PatternCreator(PatternToUse);
@@ -856,7 +885,7 @@ namespace Osu2Saber.Model.Algorithm
             List<Note> swapTime = new List<Note>();
             Note lastAddedNote = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
 
-            if (pattern != "All" && pattern != "Random")
+            if (pattern != "Pack" && pattern != "Random")
             {
                 fixedPattern = true;
             }
@@ -922,15 +951,31 @@ namespace Osu2Saber.Model.Algorithm
                         looper = 0;
                     }
 
-                    patternLoop = Pattern.GetNewPattern(pattern, 999);
-                    if (pattern == "Stream")
+                    if(PatternToUse == "Pack")
                     {
-                        patternLoop = new List<Note>(StreamPatternFix(patternLoop));
+                        if(patternLoop != null)
+                        {
+                            patternLoop.Clear();
+                        }
+                        else
+                        {
+                            patternLoop = new List<Note>();
+                        }
+                        
+                        foreach (var no in patterns.ElementAt(RandNumber(0, patterns.Count()))._notes)
+                        {
+                            Note n = new Note(no);
+                            patternLoop.Add(n);
+                        }
                     }
-                    else if (pattern == "Vibro")
+                    else
+                    {
+                        patternLoop = Pattern.GetNewPattern(pattern, 999);
+                    }
+                    
+                    if (pattern == "Vibro")
                     {
                         patternLoop = Pattern.GetNewPattern("Stream", 0);
-                        patternLoop = new List<Note>(StreamPatternFix(patternLoop));
                     }
                     else if (pattern == "Random")
                     {
@@ -965,7 +1010,6 @@ namespace Osu2Saber.Model.Algorithm
                                 if (pattern == "Vibro")
                                 {
                                     patternLoop = Pattern.GetNewPattern("Stream", 0);
-                                    patternLoop = new List<Note>(StreamPatternFix(patternLoop));
                                     break;
                                 }
                                 else if (available - j < 7 && !fixedPattern)
@@ -987,14 +1031,22 @@ namespace Osu2Saber.Model.Algorithm
                                 }
                                 else
                                 {
-                                    patternLoop = Pattern.GetNewPattern(pattern, 999);
+                                    if (PatternToUse == "Pack")
+                                    {
+                                        patternLoop.Clear();
+                                        foreach (var no in patterns.ElementAt(RandNumber(0, patterns.Count()))._notes)
+                                        {
+                                            Note n = new Note(no);
+                                            patternLoop.Add(n);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        patternLoop = Pattern.GetNewPattern(pattern, 999);
+                                    }
                                     if (pattern == "Complex" && fixedPattern)
                                     {
                                         break;
-                                    }
-                                    if (pattern == "Stream")
-                                    {
-                                        patternLoop = new List<Note>(StreamPatternFix(patternLoop));
                                     }
                                 }
                             } while (patternLoop.Count > available - j + 1);
@@ -1058,77 +1110,6 @@ namespace Osu2Saber.Model.Algorithm
                     notes[notes.Count() - 1]._lineLayer = notes[notes.Count() - 3]._lineLayer;
                 }
             }
-        }
-
-        List<Note> StreamPatternFix(List<Note> temp)
-        {
-            List<Note> newLoop = new List<Note>(temp);
-
-            int id = Pattern.GetPatternID();
-            if(id == 0) //normy stream
-            {
-                int line = RandNumber(1, 4);
-                newLoop[0]._lineIndex = line;
-                if (line == 3)
-                {
-                    newLoop[1]._lineIndex = 2;
-                    newLoop[2]._lineIndex = 3;
-                    newLoop[3]._lineIndex = 2;
-                }
-                else if (line == 2)
-                {
-                    newLoop[1]._lineIndex = 1;
-                    newLoop[2]._lineIndex = 2;
-                    newLoop[3]._lineIndex = 1;
-                }
-                else
-                {
-                    newLoop[1]._lineIndex = 0;
-                    newLoop[2]._lineIndex = 1;
-                    newLoop[3]._lineIndex = 0;
-                }
-            }
-            else if (id == 10) //one-lane
-            {
-                int line = RandNumber(0, 4);
-                newLoop[0]._lineIndex = line;
-                newLoop[1]._lineIndex = line;
-                newLoop[2]._lineIndex = line;
-                newLoop[3]._lineIndex = line;
-            }
-            else if(id == 4) //banana
-            {
-                for(int i = 0; i < 8; i++)
-                {
-                    if (newLoop[i]._cutDirection == 1 && newLoop[i]._type == 1 && newLoop[i]._lineIndex == 3)
-                    {
-                        newLoop[i]._cutDirection = 7;
-                    }
-                    else if (newLoop[i]._cutDirection == 1 && newLoop[i]._type == 1 && newLoop[i]._lineIndex == 0)
-                    {
-                        newLoop[i]._cutDirection = 6;
-                    }
-                }
-            }
-            else if(id == 14) //inward to outward
-            {
-                if(RandNumber(0, 2) == 0)
-                {
-                    for (int i = 0; i < 4; i++)
-                    {
-                        if (newLoop[i]._cutDirection == 0 && newLoop[i]._type == 1 && newLoop[i]._lineLayer == 1)
-                        {
-                            newLoop[i]._cutDirection = 5;
-                        }
-                        else if (newLoop[i]._cutDirection == 0 && newLoop[i]._type == 0 && newLoop[i]._lineLayer == 1)
-                        {
-                            newLoop[i]._cutDirection = 4;
-                        }
-                    }
-                }
-            }
-
-            return newLoop;
         }
 
         #endregion

@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="Osu2Saber.View.PatternControl"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" Height="500" Width="670">
+    <Grid Background="#FFF0EBEB">
+        <Label Content="Pack" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="20" Width="200" Grid.ColumnSpan="2"/>
+        <ComboBox x:Name="Pattern" ItemsSource="{Binding PatternsName}" HorizontalAlignment="Left" Margin="231,52,0,0" VerticalAlignment="Top" Width="200" FontSize="14" SelectionChanged="Pattern_SelectionChanged"></ComboBox>
+            <Label Content="Pattern" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="231,10,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
+        <ListBox x:Name="Notes" HorizontalAlignment="Left" Height="275" Margin="10,93,0,0" VerticalAlignment="Top" Width="420"/>
+        <Label Content="Type" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="451,10,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
+        <Label Content="Line" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="451,82,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
+        <Label Content="Layer" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="451,154,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
+        <Label Content="Cut" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="451,226,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
+        <ComboBox x:Name="Type" HorizontalAlignment="Left" Margin="451,52,0,0" VerticalAlignment="Top" Width="200" FontSize="14"/>
+        <ComboBox x:Name="Lane" HorizontalAlignment="Left" Margin="451,124,0,0" VerticalAlignment="Top" Width="200" FontSize="14"/>
+        <ComboBox x:Name="Lay" HorizontalAlignment="Left" Margin="451,196,0,0" VerticalAlignment="Top" Width="200" FontSize="14"/>
+        <ComboBox x:Name="Cut" HorizontalAlignment="Left" Margin="451,268,0,0" VerticalAlignment="Top" Width="200" FontSize="14"/>
+        <Button Content="Add Note" HorizontalAlignment="Left" Margin="451,309,0,0" VerticalAlignment="Top" Width="200" Height="49" FontSize="20" Click="Add_Click"/>
+        <Button Content="Remove Note" HorizontalAlignment="Left" Margin="451,373,0,0" VerticalAlignment="Top" Width="200" Height="49" FontSize="20" Click="Remove_Click"/>
+        <Button Content="Save Pack" HorizontalAlignment="Left" Margin="451,441,0,0" VerticalAlignment="Top" Width="200" Height="49" FontSize="20" Click="Save_Click"/>
+        <Label x:Name="currentPack" Content="" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="10,46,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
+        <Button Content="New Pack" HorizontalAlignment="Left" Margin="10,373,0,0" VerticalAlignment="Top" Width="200" Height="49" FontSize="20" Click="New_Click"/>
+        <Button Content="New Pattern" HorizontalAlignment="Left" Margin="231,373,0,0" VerticalAlignment="Top" Width="200" Height="49" FontSize="20" Click="NewPat_Click"/>
+        <Button Content="Delete Pattern" HorizontalAlignment="Left" Margin="231,441,0,0" VerticalAlignment="Top" Width="200" Height="49" FontSize="20" Click="DelPat_Click"/>
+        <Button Content="Open Pack" HorizontalAlignment="Left" Margin="10,441,0,0" VerticalAlignment="Top" Width="200" Height="49" FontSize="20" Click="Open_Click"/>
+    </Grid>
+</UserControl>
