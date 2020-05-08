@@ -43,5 +43,7 @@ Removed the output folder (there's no output anyway).
 Modified the OszProcessor.cs so it only read a single difficulty you can select.
 Added Pattern.cs for the automapper in ConvertAlgorithm.cs.
 Added a lot of code in ConvertAlgorithm.cs, mostly an automapper, a different way to handle notes cleanup, some fixes and new features for the notes output.
+Added Pack.cs for Pack/Pattern/Notes structure for the automapper.
+Added PatternControl and PatternWindow as UI for the user to be able to create/modify pack.
 
 Everything else is kept the same to not break something.
