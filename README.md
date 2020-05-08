@@ -5,7 +5,7 @@ By **Loloppe#6435**
 
 **Light?** This program use "_notes" "_time" from your .dat file to generate "_events" corresponding to your Beatmap. A new file called "ExpertPlusStandard.dat" will be created in the same location of the program. Color swap speed: The color swap between blue and red every X beat (default 4). Color swap offset: Where the first color should start (default first note + 0). Use Strobe: Unticking this will remove all the "Off" events. Use Fade: Unticking this will change all "Fade" into "On" events. Spin/Zoom: Unticking this will remove all "Spin" and "Zoom" events. Spin Speed: Range allowed for the randomizer to pick from during left/right laser placement.
 
-**Automapper?** Can convert osu!mania (or osu!taiko/osu but I wouldn't recommend) maps into notes and patterns randomly generated with an algorithm and some other features. To use the osu(!mania) converter, just need to open file and select a .osz or .zip file. Be patient, it take a while to read file. Nice for map and light generation.
+**Automapper?** Can convert osu!mania (or osu!taiko/osu but I wouldn't recommend) maps into notes and patterns randomly generated with an algorithm and some other features. To use the osu(!mania) converter, just need to open file and select a .osz or .zip file. Be patient, it take a while to read file. Nice for map and light generation. Pattern can be modified.
 
 **Sliders?** Convert most notes into sliders. Limiter: Minimum distance required between notes of the same color, or ignored. Checkbox: Untick to allow "Loloppe notes" to be slidified, can cause issue.
 
@@ -22,18 +22,15 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
+### Version 3.4
+Now with a Pack Pattern Editor for the Osu converter.
+
 ### Version 3.3
 Massive cleanup of unused codes and dependencies.
 Pattern and algorithm cleanup.
 Fixed most of the bugs with the automapper and a very big bug from the converter.
 Deleted a few unused files from Osu2Saber.
 More...
-___
-## TODO
-All the program is missing right now is a way for the user to add/modify/delete pattern and choose what to use during the creation of the map. It would then create maps good enough to be called hand-made.
-My algorithm was made for osu!mania. It does work with osu and taiko but it's just stream then.
-By using Melodyne to generate MIDI file and then converting them into osu!mania chart with Automap-chan (https://github.com/dudehacker/Automap-chan) it's possible to generate high quality map off mp3 audio file.
-..Or just use a decent osu!mania chart.
 ___
 ## Osu2Saber LGPL-3.0
 Majority of the files, dependencies, codes that were unused by lolighter were deleted.
