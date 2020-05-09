@@ -33,10 +33,10 @@
         <TextBlock HorizontalAlignment="Left" Margin="14,174,0,0" TextWrapping="Wrap" Text="Pack: Use a customized pattern pack" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="14,191,0,0" TextWrapping="Wrap" Text="Complex: Complex jumpstream" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="14,207,0,0" TextWrapping="Wrap" Text="Random: Select pattern randomly" VerticalAlignment="Top"/>
-        <TextBlock HorizontalAlignment="Left" Margin="13,225,0,0" TextWrapping="Wrap" Text="RandomStream: Random bottom row with no pattern" VerticalAlignment="Top"/>
         <CheckBox IsChecked="{Binding GenerateGallops}" Content="Gallops" HorizontalAlignment="Left" Margin="15,39,0,0" VerticalAlignment="Top" ToolTip="If ticked with Double, generate gallops"/>
-        <CheckBox IsChecked="{Binding AllTopUp}" Content="All Up-Top" HorizontalAlignment="Left" Margin="115,77,0,0" VerticalAlignment="Top" ToolTip="Make all the Up notes top layer"/>
-        <Button Content="Pattern Creator" HorizontalAlignment="Left" Margin="139,57,0,0" VerticalAlignment="Top" Width="97" Click="Pattern_Click"/>
+        <CheckBox IsChecked="{Binding AllTopUp}" Content="All Up-Top" HorizontalAlignment="Left" Margin="139,58,0,0" VerticalAlignment="Top" ToolTip="Make all the Up notes top layer"/>
+        <Button Content="Pattern Creator" HorizontalAlignment="Left" Margin="78,234,0,0" VerticalAlignment="Top" Width="98" Click="Pattern_Click"/>
+        <CheckBox IsChecked="{Binding UseLogic}" Content="Use Logic" HorizontalAlignment="Left" Margin="139,77,0,0" VerticalAlignment="Top" ToolTip="Logic algorithm to fix map issues after generation"/>
 
     </Grid>
 </UserControl>

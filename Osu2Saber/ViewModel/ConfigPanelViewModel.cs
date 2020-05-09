@@ -36,6 +36,12 @@ namespace Osu2Saber.ViewModel
             get => ConvertAlgorithm.AllUpDown;
         }
 
+        public bool UseLogic
+        {
+            set { ConvertAlgorithm.UseLogic = value; }
+            get => ConvertAlgorithm.UseLogic;
+        }
+
         public bool AllTopUp
         {
             set { ConvertAlgorithm.AllTopUp = value; }

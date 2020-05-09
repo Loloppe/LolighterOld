@@ -93,6 +93,9 @@ namespace Lolighter
 
                 Process.Start(dir);
 
+                map = null;
+                map = new Rootobject();
+
                 SimpleLighter.IsEnabled = false;
                 SaveFile.IsEnabled = false;
                 SlidersMadness.IsEnabled = false;

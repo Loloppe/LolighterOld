@@ -139,11 +139,11 @@ namespace Osu2Saber.Model
             return map;
         }
 
-        int CalcOriginalBPM(Beatmap org)
+        double CalcOriginalBPM(Beatmap org)
         {
             var tp = org.TimingPoints[0];
             var mpb = tp.MsPerBeat;
-            return (int)Math.Round(1000.0 / mpb * 60);
+            return Math.Round(1000.0 / mpb * 60);
         }
     }
 }

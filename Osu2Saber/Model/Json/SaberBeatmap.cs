@@ -11,7 +11,7 @@ namespace Osu2Saber.Model.Json
     {
         public string origin;
         public string _version;
-        public int _beatsPerMinute;
+        public double _beatsPerMinute;
         public int _beatsPerBar;
         public double _noteJumpSpeed;
         public int _shuffle;

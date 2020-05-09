@@ -9,7 +9,7 @@ namespace Osu2Saber.Model.Json
         public string songName;
         public string songSubName;
         public string authorName;
-        public int beatsPerMinute;
+        public double beatsPerMinute;
         public int previewStartTime;
         public int previewDuration;
         public string coverImagePath;

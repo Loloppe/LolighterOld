@@ -383,19 +383,11 @@ namespace Osu2Saber.Model
             int cut = 1;
             int color = 1;
             int count = 0;
-            int line = 0;
 
-            for(int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
-                line = ConvertAlgorithm.RandNumber(0, 4);
-                if(line == 0 && color == 1)
-                {
-                    line = ConvertAlgorithm.RandNumber(0, 4);
-                }
-                else if(line == 3 && color == 0)
-                {
-                    line = ConvertAlgorithm.RandNumber(0, 4);
-                }
+                int line = ConvertAlgorithm.RandNumber(0, 4);
+
                 Note note = new Note(0, (Line)line, Layer.Bottom, (NoteType)color, (CutDirection)cut);
                 random.Add(note);
                 if (cut == 1 && count == 1)

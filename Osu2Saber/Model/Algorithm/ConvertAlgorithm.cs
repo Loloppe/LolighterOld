@@ -6,6 +6,7 @@ using osuBMParser;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -26,6 +27,7 @@ namespace Osu2Saber.Model.Algorithm
         public static bool CreateDouble = true;
         public static bool GenerateGallops = false;
         public static bool AllTopUp = false;
+        public static bool UseLogic = true;
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
@@ -38,7 +40,9 @@ namespace Osu2Saber.Model.Algorithm
         protected List<Event> events = new List<Event>();
         protected List<Obstacle> obstacles = new List<Obstacle>();
         protected List<Note> notes = new List<Note>();
-        protected int bpm;
+        protected double bpm;
+        protected double realBpm;
+        protected List<double> bpmPerNote = new List<double>();
         protected int offset;
         protected bool isMania = false;
         protected Event ev;
@@ -59,6 +63,7 @@ namespace Osu2Saber.Model.Algorithm
             org = osu;
             dst = bs;
             bpm = dst._beatsPerMinute;
+            realBpm = bpm;
             offset = osu.TimingPoints[0].Offset;
             isMania = org.Mode == 3;
         }
@@ -71,7 +76,10 @@ namespace Osu2Saber.Model.Algorithm
             {
                 RemoveExcessNotes();
                 MapReader();
-                LogicChecker();
+                if(UseLogic)
+                {
+                    LogicChecker();
+                }
             }
             if(AllTopUp)
             {
@@ -92,7 +100,6 @@ namespace Osu2Saber.Model.Algorithm
         {
             foreach (var obj in org.HitObjects)
             {
-                if (obj.Time < EnoughIntervalBetweenNotes) continue;
                 if(obj is HoldNote && !IgnoreHitSlider)
                 {
                     var temp = (HoldNote)obj;
@@ -144,8 +151,21 @@ namespace Osu2Saber.Model.Algorithm
         void AddNote(int timeMs, float posx, float posy)
         {
             var (line, layer) = DeterminePosition(posx, posy);
-            var note = new Note(ConvertTime(timeMs), line, layer, 0, CutDirection.Any);
+
+            // Handle variable BPM
+            for (int i = org.TimingPoints.Count() - 1; i > -1; i--)
+            {
+                if (org.TimingPoints[i].Offset <= timeMs && org.TimingPoints[i].MsPerBeat > 5 && org.TimingPoints[i].MsPerBeat < 1000)
+                {
+                    realBpm = Math.Round(1000.0 / org.TimingPoints[i].MsPerBeat * 60);
+                    break;
+                }
+            }
+
+            var time = ConvertTime(timeMs);
+            var note = new Note(time, line, layer, 0, CutDirection.Any);
             notes.Add(note);
+            bpmPerNote.Add(realBpm);
         }
 
         (int line, int layer) DeterminePosition(double x, double y)
@@ -253,14 +273,14 @@ namespace Osu2Saber.Model.Algorithm
             {
                 for (int i = notes.Count() - 1; i > 1; i--)
                 {
-                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i - 1]._time - notes[i - 2]._time <= 0.25)
+                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i - 1]._time - notes[i - 2]._time <= 0.25 * (bpm / bpmPerNote[i]))
                     {
                         notes.Remove(notes[i]);
                     }
                 }
                 for (int i = notes.Count() - 2; i > 0; i--)
                 {
-                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i + 1]._time - notes[i]._time <= 0.25)
+                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i + 1]._time - notes[i]._time <= 0.25 * (bpm / bpmPerNote[i]))
                     {
                         notes.Remove(notes[i]);
                     }
@@ -273,6 +293,7 @@ namespace Osu2Saber.Model.Algorithm
             double lastTime = -100;
             var keepNotes = new List<Note>();
             var dbl = false;
+            int i = 0;
 
             foreach (var note in notes)
             {
@@ -286,12 +307,23 @@ namespace Osu2Saber.Model.Algorithm
                 {
                     continue;
                 }
+                else if(bpm != bpmPerNote[i])
+                {
+                    if (timeGap >= (EnoughIntervalBetweenNotes * (bpm / bpmPerNote[i])))
+                    {
+                        keepNotes.Add(note);
+                        lastTime = note._time;
+                        dbl = false;
+                    }
+                }
                 else if (timeGap >= EnoughIntervalBetweenNotes)
                 {
                     keepNotes.Add(note);
                     lastTime = note._time;
                     dbl = false;
                 }
+
+                i++;
             }
             return keepNotes;
         }
@@ -323,17 +355,10 @@ namespace Osu2Saber.Model.Algorithm
         {
             var unit = 60.0 / bpm / 8.0;
             var sectionIdx = (int)Math.Round(((timeMs) / 1000.0 / unit));
-            if(isMania)
-            {
-                return Math.Round(sectionIdx / 8.0, 3, MidpointRounding.AwayFromZero) + 0.125;
-            }
-            else
-            {
-                return Math.Round(sectionIdx / 8.0, 3, MidpointRounding.AwayFromZero);
-            }
+            return Math.Round(sectionIdx / 8.0, 3, MidpointRounding.AwayFromZero);
         }
 
-        protected int ConvertBeat(double timeBeat)
+        protected int ConvertBeat(double timeBeat, double bpm)
         {
             return (int)Math.Round(timeBeat / bpm * 60 * 1000);
         }
@@ -351,7 +376,7 @@ namespace Osu2Saber.Model.Algorithm
             {
                 Note n = notes[i];
 
-                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02 && (n._lineLayer == notes[i + 1]._lineLayer || n._lineLayer == notes[i + 1]._lineLayer - 1 || n._lineLayer == notes[i + 1]._lineLayer + 1) && (n._lineIndex == notes[i + 1]._lineIndex || n._lineIndex == notes[i + 1]._lineIndex + 1 || n._lineIndex == notes[i + 1]._lineIndex - 1))
+                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02 && n._lineLayer == notes[i + 1]._lineLayer && n._lineIndex == notes[i + 1]._lineIndex)
                 {
                     if (n._type == 0 && n._lineIndex <= 1)
                     {
@@ -885,7 +910,7 @@ namespace Osu2Saber.Model.Algorithm
             List<Note> swapTime = new List<Note>();
             Note lastAddedNote = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
 
-            if (pattern != "Pack" && pattern != "Random")
+            if (pattern != "Random")
             {
                 fixedPattern = true;
             }
@@ -899,15 +924,15 @@ namespace Osu2Saber.Model.Algorithm
                 {
                     if(duration <= 0.01 || duration >= -0.01)
                     {
-                        if(now - preceding >= 0.25)
+                        if(now - preceding >= (0.25 * bpm / bpmPerNote.ElementAt(i)))
                         {
                             duration = now - preceding;
                         }
-                        else if (notes[i + 1]._time - notes[i]._time >= 0.25)
+                        else if (notes[i + 1]._time - notes[i]._time >= (0.25 * bpm / bpmPerNote.ElementAt(i)))
                         {
                             duration = notes[i + 1]._time - notes[i]._time;
                         }
-                        else if (notes[i + 2]._time - notes[i + 1]._time >= 0.25)
+                        else if (notes[i + 2]._time - notes[i + 1]._time >= (0.25 * bpm / bpmPerNote.ElementAt(i)))
                         {
                             duration = notes[i + 2]._time - notes[i + 1]._time;
                         }
@@ -930,11 +955,11 @@ namespace Osu2Saber.Model.Algorithm
                     {
                         patternStart = i - 1;
                     }
-                    if (duration <= 0.125 && fixedPattern == false)
+                    if (duration <= (0.125 * bpm / bpmPerNote.ElementAt(i)) && fixedPattern == false)
                     {
                         pattern = "Vibro";
                     }
-                    else if (duration <= 0.25 && fixedPattern == false)
+                    else if (duration <= (0.25 * bpm / bpmPerNote.ElementAt(i)) && fixedPattern == false)
                     {
                         pattern = "Complex";
                     }
@@ -1007,7 +1032,26 @@ namespace Osu2Saber.Model.Algorithm
 
                             do
                             {
-                                if (pattern == "Vibro")
+                                if (PatternToUse == "Pack")
+                                {
+                                    if (patternLoop != null)
+                                    {
+                                        patternLoop.Clear();
+                                    }
+                                    else
+                                    {
+                                        patternLoop = new List<Note>();
+                                    }
+
+                                    foreach (var no in patterns.ElementAt(RandNumber(0, patterns.Count()))._notes)
+                                    {
+                                        Note n = new Note(no);
+                                        patternLoop.Add(n);
+                                    }
+
+                                    break;
+                                }
+                                else if (pattern == "Vibro")
                                 {
                                     patternLoop = Pattern.GetNewPattern("Stream", 0);
                                     break;
@@ -1031,20 +1075,7 @@ namespace Osu2Saber.Model.Algorithm
                                 }
                                 else
                                 {
-                                    if (PatternToUse == "Pack")
-                                    {
-                                        patternLoop.Clear();
-                                        foreach (var no in patterns.ElementAt(RandNumber(0, patterns.Count()))._notes)
-                                        {
-                                            Note n = new Note(no);
-                                            patternLoop.Add(n);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        patternLoop = Pattern.GetNewPattern(pattern, 999);
-                                    }
-                                    if (pattern == "Complex" && fixedPattern)
+                                    if (fixedPattern)
                                     {
                                         break;
                                     }

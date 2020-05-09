@@ -26,7 +26,6 @@ namespace Osu2Saber.View
         public PatternControl()
         {
             InitializeComponent();
-
             PatternsName = new ObservableCollection<string>();
             Type.Items.Add(NoteType.Red);
             Type.Items.Add(NoteType.Blue);
@@ -95,10 +94,13 @@ namespace Osu2Saber.View
         {
             if(Pattern.SelectedIndex != -1)
             {
-                if (_patterns[Pattern.SelectedIndex]._notes.Length != 0)
+                if (_notes.Any())
                 {
                     _notes.Clear();
                     Notes.Items.Clear();
+                }
+                if (_patterns[Pattern.SelectedIndex]._notes.Length != 0)
+                {
                     foreach (var note in _patterns[Pattern.SelectedIndex]._notes)
                     {
                         // When changing pattern, need to reload all notes.
