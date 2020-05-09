@@ -22,10 +22,9 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-### Version 3.4
+### Version 3.5
+Should be variable BPM compatible.
 Now with a Pack Pattern Editor for the Osu converter.
-
-### Version 3.3
 Massive cleanup of unused codes and dependencies.
 Pattern and algorithm cleanup.
 Fixed most of the bugs with the automapper and a very big bug from the converter.
