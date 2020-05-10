@@ -411,552 +411,336 @@ namespace Osu2Saber.Model.Algorithm
                 {
                     if (n._type == 0 && n._lineIndex <= 1)
                     {
-                        notes[i + 1]._lineIndex = n._lineIndex + 2;
+                        notes[i + 1]._lineIndex = n._lineIndex + 1;
                     }
                     else if (n._type == 1 && n._lineIndex >= 2)
                     {
-                        notes[i + 1]._lineIndex = n._lineIndex - 2;
+                        notes[i + 1]._lineIndex = n._lineIndex - 1;
                     }
                     else if (n._type == 1 && notes[i + 1]._lineIndex <= 1)
                     {
-                        n._lineIndex = notes[i + 1]._lineIndex + 2;
+                        n._lineIndex = notes[i + 1]._lineIndex + 1;
                     }
                     else if (n._type == 0 && notes[i + 1]._lineIndex >= 2)
                     {
-                        n._lineIndex = notes[i + 1]._lineIndex - 2;
+                        n._lineIndex = notes[i + 1]._lineIndex - 1;
                     }
                 }
             }
 
             //Fix hitbox issue
-            for (int i = 0; i < notes.Count() - 1; i++)
+            for (int i = 0; i < notes.Count() - 2; i++)
             {
-                Note n = notes[i];
+                Note now = notes[i];
+                Note next = notes[i + 1];
 
-                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02)
+                if (next._time - now._time <= 0.02 && next._time - now._time >= -0.02)
                 {
-                    if(((notes[i]._cutDirection == 0 || notes[i]._cutDirection == 1) && notes[i + 1]._lineIndex == notes[i]._lineIndex) || (notes[i]._cutDirection == 2 || notes[i]._cutDirection == 3) && notes[i + 1]._lineLayer == notes[i]._lineLayer)
+                    if ((now._cutDirection == 0 || now._cutDirection == 1) && now._lineIndex == next._lineIndex)
                     {
-                        if (n._type == 0 && n._lineIndex <= 1)
+                        if (next._lineIndex != 3 && next._type == 1)
                         {
-                            notes[i + 1]._lineIndex = n._lineIndex + 2;
-                        }
-                        else if (n._type == 1 && n._lineIndex >= 2)
-                        {
-                            notes[i + 1]._lineIndex = n._lineIndex - 2;
-                        }
-                        else if (n._type == 1 && notes[i + 1]._lineIndex <= 1)
-                        {
-                            n._lineIndex = notes[i + 1]._lineIndex + 2;
-                        }
-                        else if (n._type == 0 && notes[i + 1]._lineIndex >= 2)
-                        {
-                            n._lineIndex = notes[i + 1]._lineIndex - 2;
-                        }
-                    }
-                    else if((notes[i]._cutDirection == 4 || notes[i]._cutDirection == 7) && ((notes[i + 1]._lineIndex == notes[i]._lineIndex + 1 && notes[i + 1]._lineLayer == notes[i]._lineLayer - 1) || (notes[i + 1]._lineIndex == notes[i]._lineIndex - 1 && notes[i + 1]._lineLayer == notes[i]._lineLayer + 1)))
-                    {
-                        if (n._type == 0 && n._lineIndex <= 1)
-                        {
-                            notes[i + 1]._lineIndex = n._lineIndex + 2;
-                        }
-                        else if (n._type == 1 && n._lineIndex >= 2)
-                        {
-                            notes[i + 1]._lineIndex = n._lineIndex - 2;
-                        }
-                        else if (n._type == 1 && notes[i + 1]._lineIndex <= 1)
-                        {
-                            n._lineIndex = notes[i + 1]._lineIndex + 2;
-                        }
-                        else if (n._type == 0 && notes[i + 1]._lineIndex >= 2)
-                        {
-                            n._lineIndex = notes[i + 1]._lineIndex - 2;
-                        }
-                    }
-                    else if ((notes[i]._cutDirection == 5 || notes[i]._cutDirection == 6) && ((notes[i + 1]._lineIndex == notes[i]._lineIndex + 1 && notes[i + 1]._lineLayer == notes[i]._lineLayer + 1) || (notes[i + 1]._lineIndex == notes[i]._lineIndex - 1 && notes[i + 1]._lineLayer == notes[i]._lineLayer - 1)))
-                    {
-                        if (n._type == 0 && n._lineIndex <= 1)
-                        {
-                            notes[i + 1]._lineIndex = n._lineIndex + 2;
-                        }
-                        else if (n._type == 1 && n._lineIndex >= 2)
-                        {
-                            notes[i + 1]._lineIndex = n._lineIndex - 2;
-                        }
-                        else if (n._type == 1 && notes[i + 1]._lineIndex <= 1)
-                        {
-                            n._lineIndex = notes[i + 1]._lineIndex + 2;
-                        }
-                        else if (n._type == 0 && notes[i + 1]._lineIndex >= 2)
-                        {
-                            n._lineIndex = notes[i + 1]._lineIndex - 2;
-                        }
-                    }
-                }
-            }
-
-            // Make the map flow better
-            for (int i = 0; i < notes.Count() - 1; i++)
-            {
-                Note n = notes[i];
-
-                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02)
-                {
-                    switch (n._cutDirection)
-                    {
-                        case 0: 
-                            if(notes[i + 1]._lineIndex == n._lineIndex)
+                            next._lineIndex++;
+                            if (next._lineLayer == 1 && (next._lineIndex == 1 || next._lineIndex == 2))
                             {
-                                if (n._type == 0 && n._lineIndex != 0 && n._lineLayer != 1)
+                                if (next._cutDirection == 0)
                                 {
-                                    n._lineIndex--;
-                                }
-                                else if (n._type == 1 && n._lineIndex != 3 && n._lineLayer != 1)
-                                {
-                                    n._lineIndex++;
-                                }
-                                else if(n._type == 0 && n._lineIndex == 0 && notes[i + 1]._lineLayer != 1)
-                                {
-                                    notes[i + 1]._lineIndex++;
-                                }
-                                else if(n._type == 1 && n._lineIndex == 3 && notes[i + 1]._lineLayer != 1)
-                                {
-                                    notes[i + 1]._lineIndex--;
-                                }
-                            }
-                            break;
-                        case 1:
-                            if (notes[i + 1]._lineIndex == n._lineIndex)
-                            {
-                                if (n._type == 0 && n._lineIndex != 0 && n._lineLayer != 1)
-                                {
-                                    n._lineIndex--;
-                                }
-                                else if (n._type == 1 && n._lineIndex != 3 && n._lineLayer != 1)
-                                {
-                                    n._lineIndex++;
-                                }
-                                else if (n._type == 0 && n._lineIndex == 0 && notes[i + 1]._lineLayer != 1)
-                                {
-                                    notes[i + 1]._lineIndex++;
-                                }
-                                else if (n._type == 1 && n._lineIndex == 3 && notes[i + 1]._lineLayer != 1)
-                                {
-                                    notes[i + 1]._lineIndex--;
-                                }
-                            }
-                            break;
-                        case 2:
-                            if(notes[i + 1]._lineLayer == n._lineLayer)
-                            {
-                                if(n._lineLayer == 2 || n._lineLayer == 1)
-                                {
-                                    n._lineLayer--;
+                                    next._lineLayer = 2;
                                 }
                                 else
                                 {
-                                    n._lineLayer++;
+                                    next._lineLayer = 0;
                                 }
                             }
-                            break;
-                        case 3:
-                            if (notes[i + 1]._lineLayer == n._lineLayer)
+                        }
+                        else if (now._lineIndex != 3 && now._type == 1)
+                        {
+                            now._lineIndex++;
+                            if (now._lineLayer == 1 && (now._lineIndex == 1 || now._lineIndex == 2))
                             {
-                                if (n._lineLayer == 2 || n._lineLayer == 1)
+                                if (now._cutDirection == 0)
                                 {
-                                    n._lineLayer--;
+                                    now._lineLayer = 2;
                                 }
                                 else
                                 {
-                                    n._lineLayer++;
+                                    now._lineLayer = 0;
                                 }
                             }
-                            break;
-                        case 4:
-                            if ((notes[i + 1]._lineIndex == n._lineIndex - 1 && notes[i + 1]._lineLayer == n._lineLayer + 1) || (notes[i + 1]._lineIndex == n._lineIndex + 1 && notes[i + 1]._lineLayer == n._lineLayer - 1) || (notes[i + 1]._lineIndex == n._lineIndex - 1 && notes[i + 1]._lineLayer == n._lineLayer) || (notes[i + 1]._lineIndex == n._lineIndex && notes[i + 1]._lineLayer == n._lineLayer + 1) || (notes[i + 1]._lineIndex == n._lineIndex && notes[i + 1]._lineLayer == n._lineLayer - 1) || (notes[i + 1]._lineIndex == n._lineIndex + 1 && notes[i + 1]._lineLayer == n._lineLayer))
+                        }
+                        else if (now._lineIndex != 0 && now._type == 0)
+                        {
+                            now._lineIndex--;
+                            if (now._lineLayer == 1 && (now._lineIndex == 1 || now._lineIndex == 2))
                             {
-                                if((notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 6) && n._lineLayer != 0 && n._lineIndex != 0)
+                                if (now._cutDirection == 0)
                                 {
-                                    notes[i + 1]._lineIndex = n._lineIndex - 1;
-                                    notes[i + 1]._lineLayer = n._lineLayer - 1;
-                                    if(notes[i + 1]._lineLayer == 1)
-                                    {
-                                        notes[i + 1]._lineLayer--;
-                                    }
+                                    now._lineLayer = 2;
                                 }
-                                else if ((notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 6) && notes[i + 1]._lineLayer != 2 && notes[i + 1]._lineIndex != 3)
+                                else
                                 {
-                                    n._lineIndex = notes[i + 1]._lineIndex + 1;
-                                    n._lineLayer = notes[i + 1]._lineLayer + 1;
-                                    if (n._lineLayer == 1)
-                                    {
-                                        n._lineLayer++;
-                                    }
-                                }
-                                else if(n._type == 1 && n._lineIndex != 3)
-                                {
-                                    n._lineIndex++;
-                                }
-                                else if (notes[i + 1]._type == 0 && notes[i + 1]._lineIndex != 0)
-                                {
-                                    notes[i + 1]._lineIndex--;
-                                }
-                                else if(n._type == 0 && n._lineIndex != 0)
-                                {
-                                    n._lineIndex--;
+                                    now._lineLayer = 0;
                                 }
                             }
-                            break;
-                        case 5:
-                            if ((notes[i + 1]._lineIndex == n._lineIndex - 1 && notes[i + 1]._lineLayer == n._lineLayer - 1) || (notes[i + 1]._lineIndex == n._lineIndex + 1 && notes[i + 1]._lineLayer == n._lineLayer + 1) || (notes[i + 1]._lineIndex == n._lineIndex - 1 && notes[i + 1]._lineLayer == n._lineLayer) || (notes[i + 1]._lineIndex == n._lineIndex && notes[i + 1]._lineLayer == n._lineLayer + 1) || (notes[i + 1]._lineIndex == n._lineIndex && notes[i + 1]._lineLayer == n._lineLayer - 1) || (notes[i + 1]._lineIndex == n._lineIndex + 1 && notes[i + 1]._lineLayer == n._lineLayer))
+                        }
+                    }
+                    else if((next._cutDirection == 0 || next._cutDirection == 1) && now._lineIndex == next._lineIndex)
+                    {
+                        if (next._lineIndex != 3 && next._type == 1)
+                        {
+                            next._lineIndex++;
+                            if (next._lineLayer == 1 && (next._lineIndex == 1 || next._lineIndex == 2))
                             {
-                                if ((notes[i + 1]._cutDirection == 5 || notes[i + 1]._cutDirection == 7) && n._lineLayer != 0 && n._lineIndex != 0)
+                                if (next._cutDirection == 0)
                                 {
-                                    notes[i + 1]._lineIndex = n._lineIndex - 1;
-                                    notes[i + 1]._lineLayer = n._lineLayer - 1;
-                                    if (notes[i + 1]._lineLayer == 1)
-                                    {
-                                        notes[i + 1]._lineLayer--;
-                                    }
+                                    next._lineLayer = 2;
                                 }
-                                else if ((notes[i + 1]._cutDirection == 5 || notes[i + 1]._cutDirection == 7) && notes[i + 1]._lineLayer != 2 && notes[i + 1]._lineIndex != 3)
+                                else
                                 {
-                                    n._lineIndex = notes[i + 1]._lineIndex + 1;
-                                    n._lineLayer = notes[i + 1]._lineLayer + 1;
-                                    if (n._lineLayer == 1)
-                                    {
-                                        n._lineLayer++;
-                                    }
-                                }
-                                else if (n._type == 1 && n._lineIndex != 3)
-                                {
-                                    n._lineIndex++;
-                                }
-                                else if (notes[i + 1]._type == 0 && notes[i + 1]._lineIndex != 0)
-                                {
-                                    notes[i + 1]._lineIndex--;
-                                }
-                                else if (n._type == 0 && n._lineIndex != 0)
-                                {
-                                    n._lineIndex--;
+                                    next._lineLayer = 0;
                                 }
                             }
-                            break;
-                        case 6:
-                            if ((notes[i + 1]._lineIndex == n._lineIndex - 1 && notes[i + 1]._lineLayer == n._lineLayer + 1) || (notes[i + 1]._lineIndex == n._lineIndex + 1 && notes[i + 1]._lineLayer == n._lineLayer - 1) || (notes[i + 1]._lineIndex == n._lineIndex - 1 && notes[i + 1]._lineLayer == n._lineLayer) || (notes[i + 1]._lineIndex == n._lineIndex && notes[i + 1]._lineLayer == n._lineLayer + 1) || (notes[i + 1]._lineIndex == n._lineIndex && notes[i + 1]._lineLayer == n._lineLayer - 1) || (notes[i + 1]._lineIndex == n._lineIndex + 1 && notes[i + 1]._lineLayer == n._lineLayer))
+                        }
+                        else if(now._lineIndex != 3 && now._type == 1)
+                        {
+                            now._lineIndex++;
+                            if (now._lineLayer == 1 && (now._lineIndex == 1 || now._lineIndex == 2))
                             {
-                                if ((notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 6) && n._lineLayer != 0 && n._lineIndex != 0)
+                                if (now._cutDirection == 0)
                                 {
-                                    notes[i + 1]._lineIndex = n._lineIndex - 1;
-                                    notes[i + 1]._lineLayer = n._lineLayer - 1;
-                                    if (notes[i + 1]._lineLayer == 1)
-                                    {
-                                        notes[i + 1]._lineLayer--;
-                                    }
+                                    now._lineLayer = 2;
                                 }
-                                else if ((notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 6) && notes[i + 1]._lineLayer != 2 && notes[i + 1]._lineIndex != 3)
+                                else
                                 {
-                                    n._lineIndex = notes[i + 1]._lineIndex + 1;
-                                    n._lineLayer = notes[i + 1]._lineLayer + 1;
-                                    if (n._lineLayer == 1)
-                                    {
-                                        n._lineLayer++;
-                                    }
-                                }
-                                else if (n._type == 1 && n._lineIndex != 3)
-                                {
-                                    n._lineIndex++;
-                                }
-                                else if (notes[i + 1]._type == 0 && notes[i + 1]._lineIndex != 0)
-                                {
-                                    notes[i + 1]._lineIndex--;
-                                }
-                                else if (n._type == 0 && n._lineIndex != 0)
-                                {
-                                    n._lineIndex--;
+                                    now._lineLayer = 0;
                                 }
                             }
-                            break;
-                        case 7:
-                            if ((notes[i + 1]._lineIndex == n._lineIndex - 1 && notes[i + 1]._lineLayer == n._lineLayer - 1) || (notes[i + 1]._lineIndex == n._lineIndex + 1 && notes[i + 1]._lineLayer == n._lineLayer + 1) || (notes[i + 1]._lineIndex == n._lineIndex - 1 && notes[i + 1]._lineLayer == n._lineLayer) || (notes[i + 1]._lineIndex == n._lineIndex && notes[i + 1]._lineLayer == n._lineLayer + 1) || (notes[i + 1]._lineIndex == n._lineIndex && notes[i + 1]._lineLayer == n._lineLayer - 1) || (notes[i + 1]._lineIndex == n._lineIndex + 1 && notes[i + 1]._lineLayer == n._lineLayer))
+                        }
+                        else if (now._lineIndex != 0 && now._type == 0)
+                        {
+                            now._lineIndex--;
+                            if (now._lineLayer == 1 && (now._lineIndex == 1 || now._lineIndex == 2))
                             {
-                                if ((notes[i + 1]._cutDirection == 5 || notes[i + 1]._cutDirection == 7) && n._lineLayer != 0 && n._lineIndex != 0)
+                                if (now._cutDirection == 0)
                                 {
-                                    notes[i + 1]._lineIndex = n._lineIndex - 1;
-                                    notes[i + 1]._lineLayer = n._lineLayer - 1;
-                                    if (notes[i + 1]._lineLayer == 1)
-                                    {
-                                        notes[i + 1]._lineLayer--;
-                                    }
+                                    now._lineLayer = 2;
                                 }
-                                else if ((notes[i + 1]._cutDirection == 5 || notes[i + 1]._cutDirection == 7) && notes[i + 1]._lineLayer != 2 && notes[i + 1]._lineIndex != 3)
+                                else
                                 {
-                                    n._lineIndex = notes[i + 1]._lineIndex + 1;
-                                    n._lineLayer = notes[i + 1]._lineLayer + 1;
-                                    if (n._lineLayer == 1)
-                                    {
-                                        n._lineLayer++;
-                                    }
-                                }
-                                else if (n._type == 1 && n._lineIndex != 3)
-                                {
-                                    n._lineIndex++;
-                                }
-                                else if (notes[i + 1]._type == 0 && notes[i + 1]._lineIndex != 0)
-                                {
-                                    notes[i + 1]._lineIndex--;
-                                }
-                                else if (n._type == 0 && n._lineIndex != 0)
-                                {
-                                    n._lineIndex--;
+                                    now._lineLayer = 0;
                                 }
                             }
-                            break;
-                        case 8:
-                            break;
+                        }
+                    }
+                    else if ((now._cutDirection == 2 || now._cutDirection == 3) && next._lineLayer == now._lineLayer)
+                    {
+                        if ((now._lineIndex == 0 || now._lineIndex == 3) && now._lineLayer != 0)
+                        {
+                            now._lineLayer--;
+                        }
+                        else if ((now._lineIndex == 0 || now._lineIndex == 3) && now._lineLayer != 3)
+                        {
+                            now._lineLayer++;
+                        }
+                        else if ((next._lineIndex == 0 || next._lineIndex == 3) && next._lineLayer != 0)
+                        {
+                            next._lineLayer--;
+                        }
+                        else if ((next._lineIndex == 0 || next._lineIndex == 3) && next._lineLayer != 3)
+                        {
+                            next._lineLayer++;
+                        }
+                    }
+                    if ((now._cutDirection == 4 || now._cutDirection == 7) && ((next._lineIndex == now._lineIndex - 1 && next._lineLayer == now._lineLayer + 1) || (next._lineIndex == now._lineIndex + 1 && next._lineLayer == now._lineLayer - 1) || (next._lineIndex == now._lineIndex && next._lineLayer == now._lineLayer + 1) || (next._lineIndex == now._lineIndex && next._lineLayer == now._lineLayer - 1) || (next._lineIndex == now._lineIndex - 1 && next._lineLayer == now._lineLayer) || (next._lineIndex == now._lineIndex + 1 && next._lineLayer == now._lineLayer)))
+                    {
+                        if (next._cutDirection > 3)
+                        {
+                            if (now._lineLayer == 2)
+                            {
+                                now._lineLayer = 0;
+                                now._lineIndex = next._lineIndex;
+                            }
+                            else
+                            {
+                                now._lineLayer = 2;
+                                now._lineIndex = next._lineIndex;
+                            }
+                        }
+                        else
+                        {
+                            if (now._lineLayer == 2)
+                            {
+                                now._lineLayer = 0;
+                            }
+                            else
+                            {
+                                now._lineLayer = 2;
+                            }
+                        }
+                    }
+                    if ((now._cutDirection == 5 || now._cutDirection == 6) && ((next._lineIndex == now._lineIndex + 1 && next._lineLayer == now._lineLayer + 1) || (next._lineIndex == now._lineIndex - 1 && next._lineLayer == now._lineLayer - 1) || (next._lineIndex == now._lineIndex && next._lineLayer == now._lineLayer + 1) || (next._lineIndex == now._lineIndex && next._lineLayer == now._lineLayer - 1) || (next._lineIndex == now._lineIndex - 1 && next._lineLayer == now._lineLayer) || (next._lineIndex == now._lineIndex + 1 && next._lineLayer == now._lineLayer)))
+                    {
+                        if (next._cutDirection > 3)
+                        {
+                            if (now._lineLayer == 2)
+                            {
+                                now._lineLayer = 0;
+                                now._lineIndex = next._lineIndex;
+                            }
+                            else
+                            {
+                                now._lineLayer = 2;
+                                now._lineIndex = next._lineIndex;
+                            }
+                        }
+                        else
+                        {
+                            if (now._lineLayer == 2)
+                            {
+                                now._lineLayer = 0;
+                            }
+                            else
+                            {
+                                now._lineLayer = 2;
+                            }
+                        }
+                    }
+                    if ((next._cutDirection == 4 || next._cutDirection == 7) && ((now._lineIndex == next._lineIndex - 1 && now._lineLayer == next._lineLayer + 1) || (now._lineIndex == next._lineIndex + 1 && now._lineLayer == next._lineLayer - 1) || (now._lineIndex == next._lineIndex && now._lineLayer == next._lineLayer + 1) || (now._lineIndex == next._lineIndex && now._lineLayer == next._lineLayer - 1) || (now._lineIndex == next._lineIndex - 1 && now._lineLayer == next._lineLayer) || (now._lineIndex == next._lineIndex + 1 && now._lineLayer == next._lineLayer)))
+                    {
+                        if (now._cutDirection > 3)
+                        {
+                            if (next._lineLayer == 2)
+                            {
+                                next._lineLayer = 0;
+                                next._lineIndex = now._lineIndex;
+                            }
+                            else
+                            {
+                                next._lineLayer = 2;
+                                next._lineIndex = now._lineIndex;
+                            }
+                        }
+                        else
+                        {
+                            if (next._lineLayer == 2)
+                            {
+                                next._lineLayer = 0;
+                            }
+                            else
+                            {
+                                next._lineLayer = 2;
+                            }
+                        }
+                    }
+                    if ((next._cutDirection == 5 || next._cutDirection == 6) && ((now._lineIndex == next._lineIndex + 1 && now._lineLayer == next._lineLayer + 1) || (now._lineIndex == next._lineIndex - 1 && now._lineLayer == next._lineLayer - 1) || (now._lineIndex == next._lineIndex && now._lineLayer == next._lineLayer + 1) || (now._lineIndex == next._lineIndex && now._lineLayer == next._lineLayer - 1) || (now._lineIndex == next._lineIndex - 1 && now._lineLayer == next._lineLayer) || (now._lineIndex == next._lineIndex + 1 && now._lineLayer == next._lineLayer)))
+                    {
+                        if (now._cutDirection > 3)
+                        {
+                            if (next._lineLayer == 2)
+                            {
+                                next._lineLayer = 0;
+                                next._lineIndex = now._lineIndex;
+                            }
+                            else
+                            {
+                                next._lineLayer = 2;
+                                next._lineIndex = now._lineIndex;
+                            }
+                        }
+                        else
+                        {
+                            if (next._lineLayer == 2)
+                            {
+                                next._lineLayer = 0;
+                            }
+                            else
+                            {
+                                next._lineLayer = 2;
+                            }
+                        }
+                    }
+                    if(now._lineIndex == next._lineIndex && (now._lineLayer == next._lineLayer + 1 || now._lineLayer == next._lineLayer -1))
+                    {
+                        if(now._cutDirection != 2 && now._cutDirection != 3 && next._cutDirection != 2 && next._cutDirection != 3)
+                        {
+                            if (now._lineLayer == 0)
+                            {
+                                next._lineLayer = 2;
+                            }
+                            else if (now._lineLayer == 1 && next._lineLayer == 0)
+                            {
+                                now._lineLayer = 2;
+                            }
+                            else if (now._lineLayer == 1 && next._lineLayer == 2)
+                            {
+                                now._lineLayer = 0;
+                            }
+                            else if(now._lineLayer == 2)
+                            {
+                                next._lineLayer = 0;
+                            }
+                        }
                     }
                 }
             }
 
-            //Fix vision
-            for (int i = 0; i < notes.Count() - 1; i++)
+            //Flow fix
+            for (int i = 0; i < notes.Count() - 2; i++)
             {
-                Note n = notes[i];
+                Note now = notes[i];
+                Note other = notes[i + 1];
+                Note next = notes[i + 2];
 
-                if ((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 1)
+                if (now._cutDirection == 5 && next._cutDirection == 7 && now._type == 1)
                 {
-                    if (n._cutDirection == 0 || n._cutDirection == 4 || n._cutDirection == 5)
-                    {
-                        n._lineLayer = 2;
-                    }
-                    else if (n._cutDirection == 1 || n._cutDirection == 6 || n._cutDirection == 7)
-                    {
-                        n._lineLayer = 0;
-                    }
-                    else
-                    {
-                        n._lineLayer = 0;
-                    }
+                    next._cutDirection = 1;
                 }
-            }
-
-            //Swap pickles
-            for (int i = 0; i < notes.Count() - 1; i++)
-            {
-                if (notes[i + 1]._time - notes[i]._time <= 0.01 && notes[i + 1]._time - notes[i]._time >= -0.01)
+                else if (now._cutDirection == 4 && next._cutDirection == 6 && now._type == 0)
                 {
-                    if ((notes[i]._lineIndex > notes[i + 1]._lineIndex + 1 && notes[i]._type == 0) || (notes[i]._lineIndex < notes[i + 1]._lineIndex - 1 && notes[i]._type == 1))
-                    {
-                        int tempo = notes[i]._lineIndex;
-                        notes[i]._lineIndex = notes[i + 1]._lineIndex;
-                        notes[i + 1]._lineIndex = tempo;
-
-                        tempo = notes[i]._lineLayer;
-                        notes[i]._lineLayer = notes[i + 1]._lineLayer;
-                        notes[i + 1]._lineLayer = tempo;
-                    }
-                }
-            }
-
-            Note lastBlue = new Note(0, 0, 0, 0, 0);
-            Note lastRed = new Note(0, 0, 0, 0, 0);
-
-            //Fix fused hitbox issue again
-            for (int i = 0; i < notes.Count() - 1; i++)
-            {
-                Note n = notes[i];
-
-                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02 && n._lineLayer == notes[i + 1]._lineLayer && n._lineIndex == notes[i + 1]._lineIndex)
-                {
-                    if(n._type == 0 && n._lineIndex >= 2)
-                    {
-                        n._lineIndex -= 2;
-                    }
-                    else if(n._type == 1 && n._lineIndex <= 1)
-                    {
-                        n._lineIndex += 2;
-                    }
-                    else if (notes[i + 1]._type == 0 && notes[i + 1]._lineIndex >= 2)
-                    {
-                        notes[i + 1]._lineIndex -= 2;
-                    }
-                    else if (notes[i + 1]._type == 1 && notes[i + 1]._lineIndex <= 1)
-                    {
-                        notes[i + 1]._lineIndex += 2;
-                    }
-                }
-            }
-
-            //Fix new pickles hitbox angle issue
-            for (int i = 0; i < notes.Count() - 1; i++)
-            {
-                Note n = notes[i];
-
-                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02 && n._lineLayer == notes[i + 1]._lineLayer && (n._lineIndex == notes[i + 1]._lineIndex - 1 || n._lineIndex == notes[i + 1]._lineIndex + 1))
-                {
-                    if(n._cutDirection == 4 || n._cutDirection == 5)
-                    {
-                        n._cutDirection = 0;
-                    }
-                    else if (n._cutDirection == 6 || n._cutDirection == 7)
-                    {
-                        n._cutDirection = 1;
-                    }
-                    if (notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 5)
-                    {
-                        notes[i + 1]._cutDirection = 0;
-                    }
-                    else if (notes[i + 1]._cutDirection == 6 || notes[i + 1]._cutDirection == 7)
-                    {
-                        notes[i + 1]._cutDirection = 1;
-                    }
-                }
-            }
-
-            //Fix same laneIndex hitbox issue
-            for (int i = 0; i < notes.Count() - 1; i++)
-            {
-                Note n = notes[i];
-
-                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02 && n._lineIndex == notes[i + 1]._lineIndex)
-                {
-                    if ((n._cutDirection == 0 || n._cutDirection == 1 || n._cutDirection == 4 || n._cutDirection == 5 || n._cutDirection == 6 || n._cutDirection == 7) && n._type == 0 && n._lineIndex != 0)
-                    {
-                        n._lineIndex--;
-                    }
-                    else if ((n._cutDirection == 0 || n._cutDirection == 1 || n._cutDirection == 4 || n._cutDirection == 5 || n._cutDirection == 6 || n._cutDirection == 7) && n._type == 1 && n._lineIndex != 3)
-                    {
-                        n._lineIndex++;
-                    }
-                    else if ((notes[i + 1]._cutDirection == 0 || notes[i + 1]._cutDirection == 1 || notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 5 || notes[i + 1]._cutDirection == 6 || notes[i + 1]._cutDirection == 7) && notes[i + 1]._type == 0 && notes[i + 1]._lineIndex != 0)
-                    {
-                        notes[i + 1]._lineIndex--;
-                    }
-                    else if ((notes[i + 1]._cutDirection == 0 || notes[i + 1]._cutDirection == 1 || notes[i + 1]._cutDirection == 4 || notes[i + 1]._cutDirection == 5 || notes[i + 1]._cutDirection == 6 || notes[i + 1]._cutDirection == 7) && notes[i + 1]._type == 1 && notes[i + 1]._lineIndex != 3)
-                    {
-                        notes[i + 1]._lineIndex++;
-                    }
-                }
-            }
-
-            //Fix shit-flow
-            for (int i = 0; i < notes.Count() - 1; i++)
-            {
-                Note n = notes[i];
-
-                if (lastBlue._cutDirection == 4 && n._cutDirection == 6 && n._type == 1)
-                {
-                    n._cutDirection = 1;
-                }
-                else if (lastBlue._cutDirection == 5 && n._cutDirection == 7 && n._type == 1)
-                {
-                    n._cutDirection = 1;
-                }
-                else if (lastBlue._cutDirection == 6 && n._cutDirection == 4 && n._type == 1)
-                {
-                    n._cutDirection = 0;
-                }
-                else if (lastBlue._cutDirection == 7 && n._cutDirection == 5 && n._type == 1)
-                {
-                    n._cutDirection = 0;
-                }
-                else if (lastRed._cutDirection == 5 && n._cutDirection == 7 && n._type == 0)
-                {
-                    n._cutDirection = 1;
-                }
-                else if (lastRed._cutDirection == 6 && n._cutDirection == 4 && n._type == 0)
-                {
-                    n._cutDirection = 0;
-                }
-                else if (lastRed._cutDirection == 7 && n._cutDirection == 5 && n._type == 0)
-                {
-                    n._cutDirection = 0;
-                }
-                else if (lastRed._cutDirection == 7 && n._cutDirection == 5 && n._type == 0)
-                {
-                    n._cutDirection = 0;
+                    next._cutDirection = 1;
                 }
 
-                if ((n._cutDirection == 5) && n._lineIndex == 0)
+                if(now._cutDirection == 4 && now._type == 0 && now._lineIndex > 1)
                 {
-                    n._cutDirection = 0;
+                    now._cutDirection = 1;
                 }
-                else if ((n._cutDirection == 4) && n._lineIndex == 3)
+                else if (now._cutDirection == 5 && now._type == 1 && now._lineIndex < 2)
                 {
-                    n._cutDirection = 0;
+                    now._cutDirection = 1;
                 }
-                else if ((n._cutDirection == 6) && n._lineIndex == 3)
+                else if (now._cutDirection == 6 && now._type == 0 && now._lineIndex > 1)
                 {
-                    n._cutDirection = 1;
+                    now._cutDirection = 0;
                 }
-                else if ((n._cutDirection == 7) && n._lineIndex == 0)
+                else if (now._cutDirection == 7 && now._type == 1 && now._lineIndex < 2)
                 {
-                    n._cutDirection = 1;
+                    now._cutDirection = 0;
                 }
 
-                if (lastRed._lineIndex == 0 && n._lineIndex > 0 && (n._cutDirection == 4 || n._cutDirection == 6) && n._type == 0)
+                if(now._cutDirection == 2 && next._cutDirection != 7)
                 {
-                    if (n._cutDirection == 4)
+                    next._cutDirection = 7;
+                    if(next._time - other._time <= 0.01 && next._time - other._time >= -0.01 && other._lineIndex == next._lineIndex + 1 && other._lineLayer == 0)
                     {
-                        n._cutDirection = 0;
+                        other._lineLayer++;
                     }
-                    else if (n._cutDirection == 6)
+                }
+                else if (now._cutDirection == 3 && next._cutDirection != 6)
+                {
+                    next._cutDirection = 6;
+                    if (next._time - other._time <= 0.01 && next._time - other._time >= -0.01 && other._lineIndex == next._lineIndex - 1 && other._lineLayer == 0)
                     {
-                        n._cutDirection = 1;
+                        other._lineLayer++;
                     }
                 }
 
-                if (lastBlue._lineIndex == 3 && n._lineIndex < 3 && (n._cutDirection == 5 || n._cutDirection == 7) && n._type == 1)
+                if(now._cutDirection == 0 && next._cutDirection == 6 && now._type == 1 && next._lineIndex > now._lineIndex)
                 {
-                    if (n._cutDirection == 5)
-                    {
-                        n._cutDirection = 0;
-                    }
-                    else if (n._cutDirection == 7)
-                    {
-                        n._cutDirection = 1;
-                    }
+                    next._lineIndex--;
                 }
-                
-                if(n._type == 0 && n._lineIndex >= 2)
+                else if (now._cutDirection == 0 && next._cutDirection == 7 && now._type == 0 && next._lineIndex < now._lineIndex)
                 {
-                    if (n._cutDirection == 4)
-                    {
-                        n._cutDirection = 0;
-                    }
-                    else if (n._cutDirection == 6)
-                    {
-                        n._cutDirection = 1;
-                    }
-                }
-                else if (n._type == 1 && n._lineIndex <= 1)
-                {
-                    if (n._cutDirection == 5)
-                    {
-                        n._cutDirection = 0;
-                    }
-                    else if (n._cutDirection == 7)
-                    {
-                        n._cutDirection = 1;
-                    }
-                }
-
-                if(n._type == 0 && lastRed._lineIndex == n._lineIndex && (n._cutDirection == 4 || n._cutDirection == 5))
-                {
-                    n._cutDirection = 0;
-                }
-                else if(n._type == 1 && lastBlue._lineIndex == n._lineIndex && (n._cutDirection == 4 || n._cutDirection == 5))
-                {
-                    n._cutDirection = 0;
-                }
-
-                if (n._type == 0)
-                {
-                    lastRed = notes[i];
-                }
-                else
-                {
-                    lastBlue = notes[i];
+                    next._lineIndex++;
                 }
             }
         }
@@ -1020,11 +804,10 @@ namespace Osu2Saber.Model.Algorithm
         {
             int patternStart = 0;
             int available = notes.Count;
-            int countFix = 0;
 
             for (int i = 0; i < notes.Count; i++)
             {
-                int looper = countFix;
+                int looper = 0;
 
                 if (looper == -1)
                 {
@@ -1079,7 +862,7 @@ namespace Osu2Saber.Model.Algorithm
 
                     if (looper >= patternLoop.Count)
                     {
-                        looper = countFix;
+                        looper = 0;
 
                         if (patternLoop != null)
                         {
@@ -1129,12 +912,7 @@ namespace Osu2Saber.Model.Algorithm
 
                     notes[patternStart + j] = note;
 
-                    countFix++;
                     looper++;
-                    if (countFix == 4)
-                    {
-                        countFix = 0;
-                    }
                 }
             }
 
