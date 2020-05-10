@@ -1062,27 +1062,10 @@ namespace Osu2Saber.Model
 
         public static List<Note> GetNewPattern(string name, int id)
         {
-            if(name == "Random")
-            {
-                int i;
-                i = ConvertAlgorithm.RandNumber(0, 2);
-                switch(i)
-                {
-                    case 0:
-                        name = "Stream";
-                        break;
-                    case 1:
-                        name = "Complex";
-                        break;
-                }
-            }
-
             switch(name)
             {
                 case "RandomStream":
                     return new List<Note>(SelectRandomStream(id));
-                case "Stream":
-                    return new List<Note>(SelectStream(id));
                 case "Complex":
                     return new List<Note>(SelectComplex(id));
             }

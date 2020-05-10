@@ -5,7 +5,7 @@
 
         #region fields
         public int Offset { get; set; }
-        public float MsPerBeat { get; set; }
+        public double MsPerBeat { get; set; }
         public int Meter { get; set; }
         public int SampleType { get; set; }
         public int SampleSet { get; set; }

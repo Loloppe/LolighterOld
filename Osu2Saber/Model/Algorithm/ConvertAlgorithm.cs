@@ -10,12 +10,14 @@ using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Forms;
+using MessageBox = System.Windows.Forms.MessageBox;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace Osu2Saber.Model.Algorithm
 {
     public class ConvertAlgorithm
     {
-        public static bool IgnoreHitSlider = false;
         public static bool NoDirectionAndPlacement = false;
         public static bool GenerateLight = true;
         public static bool AllBottom = false;
@@ -31,7 +33,9 @@ namespace Osu2Saber.Model.Algorithm
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
-        public static double EnoughIntervalBetweenNotes = 0.250;
+        public static double SlowSpeed = 0.4;
+        public static double EnoughIntervalBetweenNotes = 0.2;
+        public static double GallopSpeed = 0.3;
         public static string PatternToUse = "Pack";
 
         protected Beatmap org;
@@ -51,6 +55,7 @@ namespace Osu2Saber.Model.Algorithm
         protected List<Note> patternLoop;
 
         public List<_Pattern> patterns = new List<_Pattern>();
+        public List<_Pattern> slowPatterns = new List<_Pattern>();
         public List<Event> Events => events;
         public List<Obstacle> Obstacles => obstacles;
         public List<Note> Notes => notes;
@@ -66,6 +71,11 @@ namespace Osu2Saber.Model.Algorithm
             realBpm = bpm;
             offset = osu.TimingPoints[0].Offset;
             isMania = org.Mode == 3;
+        }
+
+        public ConvertAlgorithm(List<Note> note)
+        {
+            Notes.AddRange(note);
         }
 
         // You may override this method for better map generation
@@ -95,18 +105,39 @@ namespace Osu2Saber.Model.Algorithm
             }
         }
 
+        public void ConvertDat()
+        {
+            MapReader();
+            if (UseLogic)
+            {
+                LogicChecker();
+            }
+            if (AllTopUp)
+            {
+                AllUpTop();
+            }
+            if (AllBottom)
+            {
+                BottomDisplacement();
+            }
+            if (AllUpDown)
+            {
+                UpDown();
+            }
+        }
+
         #region Process for placing notes
         void MakeHitObjects()
         {
             foreach (var obj in org.HitObjects)
             {
-                if(obj is HoldNote && !IgnoreHitSlider)
+                if(obj is HoldNote)
                 {
                     var temp = (HoldNote)obj;
 
                     AddNote(temp.Time, temp.Position.x, temp.Position.y);
                 }
-                else if (obj is HitSlider && !IgnoreHitSlider)
+                else if (obj is HitSlider)
                 {
                     var temp = (HitSlider)obj;
 
@@ -273,14 +304,14 @@ namespace Osu2Saber.Model.Algorithm
             {
                 for (int i = notes.Count() - 1; i > 1; i--)
                 {
-                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i - 1]._time - notes[i - 2]._time <= 0.25 * (bpm / bpmPerNote[i]))
+                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i - 1]._time - notes[i - 2]._time <= GallopSpeed * (bpm / bpmPerNote[i]))
                     {
                         notes.Remove(notes[i]);
                     }
                 }
                 for (int i = notes.Count() - 2; i > 0; i--)
                 {
-                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i + 1]._time - notes[i]._time <= 0.25 * (bpm / bpmPerNote[i]))
+                    if (notes[i]._time - notes[i - 1]._time >= -0.01 && notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i + 1]._time - notes[i]._time <= GallopSpeed * (bpm / bpmPerNote[i]))
                     {
                         notes.Remove(notes[i]);
                     }
@@ -355,7 +386,7 @@ namespace Osu2Saber.Model.Algorithm
         {
             var unit = 60.0 / bpm / 8.0;
             var sectionIdx = (int)Math.Round(((timeMs) / 1000.0 / unit));
-            return Math.Round(sectionIdx / 8.0, 3, MidpointRounding.AwayFromZero);
+            return Math.Round(sectionIdx / 8.0, 3, MidpointRounding.AwayFromZero) + 0.125;
         }
 
         protected int ConvertBeat(double timeBeat, double bpm)
@@ -393,6 +424,73 @@ namespace Osu2Saber.Model.Algorithm
                     else if (n._type == 0 && notes[i + 1]._lineIndex >= 2)
                     {
                         n._lineIndex = notes[i + 1]._lineIndex - 2;
+                    }
+                }
+            }
+
+            //Fix hitbox issue
+            for (int i = 0; i < notes.Count() - 1; i++)
+            {
+                Note n = notes[i];
+
+                if (notes[i + 1]._time - n._time <= 0.02 && notes[i + 1]._time - n._time >= -0.02)
+                {
+                    if(((notes[i]._cutDirection == 0 || notes[i]._cutDirection == 1) && notes[i + 1]._lineIndex == notes[i]._lineIndex) || (notes[i]._cutDirection == 2 || notes[i]._cutDirection == 3) && notes[i + 1]._lineLayer == notes[i]._lineLayer)
+                    {
+                        if (n._type == 0 && n._lineIndex <= 1)
+                        {
+                            notes[i + 1]._lineIndex = n._lineIndex + 2;
+                        }
+                        else if (n._type == 1 && n._lineIndex >= 2)
+                        {
+                            notes[i + 1]._lineIndex = n._lineIndex - 2;
+                        }
+                        else if (n._type == 1 && notes[i + 1]._lineIndex <= 1)
+                        {
+                            n._lineIndex = notes[i + 1]._lineIndex + 2;
+                        }
+                        else if (n._type == 0 && notes[i + 1]._lineIndex >= 2)
+                        {
+                            n._lineIndex = notes[i + 1]._lineIndex - 2;
+                        }
+                    }
+                    else if((notes[i]._cutDirection == 4 || notes[i]._cutDirection == 7) && ((notes[i + 1]._lineIndex == notes[i]._lineIndex + 1 && notes[i + 1]._lineLayer == notes[i]._lineLayer - 1) || (notes[i + 1]._lineIndex == notes[i]._lineIndex - 1 && notes[i + 1]._lineLayer == notes[i]._lineLayer + 1)))
+                    {
+                        if (n._type == 0 && n._lineIndex <= 1)
+                        {
+                            notes[i + 1]._lineIndex = n._lineIndex + 2;
+                        }
+                        else if (n._type == 1 && n._lineIndex >= 2)
+                        {
+                            notes[i + 1]._lineIndex = n._lineIndex - 2;
+                        }
+                        else if (n._type == 1 && notes[i + 1]._lineIndex <= 1)
+                        {
+                            n._lineIndex = notes[i + 1]._lineIndex + 2;
+                        }
+                        else if (n._type == 0 && notes[i + 1]._lineIndex >= 2)
+                        {
+                            n._lineIndex = notes[i + 1]._lineIndex - 2;
+                        }
+                    }
+                    else if ((notes[i]._cutDirection == 5 || notes[i]._cutDirection == 6) && ((notes[i + 1]._lineIndex == notes[i]._lineIndex + 1 && notes[i + 1]._lineLayer == notes[i]._lineLayer + 1) || (notes[i + 1]._lineIndex == notes[i]._lineIndex - 1 && notes[i + 1]._lineLayer == notes[i]._lineLayer - 1)))
+                    {
+                        if (n._type == 0 && n._lineIndex <= 1)
+                        {
+                            notes[i + 1]._lineIndex = n._lineIndex + 2;
+                        }
+                        else if (n._type == 1 && n._lineIndex >= 2)
+                        {
+                            notes[i + 1]._lineIndex = n._lineIndex - 2;
+                        }
+                        else if (n._type == 1 && notes[i + 1]._lineIndex <= 1)
+                        {
+                            n._lineIndex = notes[i + 1]._lineIndex + 2;
+                        }
+                        else if (n._type == 0 && notes[i + 1]._lineIndex >= 2)
+                        {
+                            n._lineIndex = notes[i + 1]._lineIndex - 2;
+                        }
                     }
                 }
             }
@@ -868,13 +966,13 @@ namespace Osu2Saber.Model.Algorithm
         #region Process for patterns
         private void MapReader()
         {
-            if(PatternToUse != "Pack" && PatternToUse != "Complex" && PatternToUse != "Random" && PatternToUse != "RandomStream")
+            if(PatternToUse != "Pack" && PatternToUse != "RandomStream" && PatternToUse != "Complex")
             {
                 PatternToUse = "Pack";
             }
             if(PatternToUse == "Pack")
             {
-                MessageBox.Show("Select the pack to use.");
+                MessageBox.Show("Select the pack to use for faster part.");
                 OpenFileDialog open = new OpenFileDialog
                 {
                     Filter = "pak|*.pak",
@@ -893,6 +991,26 @@ namespace Osu2Saber.Model.Algorithm
                     MessageBox.Show("Error during Pack selection, closing.");
                     Process.GetCurrentProcess().Kill();
                 }
+
+                MessageBox.Show("Select the pack to use for slower part.");
+                open = new OpenFileDialog
+                {
+                    Filter = "pak|*.pak",
+                    InitialDirectory = AppDomain.CurrentDomain.BaseDirectory,
+                    Multiselect = false
+                };
+
+                if (open.ShowDialog() == true)
+                {
+                    string data = File.ReadAllText(open.FileName);
+                    Pack pack = JsonConvert.DeserializeObject<Pack>(data);
+                    slowPatterns.AddRange(pack._pattern);
+                }
+                else
+                {
+                    MessageBox.Show("Error during Pack selection, closing.");
+                    Process.GetCurrentProcess().Kill();
+                }
             }
 
             PatternCreator(PatternToUse);
@@ -900,93 +1018,47 @@ namespace Osu2Saber.Model.Algorithm
 
         void PatternCreator(string pattern)
         {
-            double preceding = -1;
-            int patternStart = -1;
-            int available = 1;
-            double duration = -1;
+            int patternStart = 0;
+            int available = notes.Count;
             int countFix = 0;
-            Note before = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
-            bool fixedPattern = false;
-            List<Note> swapTime = new List<Note>();
-            Note lastAddedNote = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
 
-            if (pattern != "Random")
+            for (int i = 0; i < notes.Count; i++)
             {
-                fixedPattern = true;
-            }
+                int looper = countFix;
 
-            for (int i = 0; i < notes.Count - 2; i++)
-            {
-                double now = notes[i]._time;
-                double next = notes[i + 1]._time;
-
-                if (((now - preceding == duration || notes[i + 1]._time - notes[i]._time == duration || notes[i + 2]._time - notes[i + 1]._time == duration) && i != notes.Count - 3) || fixedPattern == true && i != notes.Count - 3) //Count the amount of notes available for the pattern, save the start location.
+                if (looper == -1)
                 {
-                    if(duration <= 0.01 || duration >= -0.01)
+                    looper = 0;
+                }
+
+                if (patternLoop != null)
+                {
+                    patternLoop.Clear();
+                }
+                else
+                {
+                    patternLoop = new List<Note>();
+                }
+
+                if (notes[1]._time - notes[0]._time >= SlowSpeed || (notes[1]._time - notes[0]._time > -0.01 && notes[1]._time - notes[0]._time <= 0.01 && notes[2]._time - notes[1]._time >= SlowSpeed))
+                {
+                    if (PatternToUse == "Pack")
                     {
-                        if(now - preceding >= (0.25 * bpm / bpmPerNote.ElementAt(i)))
+                        foreach (var no in slowPatterns.ElementAt(RandNumber(0, slowPatterns.Count()))._notes)
                         {
-                            duration = now - preceding;
-                        }
-                        else if (notes[i + 1]._time - notes[i]._time >= (0.25 * bpm / bpmPerNote.ElementAt(i)))
-                        {
-                            duration = notes[i + 1]._time - notes[i]._time;
-                        }
-                        else if (notes[i + 2]._time - notes[i + 1]._time >= (0.25 * bpm / bpmPerNote.ElementAt(i)))
-                        {
-                            duration = notes[i + 2]._time - notes[i + 1]._time;
+                            Note n = new Note(no);
+                            patternLoop.Add(n);
                         }
                     }
-
-                    available++;
-
-                    if (patternStart == -1)
+                    else
                     {
-                        patternStart = i - 1;
+                        patternLoop = Pattern.GetNewPattern(pattern, 999);
                     }
                 }
-                else if(i != 0)
+                else
                 {
-                    if(i == notes.Count - 3)
+                    if (PatternToUse == "Pack")
                     {
-                        available += 2;
-                    }
-                    if (patternStart == -1)
-                    {
-                        patternStart = i - 1;
-                    }
-                    if (duration <= (0.125 * bpm / bpmPerNote.ElementAt(i)) && fixedPattern == false)
-                    {
-                        pattern = "Vibro";
-                    }
-                    else if (duration <= (0.25 * bpm / bpmPerNote.ElementAt(i)) && fixedPattern == false)
-                    {
-                        pattern = "Complex";
-                    }
-                    else if (fixedPattern == false)
-                    {
-                        pattern = "Complex";
-                    }
-
-                    duration = 0;
-                    int looper = countFix;
-
-                    if(looper == -1)
-                    {
-                        looper = 0;
-                    }
-
-                    if(PatternToUse == "Pack")
-                    {
-                        if(patternLoop != null)
-                        {
-                            patternLoop.Clear();
-                        }
-                        else
-                        {
-                            patternLoop = new List<Note>();
-                        }
-                        
                         foreach (var no in patterns.ElementAt(RandNumber(0, patterns.Count()))._notes)
                         {
                             Note n = new Note(no);
@@ -997,126 +1069,81 @@ namespace Osu2Saber.Model.Algorithm
                     {
                         patternLoop = Pattern.GetNewPattern(pattern, 999);
                     }
-                    
-                    if (pattern == "Vibro")
+                }
+
+                Note note = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
+
+                for (int j = 0; j < available - 2; j++)
+                {
+                    note = notes[patternStart + j];
+
+                    if (looper >= patternLoop.Count)
                     {
-                        patternLoop = Pattern.GetNewPattern("Stream", 0);
-                    }
-                    else if (pattern == "Random")
-                    {
-                        patternLoop = Pattern.GetNewPattern("Random", 999);
-                    }
-                    if (available < 7 && !fixedPattern)
-                    {
-                        if(patternStart == 0)
+                        looper = countFix;
+
+                        if (patternLoop != null)
                         {
-                            patternLoop = Pattern.GetNewPattern("Complex", 999);
+                            patternLoop.Clear();
                         }
                         else
                         {
-                            do
+                            patternLoop = new List<Note>();
+                        }
+
+                        if (notes[j + 1]._time - notes[j]._time >= SlowSpeed * (bpm / bpmPerNote[j]) || (notes[j  + 1]._time - notes[j]._time > -0.01 && notes[j + 1]._time - notes[j]._time <= 0.01 && notes[j + 2]._time - notes[j + 1]._time >= SlowSpeed * (bpm / bpmPerNote[j])))
+                        {
+                            if (PatternToUse == "Pack")
                             {
-                                patternLoop = Pattern.GetNewPattern("Complex", 999);
-                            } while (patternLoop[looper]._lineIndex == notes[patternStart - 1]._lineIndex && patternLoop[looper]._lineLayer == notes[patternStart - 1]._lineLayer);
+                                foreach (var no in slowPatterns.ElementAt(RandNumber(0, slowPatterns.Count()))._notes)
+                                {
+                                    Note n = new Note(no);
+                                    patternLoop.Add(n);
+                                }
+                            }
+                            else
+                            {
+                                patternLoop = Pattern.GetNewPattern(pattern, 999);
+                            }
+                        }
+                        else
+                        {
+                            if (PatternToUse == "Pack")
+                            {
+                                foreach (var no in patterns.ElementAt(RandNumber(0, patterns.Count()))._notes)
+                                {
+                                    Note n = new Note(no);
+                                    patternLoop.Add(n);
+                                }
+                            }
+                            else
+                            {
+                                patternLoop = Pattern.GetNewPattern(pattern, 999);
+                            }
                         }
                     }
-                    Note note = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
 
-                    for (int j = 0; j < available; j++) 
+                    note._lineIndex = patternLoop[looper]._lineIndex;
+                    note._lineLayer = patternLoop[looper]._lineLayer;
+                    note._cutDirection = patternLoop[looper]._cutDirection;
+                    note._type = patternLoop[looper]._type;
+
+                    notes[patternStart + j] = note;
+
+                    countFix++;
+                    looper++;
+                    if (countFix == 4)
                     {
-                        note = notes[patternStart + j];
-
-                        if (looper >= patternLoop.Count)
-                        {
-                            looper = countFix;
-
-                            do
-                            {
-                                if (PatternToUse == "Pack")
-                                {
-                                    if (patternLoop != null)
-                                    {
-                                        patternLoop.Clear();
-                                    }
-                                    else
-                                    {
-                                        patternLoop = new List<Note>();
-                                    }
-
-                                    foreach (var no in patterns.ElementAt(RandNumber(0, patterns.Count()))._notes)
-                                    {
-                                        Note n = new Note(no);
-                                        patternLoop.Add(n);
-                                    }
-
-                                    break;
-                                }
-                                else if (pattern == "Vibro")
-                                {
-                                    patternLoop = Pattern.GetNewPattern("Stream", 0);
-                                    break;
-                                }
-                                else if (available - j < 7 && !fixedPattern)
-                                {
-                                    do
-                                    {
-                                        patternLoop = Pattern.GetNewPattern("Complex", 999);
-                                    } while (patternLoop[looper]._lineIndex == notes[patternStart + j - 1]._lineIndex && patternLoop[looper]._lineLayer == notes[patternStart + j - 1]._lineLayer);
-                                    break;
-                                }
-                                else if (pattern == "Random")
-                                {
-                                    patternLoop = Pattern.GetNewPattern("Random", 999);
-                                }
-                                else if(pattern == "RandomStream")
-                                {
-                                    patternLoop = Pattern.GetNewPattern(pattern, 999);
-                                    break;
-                                }
-                                else
-                                {
-                                    if (fixedPattern)
-                                    {
-                                        break;
-                                    }
-                                }
-                            } while (patternLoop.Count > available - j + 1);
-                        }
-
-                        note._lineIndex = patternLoop[looper]._lineIndex;
-                        note._lineLayer = patternLoop[looper]._lineLayer;
-                        note._cutDirection = patternLoop[looper]._cutDirection;
-                        note._type = patternLoop[looper]._type;
-
-                        notes[patternStart + j] = note;
-
-                        countFix++;
-                        looper++;
-                        if (countFix == 4)
-                        {
-                            countFix = 0;
-                        }
-
-                        before = note;
+                        countFix = 0;
                     }
-                    available = 1;
-                    patternStart = -1;
-                    duration = next - now;
                 }
-                
-                if(duration == -1)
-                {
-                    duration = next - now;
-                }
-                preceding = now;
             }
 
             notes = Notes.OrderBy(note => note._time).ToList();
 
-            if(notes.Any() && notes.Count() > 3) // Fix last note
+            if (notes.Any() && notes.Count() > 3) // Fix last note
             {
                 notes[notes.Count() - 1]._type = notes[notes.Count() - 3]._type;
-                if(UpCut.Contains(notes[notes.Count() - 3]._cutDirection))
+                if (UpCut.Contains(notes[notes.Count() - 3]._cutDirection))
                 {
                     notes[notes.Count() - 1]._cutDirection = 1;
                     notes[notes.Count() - 1]._lineIndex = notes[notes.Count() - 3]._lineIndex;
@@ -1139,6 +1166,32 @@ namespace Osu2Saber.Model.Algorithm
                     notes[notes.Count() - 1]._cutDirection = 2;
                     notes[notes.Count() - 1]._lineIndex = 0;
                     notes[notes.Count() - 1]._lineLayer = notes[notes.Count() - 3]._lineLayer;
+                }
+
+                notes[notes.Count() - 2]._type = notes[notes.Count() - 4]._type;
+                if (UpCut.Contains(notes[notes.Count() - 4]._cutDirection))
+                {
+                    notes[notes.Count() - 2]._cutDirection = 1;
+                    notes[notes.Count() - 2]._lineIndex = notes[notes.Count() - 4]._lineIndex;
+                    notes[notes.Count() - 2]._lineLayer = 0;
+                }
+                else if (DownCut.Contains(notes[notes.Count() - 4]._cutDirection))
+                {
+                    notes[notes.Count() - 2]._cutDirection = 0;
+                    notes[notes.Count() - 2]._lineIndex = notes[notes.Count() - 4]._lineIndex;
+                    notes[notes.Count() - 2]._lineLayer = 2;
+                }
+                else if (notes[notes.Count() - 4]._cutDirection == 2)
+                {
+                    notes[notes.Count() - 2]._cutDirection = 3;
+                    notes[notes.Count() - 2]._lineIndex = 3;
+                    notes[notes.Count() - 2]._lineLayer = notes[notes.Count() - 4]._lineLayer;
+                }
+                else if (notes[notes.Count() - 4]._cutDirection == 3)
+                {
+                    notes[notes.Count() - 2]._cutDirection = 2;
+                    notes[notes.Count() - 2]._lineIndex = 0;
+                    notes[notes.Count() - 2]._lineLayer = notes[notes.Count() - 4]._lineLayer;
                 }
             }
         }

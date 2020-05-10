@@ -30,6 +30,19 @@ namespace Osu2Saber.ViewModel
             get => ConvertAlgorithm.EnoughIntervalBetweenNotes;
         }
 
+
+        public double GallopSpeed
+        {
+            set { ConvertAlgorithm.GallopSpeed = value; }
+            get => ConvertAlgorithm.GallopSpeed;
+        }
+
+        public double SlowSpeed
+        {
+            set { ConvertAlgorithm.SlowSpeed = value; }
+            get => ConvertAlgorithm.SlowSpeed;
+        }
+
         public bool AllUpDown
         {
             set { ConvertAlgorithm.AllUpDown = value; }
@@ -100,12 +113,6 @@ namespace Osu2Saber.ViewModel
         {
             set { Osu2BsConverter.PreferHarder = value; }
             get => Osu2BsConverter.PreferHarder;
-        }
-
-        public bool IgnoreHitSlider
-        {
-            set { ConvertAlgorithm.IgnoreHitSlider = value; }
-            get => ConvertAlgorithm.IgnoreHitSlider;
         }
 
         public bool NoDirectionAndPlacement
