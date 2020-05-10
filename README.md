@@ -22,11 +22,12 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-### Version 3.6
+### Version 3.7
 Fixed variable BPM.
 Added dual-pack for slower/faster section.
 Added variable gallop and pack speed.
 Cleaned up the automapper algorithm.
+Cleaned up the Logic algorithm.
 You can now convert BS map into the automapper.
 
 ### Version 3.5
