@@ -1,16 +1,12 @@
-﻿using Ionic.Zip;
-using Microsoft.Win32;
+﻿
 using Newtonsoft.Json;
 using Osu2Saber.Model.Json;
 using osuBMParser;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
-using System.Windows;
-using System.Windows.Forms;
 using MessageBox = System.Windows.Forms.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
@@ -76,6 +72,16 @@ namespace Osu2Saber.Model.Algorithm
         public ConvertAlgorithm(List<Note> note)
         {
             Notes.AddRange(note);
+            var pd = PromptDialog.Prompt("Enter the BPM", "BPM");
+            if (pd != null)
+            {
+                bpm = double.Parse(pd);
+                realBpm = double.Parse(pd);
+                foreach (var n in notes)
+                {
+                    bpmPerNote.Add(double.Parse(pd));
+                }
+            }
         }
 
         // You may override this method for better map generation
@@ -107,6 +113,7 @@ namespace Osu2Saber.Model.Algorithm
 
         public void ConvertDat()
         {
+            RemoveExcessNotes();
             MapReader();
             if (UseLogic)
             {
