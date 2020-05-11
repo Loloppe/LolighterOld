@@ -21,7 +21,7 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-### Version 3.8
+### Version 3.9
 Fixed variable BPM.
 Added dual-pack for slower/faster section.
 Added variable gallop and pack speed.
