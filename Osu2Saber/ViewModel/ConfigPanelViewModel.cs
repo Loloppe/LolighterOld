@@ -61,6 +61,12 @@ namespace Osu2Saber.ViewModel
             get => ConvertAlgorithm.AllTopUp;
         }
 
+        public bool AllowOneHanded
+        {
+            set { ConvertAlgorithm.AllowOneHanded = value; }
+            get => ConvertAlgorithm.AllowOneHanded;
+        }
+
         public bool AllBottom
         {
             set { ConvertAlgorithm.AllBottom = value; }

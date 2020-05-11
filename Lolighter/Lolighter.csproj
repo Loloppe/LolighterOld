@@ -84,7 +84,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Methods\Bomb.cs" />
-    <Compile Include="Methods\Downscaler.cs" />
     <Compile Include="Methods\Inverted.cs" />
     <Compile Include="Methods\Light.cs" />
     <Compile Include="Methods\Loloppe.cs" />

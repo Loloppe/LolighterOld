@@ -25,7 +25,8 @@ namespace Osu2Saber.Model.Algorithm
         public static bool CreateDouble = true;
         public static bool GenerateGallops = false;
         public static bool AllTopUp = false;
-        public static bool UseLogic = true;
+        public static bool UseLogic = false;
+        public static bool AllowOneHanded = false;
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
@@ -48,7 +49,6 @@ namespace Osu2Saber.Model.Algorithm
         protected Event ev;
         protected int forceSpread = 0;
         protected int first = 0;
-        protected List<Note> patternLoop;
 
         public List<_Pattern> patterns = new List<_Pattern>();
         public List<_Pattern> slowPatterns = new List<_Pattern>();
@@ -58,6 +58,8 @@ namespace Osu2Saber.Model.Algorithm
 
         public List<int> UpCut = new List<int>() { 0, 4, 5 };
         public List<int> DownCut = new List<int>() { 1, 6, 7 };
+        public List<int> IntoLeft = new List<int>() { 3, 5, 7 };
+        public List<int> IntoRight = new List<int>() { 2, 4, 6 };
 
         public ConvertAlgorithm(Beatmap osu, SaberBeatmap bs)
         {
@@ -709,19 +711,19 @@ namespace Osu2Saber.Model.Algorithm
 
                 if(now._cutDirection == 4 && now._type == 0 && now._lineIndex > 1)
                 {
-                    now._cutDirection = 1;
+                    now._cutDirection = 0;
                 }
                 else if (now._cutDirection == 5 && now._type == 1 && now._lineIndex < 2)
                 {
-                    now._cutDirection = 1;
+                    now._cutDirection = 0;
                 }
                 else if (now._cutDirection == 6 && now._type == 0 && now._lineIndex > 1)
                 {
-                    now._cutDirection = 0;
+                    now._cutDirection = 1;
                 }
                 else if (now._cutDirection == 7 && now._type == 1 && now._lineIndex < 2)
                 {
-                    now._cutDirection = 0;
+                    now._cutDirection = 1;
                 }
 
                 if(now._cutDirection == 2 && next._cutDirection != 7)
@@ -809,123 +811,306 @@ namespace Osu2Saber.Model.Algorithm
 
         void PatternCreator(string pattern)
         {
-            int patternStart = 0;
             int available = notes.Count;
+            // Current slow section
+            bool slow = false;
+            // To find the right pattern
+            bool foundBlue = false;
+            bool foundRed = false;
+            // To know the placement order of notes.
+            List<int> noteOrder = new List<int>();
+            // Note to be used from pattern
+            Queue<Note> blueNote = new Queue<Note>();
+            Queue<Note> redNote = new Queue<Note>();
+            // To convert to queue
+            List<Note> patternList = new List<Note>();
+            // Current direction
+            int leftHand = 0;
+            int rightHand = 0;
+            // Last note used
+            Note preceding = new Note(-1, -1, -1, -1, -1);
 
-            for (int i = 0; i < notes.Count; i++)
+            Note n = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
+
+            //For each notes
+            for (int i = 0; i < available - 2; i++)
             {
-                int looper = 0;
+                n = notes[i];
 
-                if (looper == -1)
+                // If the pattern is done or the speed got faster than slow (ignore double).
+                if (noteOrder.Count() == 0 || (slow && notes[i + 1]._time - notes[i]._time < SlowSpeed * (bpm / bpmPerNote[i]) && notes[i + 1]._time - notes[i]._time >= 0.01))
                 {
-                    looper = 0;
-                }
-
-                if (patternLoop != null)
-                {
-                    patternLoop.Clear();
-                }
-                else
-                {
-                    patternLoop = new List<Note>();
-                }
-
-                if (notes[1]._time - notes[0]._time >= SlowSpeed || (notes[1]._time - notes[0]._time > -0.01 && notes[1]._time - notes[0]._time <= 0.01 && notes[2]._time - notes[1]._time >= SlowSpeed))
-                {
-                    if (PatternToUse == "Pack")
+                    // Infinite loop until a pattern that fit the condition is met.
+                    do
                     {
-                        foreach (var no in slowPatterns.ElementAt(RandNumber(0, slowPatterns.Count()))._notes)
-                        {
-                            Note n = new Note(no);
-                            patternLoop.Add(n);
-                        }
-                    }
-                    else
-                    {
-                        patternLoop = Pattern.GetNewPattern(pattern, 999);
-                    }
-                }
-                else
-                {
-                    if (PatternToUse == "Pack")
-                    {
-                        foreach (var no in patterns.ElementAt(RandNumber(0, patterns.Count()))._notes)
-                        {
-                            Note n = new Note(no);
-                            patternLoop.Add(n);
-                        }
-                    }
-                    else
-                    {
-                        patternLoop = Pattern.GetNewPattern(pattern, 999);
-                    }
-                }
+                        // Need to find a new pattern.
+                        foundBlue = false;
+                        foundRed = false;
+                        slow = false;
 
-                Note note = new Note(-1, -1, -1, NoteType.Mine, (CutDirection)8);
+                        // Clear/create a new loop.
+                        blueNote.Clear();
+                        redNote.Clear();
+                        noteOrder.Clear();
 
-                for (int j = 0; j < available - 2; j++)
-                {
-                    note = notes[patternStart + j];
-
-                    if (looper >= patternLoop.Count)
-                    {
-                        looper = 0;
-
-                        if (patternLoop != null)
-                        {
-                            patternLoop.Clear();
-                        }
-                        else
-                        {
-                            patternLoop = new List<Note>();
-                        }
-
-                        if (notes[j + 1]._time - notes[j]._time >= SlowSpeed * (bpm / bpmPerNote[j]) || (notes[j  + 1]._time - notes[j]._time > -0.01 && notes[j + 1]._time - notes[j]._time <= 0.01 && notes[j + 2]._time - notes[j + 1]._time >= SlowSpeed * (bpm / bpmPerNote[j])))
+                        // Slow speed
+                        if (notes[i + 1]._time - notes[i]._time >= SlowSpeed * (bpm / bpmPerNote[i]) || (notes[i + 1]._time - notes[i]._time > -0.01 && notes[i + 1]._time - notes[i]._time <= 0.01 && notes[i + 2]._time - notes[i + 1]._time >= SlowSpeed * (bpm / bpmPerNote[i])))
                         {
                             if (PatternToUse == "Pack")
                             {
                                 foreach (var no in slowPatterns.ElementAt(RandNumber(0, slowPatterns.Count()))._notes)
                                 {
-                                    Note n = new Note(no);
-                                    patternLoop.Add(n);
+                                    Note not = new Note(no);
+                                    if(not._type == 0)
+                                    {
+                                        noteOrder.Add(0);
+                                        redNote.Enqueue(not);
+                                    }
+                                    else if(not._type == 1)
+                                    {
+                                        noteOrder.Add(1);
+                                        blueNote.Enqueue(not);
+                                    }
                                 }
                             }
                             else
                             {
-                                patternLoop = Pattern.GetNewPattern(pattern, 999);
+                                patternList = Pattern.GetNewPattern(pattern, 999);
+                                foreach(var no in patternList)
+                                {
+                                    Note not = new Note(no);
+                                    if (not._type == 0)
+                                    {
+                                        noteOrder.Add(0);
+                                        redNote.Enqueue(not);
+                                    }
+                                    else if (not._type == 1)
+                                    {
+                                        noteOrder.Add(1);
+                                        blueNote.Enqueue(not);
+                                    }
+                                }
                             }
+                            slow = true;
                         }
-                        else
+                        else // Fast speed
                         {
                             if (PatternToUse == "Pack")
                             {
                                 foreach (var no in patterns.ElementAt(RandNumber(0, patterns.Count()))._notes)
                                 {
-                                    Note n = new Note(no);
-                                    patternLoop.Add(n);
+                                    Note not = new Note(no);
+                                    if (not._type == 0)
+                                    {
+                                        noteOrder.Add(0);
+                                        redNote.Enqueue(not);
+                                    }
+                                    else if (not._type == 1)
+                                    {
+                                        noteOrder.Add(1);
+                                        blueNote.Enqueue(not);
+                                    }
                                 }
                             }
                             else
                             {
-                                patternLoop = Pattern.GetNewPattern(pattern, 999);
+                                patternList = Pattern.GetNewPattern(pattern, 999);
+                                foreach (var no in patternList)
+                                {
+                                    Note not = new Note(no);
+                                    if (not._type == 0)
+                                    {
+                                        noteOrder.Add(0);
+                                        redNote.Enqueue(not);
+                                    }
+                                    else if (not._type == 1)
+                                    {
+                                        noteOrder.Add(1);
+                                        blueNote.Enqueue(not);
+                                    }
+                                }
+                            }
+                        }
+
+                        // Check if condition is met
+                        for (var blue = 0; blue < blueNote.Count(); blue++)
+                        {
+                            if(DownCut.Contains(rightHand) && UpCut.Contains(blueNote.Peek()._cutDirection))
+                            {
+                                foundBlue = true;
+                                break;
+                            }
+                            else if(UpCut.Contains(rightHand) && DownCut.Contains(blueNote.Peek()._cutDirection))
+                            {
+                                foundBlue = true;
+                                break;
+                            }
+                            else if(rightHand == 2 && IntoLeft.Contains(blueNote.Peek()._cutDirection))
+                            {
+                                foundBlue = true;
+                                break;
+                            }
+                            else if(rightHand == 3 && IntoRight.Contains(blueNote.Peek()._cutDirection))
+                            {
+                                foundBlue = true;
+                                break;
+                            }
+                            else if(IntoLeft.Contains(rightHand) && blueNote.Peek()._cutDirection == 2)
+                            {
+                                foundBlue = true;
+                                break;
+                            }
+                            else if(IntoRight.Contains(rightHand) && blueNote.Peek()._cutDirection == 3)
+                            {
+                                foundBlue = true;
+                                break;
+                            }
+                            blueNote.Enqueue(blueNote.Dequeue());
+                        }
+
+                        for (var red = 0; red < redNote.Count(); red++)
+                        {
+                            if (DownCut.Contains(leftHand) && UpCut.Contains(redNote.Peek()._cutDirection))
+                            {
+                                foundRed = true;
+                                break;
+                            }
+                            else if (UpCut.Contains(leftHand) && DownCut.Contains(redNote.Peek()._cutDirection))
+                            {
+                                foundRed = true;
+                                break;
+                            }
+                            else if (leftHand == 2 && IntoLeft.Contains(redNote.Peek()._cutDirection))
+                            {
+                                foundRed = true;
+                                break;
+                            }
+                            else if (leftHand == 3 && IntoRight.Contains(redNote.Peek()._cutDirection))
+                            {
+                                foundRed = true;
+                                break;
+                            }
+                            else if (IntoLeft.Contains(leftHand) && redNote.Peek()._cutDirection == 2)
+                            {
+                                foundRed = true;
+                                break;
+                            }
+                            else if (IntoRight.Contains(leftHand) && redNote.Peek()._cutDirection == 3)
+                            {
+                                foundRed = true;
+                                break;
+                            }
+                            redNote.Enqueue(redNote.Dequeue());
+                        }
+
+                        if((blueNote.Count() == 0 && redNote.Count() != 0) || (redNote.Count() == 0 && blueNote.Count != 0) && AllowOneHanded)
+                        {
+                            break;
+                        }
+                    } while (!foundBlue || !foundRed);
+                }
+
+                if (i != 0) // Check for double issue
+                {
+                    if (notes[i]._time - notes[i - 1]._time <= 0.01 && notes[i]._time - notes[i - 1]._time >= -0.01) // This will be a double
+                    {
+                        if (notes[i - 1]._type == 0 && noteOrder.First() == 0) // Both are going to be red, we don't want that.
+                        {
+                            if(noteOrder.Any(x => x == 1)) // There's blue left in the list
+                            {
+                                noteOrder.Remove(1);
+                                noteOrder.Insert(0, 1);
+                            }
+                            else // No more blue, we need to get a new pattern.
+                            {
+                                noteOrder.Clear();
+                                i--;
+                                continue;
+                            }
+                        }
+                        else if(notes[i - 1]._type == 1 && noteOrder.First() == 1) // Both are going to be blue, we don't want that.
+                        {
+                            if (noteOrder.Any(x => x == 0)) // There's red left in the list
+                            {
+                                noteOrder.Remove(0);
+                                noteOrder.Insert(0, 0);
+                            }
+                            else // No more red, we need to get a new pattern.
+                            {
+                                noteOrder.Clear();
+                                i--;
+                                continue;
                             }
                         }
                     }
-
-                    note._lineIndex = patternLoop[looper]._lineIndex;
-                    note._lineLayer = patternLoop[looper]._lineLayer;
-                    note._cutDirection = patternLoop[looper]._cutDirection;
-                    note._type = patternLoop[looper]._type;
-
-                    notes[patternStart + j] = note;
-
-                    looper++;
                 }
+
+                // Get the current note type
+                int noteType = noteOrder.First();
+                noteOrder.Remove(noteOrder.First());
+
+                // Create the note
+                if(noteType == 0)
+                {
+                    Note note = redNote.Dequeue();
+                    n._lineIndex = note._lineIndex;
+                    n._lineLayer = note._lineLayer;
+                    n._cutDirection = note._cutDirection;
+                    n._type = note._type;
+                }
+                else if (noteType == 1)
+                {
+                    Note note = blueNote.Dequeue();
+                    n._lineIndex = note._lineIndex;
+                    n._lineLayer = note._lineLayer;
+                    n._cutDirection = note._cutDirection;
+                    n._type = note._type;
+                }
+
+                // Check for fused notes issue
+                if(preceding._time - n._time >= -0.01 && preceding._time - n._time <= 0.01)
+                {
+                    if(preceding._lineIndex == n._lineIndex && preceding._lineLayer == n._lineLayer)
+                    {
+                        if(n._type == 0 && n._lineIndex != 0)
+                        {
+                            n._lineIndex--;
+                        }
+                        else if(n._type == 1 && n._lineIndex != 3)
+                        {
+                            n._lineIndex++;
+                        }
+                        else if (preceding._type == 0 && preceding._lineIndex != 0)
+                        {
+                            preceding._lineIndex--;
+                        }
+                        else if (preceding._type == 1 && preceding._lineIndex != 3)
+                        {
+                            preceding._lineIndex++;
+                        }
+                    }
+                }
+
+                // Add the note
+                notes[i] = n;
+
+                // Follow up the flow per hand
+                if (n._type == 0)
+                {
+                    leftHand = n._cutDirection;
+                }
+                else if(n._type == 1)
+                {
+                    rightHand = n._cutDirection;
+                }
+
+                preceding = notes[i];
             }
 
+            // Set notes by time order.
             notes = Notes.OrderBy(note => note._time).ToList();
 
-            if (notes.Any() && notes.Count() > 3) // Fix last note
+            if (notes.Any() && notes.Count() > 3) // Fix the last 2 notes
             {
                 notes[notes.Count() - 1]._type = notes[notes.Count() - 3]._type;
                 if (UpCut.Contains(notes[notes.Count() - 3]._cutDirection))
@@ -1025,7 +1210,7 @@ namespace Osu2Saber.Model.Algorithm
                 }
                 else if (note._cutDirection == 3)
                 {
-                    note._cutDirection = 1;
+                    note._cutDirection = 0;
                 }
             }
         }

@@ -70,8 +70,11 @@ namespace Lolighter
                     List<Note> n = new List<Note>();
                     foreach (var no in map._notes)
                     {
-                        Note not = new Note(no._time, no._lineIndex, no._lineLayer, no._type, no._cutDirection);
-                        n.Add(not);
+                        if(no._type != 3)
+                        {
+                            Note not = new Note(no._time, no._lineIndex, no._lineLayer, no._type, no._cutDirection);
+                            n.Add(not);
+                        }
                     }
                     var ca = new ConvertAlgorithm(n);
                     ca.ConvertDat();

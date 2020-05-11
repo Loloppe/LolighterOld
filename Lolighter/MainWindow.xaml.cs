@@ -102,7 +102,7 @@ namespace Lolighter
                 InvertedMadness.IsEnabled = false;
                 BombGenerator.IsEnabled = false;
                 LoloppeGenerator.IsEnabled = false;
-                Downscale.IsEnabled = false;
+                Converter.IsEnabled = true;
                 OpenFile.IsEnabled = true;
             }
             catch (Exception ex)
@@ -119,7 +119,7 @@ namespace Lolighter
             window.InvertedMadness.IsEnabled = true;
             window.BombGenerator.IsEnabled = true;
             window.LoloppeGenerator.IsEnabled = true;
-            window.Downscale.IsEnabled = true;
+            window.Converter.IsEnabled = true;
             window.OpenFile.IsEnabled = false;
         }
 
@@ -197,16 +197,11 @@ namespace Lolighter
             LoloppeGenerator.IsEnabled = false;
         }
 
-        private void Downscaler_Click(object sender, RoutedEventArgs e)
+        private void Converter_Click(object sender, RoutedEventArgs e)
         {
-            List<_Notes> noteTemp = new List<_Notes>(map._notes);
-            map._notes = null;
-
-            noteTemp = Downscaler.Downscale(noteTemp);
-
-            map._notes = noteTemp.ToArray();
-
-            Downscale.IsEnabled = false;
+            OsuWindow o = new OsuWindow();
+            o.OszFiles.Clear();
+            o.Show();
         }
         #endregion
 
@@ -222,5 +217,6 @@ namespace Lolighter
             }
         }
 
+        
     }
 }
