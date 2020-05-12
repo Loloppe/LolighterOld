@@ -54,6 +54,7 @@ namespace Lolighter
                     OsuWindow o = new OsuWindow();
                     o.OszFiles.Clear();
                     o.Show();
+                    o.button.IsEnabled = true;
                     o.OszFiles.Add(file);
                 }
 

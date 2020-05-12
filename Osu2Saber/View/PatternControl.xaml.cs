@@ -58,7 +58,7 @@ namespace Osu2Saber.View
             {
                 _Notes n = new _Notes(0, Lane.SelectedIndex, Lay.SelectedIndex, Type.SelectedIndex, Cut.SelectedIndex);
                 _notes.Add(n);
-                Notes.Items.Add(Notes.Items.Count.ToString() + " | " + Type.SelectedItem + " | " + Lane.SelectedItem + " | " + Lay.SelectedItem + " | " + Cut.SelectedItem);
+                Notes.Items.Add(Type.SelectedItem + " | " + Lane.SelectedItem + " | " + Lay.SelectedItem + " | " + Cut.SelectedItem);
                 _patterns[Pattern.SelectedIndex]._notes = _notes.ToArray();
             }
         }
@@ -81,7 +81,8 @@ namespace Osu2Saber.View
             {
                 pack._pattern = _patterns.ToArray();
                 var sz = JsonConvert.SerializeObject(pack);
-                File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\"+ currentPack.Content + ".pak", sz);
+                Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "\\Pack");
+                File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\Pack\\"+ currentPack.Content + ".pak", sz);
                 PatternWindow.window.Close();
             }
             else
@@ -105,7 +106,7 @@ namespace Osu2Saber.View
                     {
                         // When changing pattern, need to reload all notes.
                         _notes.Add(note);
-                        Notes.Items.Add(Notes.Items.Count.ToString() + " | " + ((NoteType)note._type).ToString() + " | " + ((Line)note._lineIndex).ToString() + " | " + ((Layer)note._lineLayer).ToString() + " | " + ((CutDirection)note._cutDirection).ToString());
+                        Notes.Items.Add(((NoteType)note._type).ToString() + " | " + ((Line)note._lineIndex).ToString() + " | " + ((Layer)note._lineLayer).ToString() + " | " + ((CutDirection)note._cutDirection).ToString());
                     }
                 }
             }
@@ -188,6 +189,44 @@ namespace Osu2Saber.View
                 }
                 Pattern.ItemsSource = null;
                 Pattern.ItemsSource = PatternsName;
+            }
+        }
+
+        private void Up_Click(object sender, RoutedEventArgs e)
+        {
+            if (Notes.SelectedIndex > 0 && Pattern.SelectedIndex != -1)
+            {
+                // Bring up a note
+                var n = _notes[Notes.SelectedIndex];
+                var t = Notes.Items[Notes.SelectedIndex];
+                var i = Notes.SelectedIndex;
+
+                _notes.RemoveAt(Notes.SelectedIndex);
+                Notes.Items.Remove(Notes.SelectedItem);
+
+                _notes.Insert(i - 1, n);
+                Notes.Items.Insert(i - 1, t);
+
+                _patterns[Pattern.SelectedIndex]._notes = _notes.ToArray();
+            }
+        }
+
+        private void Down_Click(object sender, RoutedEventArgs e)
+        {
+            if (Notes.SelectedIndex > -1 && Pattern.SelectedIndex != -1 && Notes.SelectedIndex != _notes.Count() - 1)
+            {
+                // Bring down a note
+                var n = _notes[Notes.SelectedIndex];
+                var t = Notes.Items[Notes.SelectedIndex];
+                var i = Notes.SelectedIndex;
+
+                _notes.RemoveAt(Notes.SelectedIndex);
+                Notes.Items.Remove(Notes.SelectedItem);
+
+                _notes.Insert(i + 1, n);
+                Notes.Items.Insert(i + 1, t);
+
+                _patterns[Pattern.SelectedIndex]._notes = _notes.ToArray();
             }
         }
     }

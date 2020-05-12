@@ -8,8 +8,8 @@
     <Grid Background="#FFF0EBEB">
         <Label Content="Pack" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="20" Width="200" Grid.ColumnSpan="2"/>
         <ComboBox x:Name="Pattern" ItemsSource="{Binding PatternsName}" HorizontalAlignment="Left" Margin="231,52,0,0" VerticalAlignment="Top" Width="200" FontSize="14" SelectionChanged="Pattern_SelectionChanged"></ComboBox>
-            <Label Content="Pattern" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="231,10,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
-        <ListBox x:Name="Notes" HorizontalAlignment="Left" Height="275" Margin="10,93,0,0" VerticalAlignment="Top" Width="420"/>
+        <Label Content="Pattern" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="231,10,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
+        <ListBox x:Name="Notes" HorizontalAlignment="Left" Height="275" Margin="10,93,0,0" VerticalAlignment="Top" Width="368"/>
         <Label Content="Type" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="451,10,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
         <Label Content="Line" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="451,82,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
         <Label Content="Layer" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="451,154,0,0" VerticalAlignment="Top" FontSize="20" Width="200"/>
@@ -26,5 +26,7 @@
         <Button Content="New Pattern" HorizontalAlignment="Left" Margin="231,373,0,0" VerticalAlignment="Top" Width="200" Height="49" FontSize="20" Click="NewPat_Click"/>
         <Button Content="Delete Pattern" HorizontalAlignment="Left" Margin="231,441,0,0" VerticalAlignment="Top" Width="200" Height="49" FontSize="20" Click="DelPat_Click"/>
         <Button Content="Open Pack" HorizontalAlignment="Left" Margin="10,441,0,0" VerticalAlignment="Top" Width="200" Height="49" FontSize="20" Click="Open_Click"/>
+        <Button Content="↑" HorizontalAlignment="Left" Margin="389,166,0,0" VerticalAlignment="Top" Width="50" Height="50" Click="Up_Click"/>
+        <Button Content="↓" HorizontalAlignment="Left" Margin="389,239,0,0" VerticalAlignment="Top" Width="50" Height="50" Click="Down_Click"/>
     </Grid>
 </UserControl>

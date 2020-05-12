@@ -20,9 +20,9 @@
         <TextBox Text="{Binding MaximumDifficulty}" HorizontalAlignment="Right" Height="23" Margin="0,73,77,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="26" Visibility="Hidden"/>
         <Label Content="Max." HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
         <CheckBox IsChecked="{Binding NoDirectionAndPlacement}" Content="No placement" HorizontalAlignment="Left" Margin="139,116,0,0" VerticalAlignment="Top" ToolTip="For mappers, this option generates only notes without setting any cut direction or scattered placement"/>
-        <CheckBox IsChecked="{Binding OnlyMakeTimingNote}" Content="Only Timing" HorizontalAlignment="Left" Margin="139,76,0,0" VerticalAlignment="Top" ToolTip="Generate only timing"/>
-        <CheckBox IsChecked="{Binding AllBottom}" Content="All Bottom" HorizontalAlignment="Left" Margin="15,76,0,0" VerticalAlignment="Top" ToolTip="Make all notes bottom row"/>
-        <CheckBox IsChecked="{Binding AllUpDown}" Content="All Up-Down" HorizontalAlignment="Left" Margin="15,95,0,0" VerticalAlignment="Top" ToolTip="Make all notes Up or Down"/>
+        <CheckBox IsChecked="{Binding OnlyMakeTimingNote}" Content="Only Timing" HorizontalAlignment="Left" Margin="139,78,0,0" VerticalAlignment="Top" ToolTip="Generate only timing"/>
+        <CheckBox IsChecked="{Binding AllBottom}" Content="All Bottom" HorizontalAlignment="Left" Margin="15,78,0,0" VerticalAlignment="Top" ToolTip="Make all notes bottom row"/>
+        <CheckBox IsChecked="{Binding AllUpDown}" Content="All Up-Down" HorizontalAlignment="Left" Margin="15,97,0,0" VerticalAlignment="Top" ToolTip="Make all notes Up or Down"/>
         <TextBlock HorizontalAlignment="Left" Margin="114,19,0,0" TextWrapping="Wrap" Text="Speed Limiter" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Height="18" Margin="190,19,0,0" TextWrapping="Wrap" Text="{Binding EnoughIntervalBetweenNotes}" VerticalAlignment="Top" Width="65" ToolTip="In beat, limit the notes conversion to this speed"/>
         <CheckBox IsChecked="{Binding CreateDouble}" Content="Use Double" HorizontalAlignment="Left" Margin="15,21,0,0" VerticalAlignment="Top" ToolTip="Tick to allow double generation"/>
@@ -32,9 +32,8 @@
         <TextBlock HorizontalAlignment="Left" Margin="14,174,0,0" TextWrapping="Wrap" Text="Pack: Use a customized pattern pack" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="15,213,0,0" TextWrapping="Wrap" Text="RandomStream: Random bottom stream" VerticalAlignment="Top"/>
         <CheckBox IsChecked="{Binding GenerateGallops}" Content="Use Gallop" HorizontalAlignment="Left" Margin="15,39,0,0" VerticalAlignment="Top" ToolTip="If ticked with Double, generate gallops"/>
-        <CheckBox IsChecked="{Binding AllTopUp}" Content="All Up-Top" HorizontalAlignment="Left" Margin="139,95,0,0" VerticalAlignment="Top" ToolTip="Make all the Up notes top layer"/>
+        <CheckBox IsChecked="{Binding AllTopUp}" Content="All Up-Top" HorizontalAlignment="Left" Margin="139,97,0,0" VerticalAlignment="Top" ToolTip="Make all the Up notes top layer"/>
         <Button Content="Pattern Creator" HorizontalAlignment="Left" Margin="78,234,0,0" VerticalAlignment="Top" Width="98" Click="Pattern_Click"/>
-        <CheckBox IsChecked="{Binding UseLogic}" Content="Use Logic" HorizontalAlignment="Left" Margin="15,56,0,0" VerticalAlignment="Top" ToolTip="Logic algorithm to fix map issues after generation"/>
         <TextBlock HorizontalAlignment="Left" Margin="15,194,0,0" TextWrapping="Wrap" Text="Complex: Random complex jumpstream" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="112,38,0,0" TextWrapping="Wrap" Text="Double Speed" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Height="18" Margin="190,38,0,0" TextWrapping="Wrap" Text="{Binding GallopSpeed}" VerticalAlignment="Top" Width="65" ToolTip="In beat, remove all gallops faster than this speed"/>

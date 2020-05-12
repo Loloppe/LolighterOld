@@ -30,23 +30,33 @@ namespace Lolighter
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            IsEnabled = false;
-
-            BatchProcessor bp = new BatchProcessor(OszFiles.ToArray(), workDir);
-            await bp.BatchProcess();
-            MessageBox.Show("Finished parsing notes");
-            List<Items._Notes> Notes = new List<Items._Notes>();
-
-            foreach (var x in Osu2BsConverter.map._notes)
+            if (OszFiles.Count() == 0)
             {
-                Items._Notes Note = new Items._Notes(x._time, x._lineIndex, x._lineLayer, x._type, x._cutDirection);
-                Notes.Add(Note);
+                MessageBox.Show("You must open a .osz file first");
             }
+            else
+            {
+                IsEnabled = false;
 
-            MainWindow.map._notes = Notes.ToArray();
+                BatchProcessor bp = new BatchProcessor(OszFiles.ToArray(), workDir);
+                await bp.BatchProcess();
+                MessageBox.Show("Finished parsing notes");
+                List<Items._Notes> Notes = new List<Items._Notes>();
 
-            MainWindow.IsReady();
-            Close();
+                if (Osu2BsConverter.map._notes != null)
+                {
+                    foreach (var x in Osu2BsConverter.map._notes)
+                    {
+                        Items._Notes Note = new Items._Notes(x._time, x._lineIndex, x._lineLayer, x._type, x._cutDirection);
+                        Notes.Add(Note);
+                    }
+                }
+
+                MainWindow.map._notes = Notes.ToArray();
+
+                MainWindow.IsReady();
+                Close();
+            }
         }
 
         private void Convert_Click(object sender, RoutedEventArgs e)
@@ -70,11 +80,8 @@ namespace Lolighter
                     List<Note> n = new List<Note>();
                     foreach (var no in map._notes)
                     {
-                        if(no._type != 3)
-                        {
-                            Note not = new Note(no._time, no._lineIndex, no._lineLayer, no._type, no._cutDirection);
-                            n.Add(not);
-                        }
+                        Note not = new Note(no._time, no._lineIndex, no._lineLayer, no._type, no._cutDirection);
+                        n.Add(not);
                     }
                     var ca = new ConvertAlgorithm(n);
                     ca.ConvertDat();
