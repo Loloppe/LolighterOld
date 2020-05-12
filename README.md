@@ -21,7 +21,7 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-### Version 3.9
+### Version 4.0
 Fixed variable BPM.
 Added dual-pack for slower/faster section.
 Added variable gallop and pack speed.
@@ -29,16 +29,14 @@ Cleaned up the automapper algorithm.
 Cleaned up the Logic algorithm.
 Fixed the .dat converter for the map generation.
 You can now convert BS map into the automapper.
-The automapper algorithm now handle flow and double generation.
-
-### Version 3.5
-Should be variable BPM compatible.
-Now with a Pack Pattern Editor for the Osu converter.
-Massive cleanup of unused codes and dependencies.
-Pattern and algorithm cleanup.
-Fixed most of the bugs with the automapper and a very big bug from the converter.
-Deleted a few unused files from Osu2Saber.
-More...
+Flow handle.
+Parity handle.
+Better patterns loop.
+Integrated logic inside the mapper to fix issues that come with "Double" generation.
+Now forcefully exit the program if the attempt limit is reached (Anti-memory leaks).
+Pack now have their own folder.
+Added buttons to bring up or down notes during pack creation.
+More..?
 ___
 ## Osu2Saber LGPL-3.0
 Majority of the files, dependencies, codes that were unused by lolighter were deleted.
