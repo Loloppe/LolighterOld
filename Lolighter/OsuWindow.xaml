@@ -8,7 +8,7 @@
         Title="Converter" Height="383.5" Width="268.5" ResizeMode="NoResize">
     <Grid>
         <View:ConfigPanel HorizontalAlignment="Right" Height="Auto" Margin="0,0,1.5,0.5" Width="262"/>
-        <Button x:Name="button" Content="Convert .osu" HorizontalAlignment="Left" Margin="10,266,0,0" VerticalAlignment="Top" Width="116" Height="64" Click="Button_Click"/>
-        <Button x:Name="button_Copy" Content="Convert .dat" HorizontalAlignment="Left" Margin="131,266,0,0" VerticalAlignment="Top" Width="116" Height="64" Click="Convert_Click"/>
+        <Button x:Name="button" Content="Convert .osu" HorizontalAlignment="Left" Margin="10,272,0,0" VerticalAlignment="Top" Width="116" Height="64" Click="Button_Click"/>
+        <Button x:Name="button_Copy" Content="Convert .dat" HorizontalAlignment="Left" Margin="131,272,0,0" VerticalAlignment="Top" Width="116" Height="64" Click="Convert_Click"/>
     </Grid>
 </Window>

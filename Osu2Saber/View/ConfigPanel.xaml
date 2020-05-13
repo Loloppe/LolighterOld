@@ -11,7 +11,7 @@
     <UserControl.DataContext>
         <Binding Source="{StaticResource vm}" />
     </UserControl.DataContext>
-    <Grid Background="#FFF0EBEB" >
+    <Grid Background="#FFF0EBEB" Margin="0,0,0,-10" >
         <Label Content="Preferred Difficulty" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.289,0.019" Visibility="Hidden"/>
         <Label Content="Min." HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.394,0.25" Visibility="Hidden"/>
         <Slider Value="{Binding MinimumDifficulty}" HorizontalAlignment="Right" Margin="0,42,109,0" VerticalAlignment="Top" Width="94" Maximum="{Binding MaximumDifficulty}" Visibility="Hidden"/>
@@ -19,27 +19,30 @@
         <Slider Value="{Binding MaximumDifficulty}" HorizontalAlignment="Right" Margin="0,73,109,0" VerticalAlignment="Top" Width="94" Minimum="{Binding MinimumDifficulty}" Visibility="Hidden"/>
         <TextBox Text="{Binding MaximumDifficulty}" HorizontalAlignment="Right" Height="23" Margin="0,73,77,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="26" Visibility="Hidden"/>
         <Label Content="Max." HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
-        <CheckBox IsChecked="{Binding NoDirectionAndPlacement}" Content="No placement" HorizontalAlignment="Left" Margin="139,116,0,0" VerticalAlignment="Top" ToolTip="For mappers, this option generates only notes without setting any cut direction or scattered placement"/>
-        <CheckBox IsChecked="{Binding OnlyMakeTimingNote}" Content="Only Timing" HorizontalAlignment="Left" Margin="139,78,0,0" VerticalAlignment="Top" ToolTip="Generate only timing"/>
-        <CheckBox IsChecked="{Binding AllBottom}" Content="All Bottom" HorizontalAlignment="Left" Margin="15,78,0,0" VerticalAlignment="Top" ToolTip="Make all notes bottom row"/>
-        <CheckBox IsChecked="{Binding AllUpDown}" Content="All Up-Down" HorizontalAlignment="Left" Margin="15,97,0,0" VerticalAlignment="Top" ToolTip="Make all notes Up or Down"/>
+        <CheckBox IsChecked="{Binding NoDirectionAndPlacement}" Content="No placement" HorizontalAlignment="Left" Margin="110,129,0,0" VerticalAlignment="Top" ToolTip="For mappers, this option generates only notes without setting any cut direction or scattered placement"/>
+        <CheckBox IsChecked="{Binding OnlyMakeTimingNote}" Content="Only Timing" HorizontalAlignment="Left" Margin="15,75,0,0" VerticalAlignment="Top" ToolTip="Generate only timing"/>
+        <CheckBox IsChecked="{Binding AllBottom}" Content="All Bottom" HorizontalAlignment="Left" Margin="15,93,0,0" VerticalAlignment="Top" ToolTip="Make all notes bottom row"/>
+        <CheckBox IsChecked="{Binding AllUpDown}" Content="All Up-Down" HorizontalAlignment="Left" Margin="15,111,0,0" VerticalAlignment="Top" ToolTip="Make all notes Up or Down"/>
         <TextBlock HorizontalAlignment="Left" Margin="114,19,0,0" TextWrapping="Wrap" Text="Speed Limiter" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Height="18" Margin="190,19,0,0" TextWrapping="Wrap" Text="{Binding EnoughIntervalBetweenNotes}" VerticalAlignment="Top" Width="65" ToolTip="In beat, limit the notes conversion to this speed"/>
         <CheckBox IsChecked="{Binding CreateDouble}" Content="Use Double" HorizontalAlignment="Left" Margin="15,21,0,0" VerticalAlignment="Top" ToolTip="Tick to allow double generation"/>
-        <TextBox HorizontalAlignment="Left" Height="18" Margin="102,136,0,0" TextWrapping="Wrap" Text="{Binding PatternToUse}" VerticalAlignment="Top" Width="109"/>
-        <TextBlock HorizontalAlignment="Left" Margin="15,135,0,0" TextWrapping="Wrap" Text="Pattern To Use :" VerticalAlignment="Top"/>
-        <TextBlock HorizontalAlignment="Left" Margin="14,155,0,0" TextWrapping="Wrap" Text="(Pack | Complex | RandomStream)" VerticalAlignment="Top"/>
-        <TextBlock HorizontalAlignment="Left" Margin="14,174,0,0" TextWrapping="Wrap" Text="Pack: Use a customized pattern pack" VerticalAlignment="Top"/>
-        <TextBlock HorizontalAlignment="Left" Margin="15,213,0,0" TextWrapping="Wrap" Text="RandomStream: Random bottom stream" VerticalAlignment="Top"/>
-        <CheckBox IsChecked="{Binding GenerateGallops}" Content="Use Gallop" HorizontalAlignment="Left" Margin="15,39,0,0" VerticalAlignment="Top" ToolTip="If ticked with Double, generate gallops"/>
-        <CheckBox IsChecked="{Binding AllTopUp}" Content="All Up-Top" HorizontalAlignment="Left" Margin="139,97,0,0" VerticalAlignment="Top" ToolTip="Make all the Up notes top layer"/>
-        <Button Content="Pattern Creator" HorizontalAlignment="Left" Margin="78,234,0,0" VerticalAlignment="Top" Width="98" Click="Pattern_Click"/>
-        <TextBlock HorizontalAlignment="Left" Margin="15,194,0,0" TextWrapping="Wrap" Text="Complex: Random complex jumpstream" VerticalAlignment="Top"/>
+        <TextBox HorizontalAlignment="Left" Height="18" Margin="102,149,0,0" TextWrapping="Wrap" Text="{Binding PatternToUse}" VerticalAlignment="Top" Width="109"/>
+        <TextBlock HorizontalAlignment="Left" Margin="15,148,0,0" TextWrapping="Wrap" Text="Pattern To Use :" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="14,168,0,0" TextWrapping="Wrap" Text="(Pack | Complex | RandomStream)" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="14,187,0,0" TextWrapping="Wrap" Text="Pack: Use a customized pattern pack" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="15,226,0,0" TextWrapping="Wrap" Text="RandomStream: Random bottom stream" VerticalAlignment="Top"/>
+        <CheckBox IsChecked="{Binding GenerateGallops}" Content="Use Gallop" HorizontalAlignment="Left" Margin="15,57,0,0" VerticalAlignment="Top" ToolTip="If ticked with Double, generate gallops"/>
+        <CheckBox IsChecked="{Binding AllTopUp}" Content="All Up-Top" HorizontalAlignment="Left" Margin="110,110,0,0" VerticalAlignment="Top" ToolTip="Make all the Up notes top layer"/>
+        <Button Content="Pattern Creator" HorizontalAlignment="Left" Margin="78,245,0,0" VerticalAlignment="Top" Width="98" Click="Pattern_Click"/>
+        <TextBlock HorizontalAlignment="Left" Margin="15,207,0,0" TextWrapping="Wrap" Text="Complex: Random complex jumpstream" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="112,38,0,0" TextWrapping="Wrap" Text="Double Speed" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Height="18" Margin="190,38,0,0" TextWrapping="Wrap" Text="{Binding GallopSpeed}" VerticalAlignment="Top" Width="65" ToolTip="In beat, remove all gallops faster than this speed"/>
         <TextBlock HorizontalAlignment="Left" Margin="120,57,0,0" TextWrapping="Wrap" Text="Slow Speed" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Height="18" Margin="190,57,0,0" TextWrapping="Wrap" Text="{Binding SlowSpeed}" VerticalAlignment="Top" Width="65" ToolTip="In beat, slow .pak/pattern will be used over this speed"/>
-        <CheckBox IsChecked="{Binding AllowOneHanded}" Content="One-Hand pattern" HorizontalAlignment="Left" Margin="15,116,0,0" VerticalAlignment="Top" ToolTip="Will allow the automapper to take pattern that doesn't match one of the hand flow"/>
+        <CheckBox IsChecked="{Binding AllowOneHanded}" Content="Short pattern" HorizontalAlignment="Left" Margin="15,129,0,0" VerticalAlignment="Top" ToolTip="Allow the mapper to use pattern that only fit parity on one hand"/>
+        <TextBlock HorizontalAlignment="Left" Margin="120,76,0,0" TextWrapping="Wrap" Text="Parity Speed" VerticalAlignment="Top"/>
+        <TextBox HorizontalAlignment="Left" Height="18" Margin="190,76,0,0" TextWrapping="Wrap" Text="{Binding ParitySpeed}" VerticalAlignment="Top" Width="65" ToolTip="In beat, notes slower than this speed won't need to pass Parity Check"/>
+        <CheckBox IsChecked="{Binding DoubleHitboxFix}" Content="Double Fix" HorizontalAlignment="Left" Margin="15,39,0,0" VerticalAlignment="Top" ToolTip="If ticked with Double, will attempt to fix hitbox issue"/>
 
     </Grid>
 </UserControl>

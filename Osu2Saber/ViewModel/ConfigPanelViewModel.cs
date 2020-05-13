@@ -30,6 +30,11 @@ namespace Osu2Saber.ViewModel
             get => ConvertAlgorithm.EnoughIntervalBetweenNotes;
         }
 
+        public double ParitySpeed
+        {
+            set { ConvertAlgorithm.ParitySpeed = value; }
+            get => ConvertAlgorithm.ParitySpeed;
+        }
 
         public double GallopSpeed
         {
@@ -47,6 +52,12 @@ namespace Osu2Saber.ViewModel
         {
             set { ConvertAlgorithm.AllUpDown = value; }
             get => ConvertAlgorithm.AllUpDown;
+        }
+        
+        public bool DoubleHitboxFix
+        {
+            set { ConvertAlgorithm.DoubleHitboxFix = value; }
+            get => ConvertAlgorithm.DoubleHitboxFix;
         }
 
         public bool AllTopUp

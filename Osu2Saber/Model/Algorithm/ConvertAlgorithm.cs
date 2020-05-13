@@ -1,16 +1,11 @@
-﻿
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Osu2Saber.Model.Json;
 using osuBMParser;
 using System;
-using System.CodeDom;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Policy;
-using System.Windows.Controls;
 using MessageBox = System.Windows.Forms.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
@@ -30,10 +25,12 @@ namespace Osu2Saber.Model.Algorithm
         public static bool GenerateGallops = false;
         public static bool AllTopUp = false;
         public static bool AllowOneHanded = false;
+        public static bool DoubleHitboxFix = true;
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
         public static double SlowSpeed = 0.4;
+        public static double ParitySpeed = 10;
         public static double EnoughIntervalBetweenNotes = 0.2;
         public static double GallopSpeed = 0.3;
         public static string PatternToUse = "Pack";
@@ -467,6 +464,12 @@ namespace Osu2Saber.Model.Algorithm
             PatternCreator(PatternToUse);
         }
 
+        // Last direction
+        private int leftHand = 0;
+        private int rightHand = 0;
+        private bool foundBlue = false;
+        private bool foundRed = false;
+
         void PatternCreator(string pattern)
         {
             // Nb of attempt to get a pattern that fit, if > 100000, forcefully stop the process.
@@ -475,9 +478,6 @@ namespace Osu2Saber.Model.Algorithm
             double first = notes[0]._time;
             // Current slow section
             bool slow = false;
-            // To find the right pattern
-            bool foundBlue = false;
-            bool foundRed = false;
             // To know the placement order of notes.
             List<int> noteOrder = new List<int>();
             // Note to be used from pattern
@@ -485,9 +485,6 @@ namespace Osu2Saber.Model.Algorithm
             Queue<Note> redNote = new Queue<Note>();
             // To convert to queue
             List<Note> patternList = new List<Note>();
-            // Last direction
-            int leftHand = 0;
-            int rightHand = 0;
             // Last-Last direction
             int leftHand2 = 1;
             int rightHand2 = 1;
@@ -602,96 +599,85 @@ namespace Osu2Saber.Model.Algorithm
                             }
                         }
 
-                        // Check if condition is met
-                        for (var blue = 0; blue < blueNote.Count(); blue++)
+                        // Here we check the flow before parity
+                        if (!(notes[i + 1]._time - notes[i]._time < 0.02 && notes[i + 1]._time - notes[i]._time > -0.02))
                         {
-                            if(DownCut.Contains(rightHand) && UpCut.Contains(blueNote.Peek()._cutDirection))
+                            // We ignore double for this
+                            if (ParitySpeed * (bpm / bpmPerNote[i]) > notes[i + 1]._time - notes[i]._time)
                             {
-                                foundBlue = true;
-                                break;
+                                FlowCheck(redNote, 0);
+                                FlowCheck(blueNote, 1);
                             }
-                            else if(UpCut.Contains(rightHand) && DownCut.Contains(blueNote.Peek()._cutDirection))
+                            else // Skip flow check
                             {
-                                foundBlue = true;
-                                break;
+                                if(blueNote.Any())
+                                {
+                                    foundBlue = true;
+                                }
+                                if(redNote.Any())
+                                {
+                                    foundRed = true;
+                                }
                             }
-                            else if(rightHand == 2 && IntoLeft.Contains(blueNote.Peek()._cutDirection))
-                            {
-                                foundBlue = true;
-                                break;
-                            }
-                            else if(rightHand == 3 && IntoRight.Contains(blueNote.Peek()._cutDirection))
-                            {
-                                foundBlue = true;
-                                break;
-                            }
-                            else if(IntoLeft.Contains(rightHand) && blueNote.Peek()._cutDirection == 2)
-                            {
-                                foundBlue = true;
-                                break;
-                            }
-                            else if(IntoRight.Contains(rightHand) && blueNote.Peek()._cutDirection == 3)
-                            {
-                                foundBlue = true;
-                                break;
-                            }
-                            blueNote.Enqueue(blueNote.Dequeue());
                         }
-
-                        for (var red = 0; red < redNote.Count(); red++)
+                        else // It's a double
                         {
-                            if (DownCut.Contains(leftHand) && UpCut.Contains(redNote.Peek()._cutDirection))
+                            if (ParitySpeed * (bpm / bpmPerNote[i]) > notes[i + 2]._time - notes[i + 1]._time)
                             {
-                                foundRed = true;
-                                break;
+                                FlowCheck(redNote, 0);
+                                FlowCheck(blueNote, 1);
                             }
-                            else if (UpCut.Contains(leftHand) && DownCut.Contains(redNote.Peek()._cutDirection))
+                            else // Skip flow check
                             {
-                                foundRed = true;
-                                break;
+                                if (blueNote.Any())
+                                {
+                                    foundBlue = true;
+                                }
+                                if (redNote.Any())
+                                {
+                                    foundRed = true;
+                                }
                             }
-                            else if (leftHand == 2 && IntoLeft.Contains(redNote.Peek()._cutDirection))
-                            {
-                                foundRed = true;
-                                break;
-                            }
-                            else if (leftHand == 3 && IntoRight.Contains(redNote.Peek()._cutDirection))
-                            {
-                                foundRed = true;
-                                break;
-                            }
-                            else if (IntoLeft.Contains(leftHand) && redNote.Peek()._cutDirection == 2)
-                            {
-                                foundRed = true;
-                                break;
-                            }
-                            else if (IntoRight.Contains(leftHand) && redNote.Peek()._cutDirection == 3)
-                            {
-                                foundRed = true;
-                                break;
-                            }
-                            redNote.Enqueue(redNote.Dequeue());
                         }
+                            
 
-                        // Check parity
-                        if (foundRed)
+                        // We only check parity if it's faster than X beat (for lower diff)
+                        if(foundRed && foundBlue)
                         {
-                            if (!ParityCheck(redNote.Peek()._type, redNote.Peek()._cutDirection, leftHand, leftHand2))
+                            // We ignore double for this
+                            if (!(notes[i + 1]._time - notes[i]._time < 0.02 && notes[i + 1]._time - notes[i]._time > -0.02))
                             {
-                                foundRed = false;
+                                if (ParitySpeed * (bpm / bpmPerNote[i]) > notes[i + 1]._time - notes[i]._time)
+                                {
+                                    if (!ParityCheck(redNote.Peek()._type, redNote.Peek()._cutDirection, leftHand, leftHand2))
+                                    {
+                                        foundRed = false;
+                                    }
+                                    if (!ParityCheck(blueNote.Peek()._type, blueNote.Peek()._cutDirection, rightHand, rightHand2))
+                                    {
+                                        foundBlue = false;
+                                    }
+                                }
+                            }
+                            else // It's a double
+                            {
+                                if (ParitySpeed * (bpm / bpmPerNote[i]) > notes[i + 2]._time - notes[i + 1]._time)
+                                {
+                                    if (!ParityCheck(redNote.Peek()._type, redNote.Peek()._cutDirection, leftHand, leftHand2))
+                                    {
+                                        foundRed = false;
+                                    }
+                                    if (!ParityCheck(blueNote.Peek()._type, blueNote.Peek()._cutDirection, rightHand, rightHand2))
+                                    {
+                                        foundBlue = false;
+                                    }
+                                }
                             }
                         }
 
-                        if (foundBlue)
-                        {
-                            if (!ParityCheck(blueNote.Peek()._type, blueNote.Peek()._cutDirection, rightHand, rightHand2))
-                            {
-                                foundBlue = false;
-                            }
-                        }
 
                         // For patterns with only one color
-                        if ((blueNote.Count() == 0 && foundRed) || (redNote.Count() == 0 && foundBlue) && AllowOneHanded)
+                        if (((foundRed) || (foundBlue)) && AllowOneHanded)
                         {
                             break;
                         }
@@ -779,240 +765,276 @@ namespace Osu2Saber.Model.Algorithm
                         }
                     }
 
-                    // Attempt to fix vision issue
-                    if((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 1)
+                    // We only try to fix if the user decide to.
+                    if(DoubleHitboxFix)
                     {
-                        n._lineLayer++;
-                    }
-                    else if((preceding._lineIndex == 1 || preceding._lineIndex == 2) && preceding._lineLayer == 1)
-                    {
-                        preceding._lineLayer++;
-                    }
+                        // Attempt to fix vision issue
+                        if ((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 1)
+                        {
+                            n._lineLayer++;
+                        }
+                        else if ((preceding._lineIndex == 1 || preceding._lineIndex == 2) && preceding._lineLayer == 1)
+                        {
+                            preceding._lineLayer++;
+                        }
 
-                    // Close together diagonally
-                    if ((n._lineIndex == preceding._lineIndex - 1 && n._lineLayer == preceding._lineIndex - 1) || (n._lineIndex == preceding._lineIndex + 1 && n._lineLayer == preceding._lineIndex + 1) || (n._lineIndex == preceding._lineIndex - 1 && n._lineLayer == preceding._lineIndex + 1) || (n._lineIndex == preceding._lineIndex + 1 && n._lineLayer == preceding._lineIndex - 1))
-                    {
-                        if((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 0)
+                        // Close together diagonally
+                        if ((n._lineIndex == preceding._lineIndex - 1 && n._lineLayer == preceding._lineIndex - 1) || (n._lineIndex == preceding._lineIndex + 1 && n._lineLayer == preceding._lineIndex + 1) || (n._lineIndex == preceding._lineIndex - 1 && n._lineLayer == preceding._lineIndex + 1) || (n._lineIndex == preceding._lineIndex + 1 && n._lineLayer == preceding._lineIndex - 1))
                         {
-                            if(preceding._lineLayer == 1)
+                            if ((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 0)
                             {
-                                preceding._lineLayer++;
-                            }
-                        }
-                        else if ((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 2)
-                        {
-                            if (preceding._lineLayer == 1)
-                            {
-                                preceding._lineLayer--;
-                            }
-                        }
-                        else if ((preceding._lineIndex == 1 || preceding._lineIndex == 2) && preceding._lineLayer == 0)
-                        {
-                            if (n._lineLayer == 1)
-                            {
-                                n._lineLayer++;
-                            }
-                        }
-                        else if ((preceding._lineIndex == 1 || preceding._lineIndex == 2) && preceding._lineLayer == 2)
-                        {
-                            if (n._lineLayer == 1)
-                            {
-                                n._lineLayer--;
-                            }
-                        }
-                    }
-
-                    // Side by side lane-wise and not down or up.
-                    if ((n._lineIndex == preceding._lineIndex - 1 || n._lineIndex == preceding._lineIndex + 1) && (n._cutDirection > 1 || preceding._cutDirection > 1))
-                    {
-                        // If one of them is left or right
-                        if(n._cutDirection == 2 || n._cutDirection == 3 || preceding._cutDirection == 2 || preceding._cutDirection == 3)
-                        {
-                            // If their layer is the same, at bottom
-                            if(n._lineLayer == preceding._lineLayer && n._lineLayer == 0)
-                            {
-                                // Attempt to bring one up
-                                if(n._lineIndex == 0 || n._lineIndex == 3)
-                                {
-                                    n._lineLayer++;
-                                }
-                                else if(preceding._lineIndex == 0 || preceding._lineIndex == 3)
+                                if (preceding._lineLayer == 1)
                                 {
                                     preceding._lineLayer++;
                                 }
                             }
-                            // If higher than bottom
-                            else if (n._lineLayer == preceding._lineLayer && n._lineLayer > 0)
+                            else if ((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 2)
                             {
-                                // Attempt to bring one down
-                                if (n._lineIndex == 0 || n._lineIndex == 3)
-                                {
-                                    n._lineLayer--;
-                                }
-                                else if (preceding._lineIndex == 0 || preceding._lineIndex == 3)
+                                if (preceding._lineLayer == 1)
                                 {
                                     preceding._lineLayer--;
                                 }
                             }
-                        }
-                        // If their cut direction is above 3, we can stack them together.
-                        else if (n._cutDirection > 3 && preceding._cutDirection > 3)
-                        {
-                            if (n._cutDirection > 5 && n._type == 0)
+                            else if ((preceding._lineIndex == 1 || preceding._lineIndex == 2) && preceding._lineLayer == 0)
                             {
-                                if (n._lineIndex > 1)
+                                if (n._lineLayer == 1)
                                 {
-                                    n._lineLayer = 0;
-                                    preceding._lineLayer = 2;
-                                    preceding._lineIndex = n._lineIndex;
-                                }
-                                else if (preceding._lineIndex > 1)
-                                {
-                                    n._lineLayer = 0;
-                                    preceding._lineLayer = 2;
-                                    n._lineIndex = preceding._lineIndex;
+                                    n._lineLayer++;
                                 }
                             }
-                            else if (n._cutDirection > 5 && n._type == 1)
+                            else if ((preceding._lineIndex == 1 || preceding._lineIndex == 2) && preceding._lineLayer == 2)
                             {
-                                if (n._lineIndex < 2)
+                                if (n._lineLayer == 1)
                                 {
-                                    n._lineLayer = 0;
-                                    preceding._lineLayer = 2;
-                                    preceding._lineIndex = n._lineIndex;
-                                }
-                                else if (preceding._lineIndex < 2)
-                                {
-                                    n._lineLayer = 0;
-                                    preceding._lineLayer = 2;
-                                    n._lineIndex = preceding._lineIndex;
-                                }
-                            }
-                            else if (n._cutDirection < 6 && n._type == 0)
-                            {
-                                if (n._lineIndex < 2)
-                                {
-                                    n._lineLayer = 2;
-                                    preceding._lineLayer = 0;
-                                    preceding._lineIndex = n._lineIndex;
-                                }
-                                else if (preceding._lineIndex < 2)
-                                {
-                                    n._lineLayer = 2;
-                                    preceding._lineLayer = 0;
-                                    n._lineIndex = preceding._lineIndex;
-                                }
-                            }
-                            else if (n._cutDirection < 6 && n._type == 1)
-                            {
-                                if (n._lineIndex > 1)
-                                {
-                                    n._lineLayer = 2;
-                                    preceding._lineLayer = 0;
-                                    preceding._lineIndex = n._lineIndex;
-                                }
-                                else if (preceding._lineIndex > 1)
-                                {
-                                    n._lineLayer = 2;
-                                    preceding._lineLayer = 0;
-                                    n._lineIndex = preceding._lineIndex;
+                                    n._lineLayer--;
                                 }
                             }
                         }
-                        // If both at the top, we handle them differently.
-                        else if(n._lineLayer == 2 && preceding._lineLayer == 2)
-                        {
-                            if (n._cutDirection > 5 || n._cutDirection == 1)
-                            {
-                                n._lineLayer = 0;
-                            }
-                            else if (preceding._cutDirection > 5 || preceding._cutDirection == 1)
-                            {
-                                n._lineLayer = 0;
-                            }
 
-                            if ((n._type == 0 && n._lineIndex > preceding._lineIndex) || (n._type == 1 && n._lineIndex < preceding._lineIndex))
+                        // Side by side lane-wise and not down or up.
+                        if ((n._lineIndex == preceding._lineIndex - 1 || n._lineIndex == preceding._lineIndex + 1) && (n._cutDirection > 1 || preceding._cutDirection > 1))
+                        {
+                            // If one of them is left or right
+                            if (n._cutDirection == 2 || n._cutDirection == 3 || preceding._cutDirection == 2 || preceding._cutDirection == 3)
                             {
-                                int temp = n._lineIndex;
-                                n._lineIndex = preceding._lineIndex;
-                                preceding._lineIndex = temp;
+                                // If their layer is the same, at bottom
+                                if (n._lineLayer == preceding._lineLayer && n._lineLayer == 0)
+                                {
+                                    // Attempt to bring one up
+                                    if (n._lineIndex == 0 || n._lineIndex == 3)
+                                    {
+                                        n._lineLayer++;
+                                    }
+                                    else if (preceding._lineIndex == 0 || preceding._lineIndex == 3)
+                                    {
+                                        preceding._lineLayer++;
+                                    }
+                                }
+                                // If higher than bottom
+                                else if (n._lineLayer == preceding._lineLayer && n._lineLayer > 0)
+                                {
+                                    // Attempt to bring one down
+                                    if (n._lineIndex == 0 || n._lineIndex == 3)
+                                    {
+                                        n._lineLayer--;
+                                    }
+                                    else if (preceding._lineIndex == 0 || preceding._lineIndex == 3)
+                                    {
+                                        preceding._lineLayer--;
+                                    }
+                                }
+                            }
+                            // If their cut direction is above 3, we can stack them together.
+                            else if (n._cutDirection > 3 && preceding._cutDirection > 3)
+                            {
+                                if (n._cutDirection > 5 && n._type == 0)
+                                {
+                                    if (n._lineIndex > 1)
+                                    {
+                                        n._lineLayer = 0;
+                                        preceding._lineLayer = 2;
+                                        preceding._lineIndex = n._lineIndex;
+                                    }
+                                    else if (preceding._lineIndex > 1)
+                                    {
+                                        n._lineLayer = 0;
+                                        preceding._lineLayer = 2;
+                                        n._lineIndex = preceding._lineIndex;
+                                    }
+                                }
+                                else if (n._cutDirection > 5 && n._type == 1)
+                                {
+                                    if (n._lineIndex < 2)
+                                    {
+                                        n._lineLayer = 0;
+                                        preceding._lineLayer = 2;
+                                        preceding._lineIndex = n._lineIndex;
+                                    }
+                                    else if (preceding._lineIndex < 2)
+                                    {
+                                        n._lineLayer = 0;
+                                        preceding._lineLayer = 2;
+                                        n._lineIndex = preceding._lineIndex;
+                                    }
+                                }
+                                else if (n._cutDirection < 6 && n._type == 0)
+                                {
+                                    if (n._lineIndex < 2)
+                                    {
+                                        n._lineLayer = 2;
+                                        preceding._lineLayer = 0;
+                                        preceding._lineIndex = n._lineIndex;
+                                    }
+                                    else if (preceding._lineIndex < 2)
+                                    {
+                                        n._lineLayer = 2;
+                                        preceding._lineLayer = 0;
+                                        n._lineIndex = preceding._lineIndex;
+                                    }
+                                }
+                                else if (n._cutDirection < 6 && n._type == 1)
+                                {
+                                    if (n._lineIndex > 1)
+                                    {
+                                        n._lineLayer = 2;
+                                        preceding._lineLayer = 0;
+                                        preceding._lineIndex = n._lineIndex;
+                                    }
+                                    else if (preceding._lineIndex > 1)
+                                    {
+                                        n._lineLayer = 2;
+                                        preceding._lineLayer = 0;
+                                        n._lineIndex = preceding._lineIndex;
+                                    }
+                                }
+                                if(n._cutDirection == 6 && n._type == 1 && n._lineLayer == 2 && n._lineIndex == 2)
+                                {
+                                    n._lineIndex--;
+                                }
+                                else if (n._cutDirection == 7 && n._type == 0 && n._lineLayer == 2 && n._lineIndex == 1)
+                                {
+                                    n._lineIndex++;
+                                }
+                                else if (n._cutDirection == 7 && n._type == 1 && n._lineLayer == 2 && n._lineIndex == 1)
+                                {
+                                    n._lineIndex++;
+                                }
+                                else if (n._cutDirection == 6 && n._type == 0 && n._lineLayer == 2 && n._lineIndex == 2)
+                                {
+                                    n._lineIndex--;
+                                }
+                                else if (preceding._cutDirection == 6 && preceding._type == 1 && preceding._lineLayer == 2 && preceding._lineIndex == 2)
+                                {
+                                    preceding._lineIndex--;
+                                }
+                                else if (preceding._cutDirection == 7 && preceding._type == 0 && preceding._lineLayer == 2 && preceding._lineIndex == 1)
+                                {
+                                    preceding._lineIndex++;
+                                }
+                                else if (preceding._cutDirection == 7 && preceding._type == 1 && preceding._lineLayer == 2 && preceding._lineIndex == 1)
+                                {
+                                    preceding._lineIndex++;
+                                }
+                                else if (preceding._cutDirection == 6 && preceding._type == 0 && preceding._lineLayer == 2 && preceding._lineIndex == 2)
+                                {
+                                    preceding._lineIndex--;
+                                }
+                            }
+                            // If both at the top, we handle them differently.
+                            else if (n._lineLayer == 2 && preceding._lineLayer == 2)
+                            {
+                                if (n._cutDirection > 5 || n._cutDirection == 1)
+                                {
+                                    n._lineLayer = 0;
+                                }
+                                else if (preceding._cutDirection > 5 || preceding._cutDirection == 1)
+                                {
+                                    n._lineLayer = 0;
+                                }
+
+                                if ((n._type == 0 && n._lineIndex > preceding._lineIndex) || (n._type == 1 && n._lineIndex < preceding._lineIndex))
+                                {
+                                    int temp = n._lineIndex;
+                                    n._lineIndex = preceding._lineIndex;
+                                    preceding._lineIndex = temp;
+                                }
+                            }
+                            else // We have to handle them another way
+                            {
+                                // We don't want to turn it into an up/down if the note before is left/right
+                                // If the other one conflict, we have to separate them
+                                if (preceding._cutDirection > 1)
+                                {
+                                    if (n._type == 0 && n._lineIndex == preceding._lineIndex - 1 && n._lineIndex != 0)
+                                    {
+                                        n._lineIndex--;
+                                    }
+                                    else if (n._type == 1 && n._lineIndex == preceding._lineIndex + 1 && n._lineIndex != 3)
+                                    {
+                                        n._lineIndex++;
+                                    }
+                                    else if (n._type == 0 && n._lineIndex == preceding._lineIndex + 1 && n._lineIndex != 3)
+                                    {
+                                        n._lineIndex++;
+                                    }
+                                    else if (n._type == 1 && n._lineIndex == preceding._lineIndex - 1 && n._lineIndex != 0)
+                                    {
+                                        n._lineIndex--;
+                                    }
+                                }
+                                else if (n._type == 0) // Current note is red
+                                {
+                                    if (n._cutDirection == 4 && leftHand != 3)
+                                    {
+                                        n._cutDirection = 0;
+                                    }
+                                    else if (n._cutDirection == 5 && leftHand != 2)
+                                    {
+                                        n._cutDirection = 0;
+                                    }
+                                    else if (n._cutDirection == 6 && leftHand != 3)
+                                    {
+                                        n._cutDirection = 1;
+                                    }
+                                    else if (n._cutDirection == 7 && leftHand != 2)
+                                    {
+                                        n._cutDirection = 1;
+                                    }
+                                }
+                                else if (n._type == 1) // Current note is blue
+                                {
+                                    if (n._cutDirection == 4 && rightHand != 3)
+                                    {
+                                        n._cutDirection = 0;
+                                    }
+                                    else if (n._cutDirection == 5 && rightHand != 2)
+                                    {
+                                        n._cutDirection = 0;
+                                    }
+                                    else if (n._cutDirection == 6 && rightHand != 3)
+                                    {
+                                        n._cutDirection = 1;
+                                    }
+                                    else if (n._cutDirection == 7 && rightHand != 2)
+                                    {
+                                        n._cutDirection = 1;
+                                    }
+                                }
                             }
                         }
-                        else // We have to handle them another way
+                        // On top of eachother with a down or up.
+                        if ((n._cutDirection < 2 || preceding._cutDirection < 2) && n._lineIndex == preceding._lineIndex)
                         {
-                            // We don't want to turn it into an up/down if the note before is left/right
-                            // If the other one conflict, we have to separate them
-                            if (preceding._cutDirection > 1)
+                            if (n._type == 0 && n._lineIndex != 0)
                             {
-                                if (n._type == 0 && n._lineIndex == preceding._lineIndex - 1 && n._lineIndex != 0)
-                                {
-                                    n._lineIndex--;
-                                }
-                                else if (n._type == 1 && n._lineIndex == preceding._lineIndex + 1 && n._lineIndex != 3)
-                                {
-                                    n._lineIndex++;
-                                }
-                                else if (n._type == 0 && n._lineIndex == preceding._lineIndex + 1 && n._lineIndex != 3)
-                                {
-                                    n._lineIndex++;
-                                }
-                                else if (n._type == 1 && n._lineIndex == preceding._lineIndex - 1 && n._lineIndex != 0)
-                                {
-                                    n._lineIndex--;
-                                }
+                                n._lineIndex--;
                             }
-                            else if (n._type == 0) // Current note is red
+                            else if (n._type == 1 && n._lineIndex != 3)
                             {
-                                if (n._cutDirection == 4 && leftHand != 3)
-                                {
-                                    n._cutDirection = 0;
-                                }
-                                else if (n._cutDirection == 5 && leftHand != 2)
-                                {
-                                    n._cutDirection = 0;
-                                }
-                                else if (n._cutDirection == 6 && leftHand != 3)
-                                {
-                                    n._cutDirection = 1;
-                                }
-                                else if (n._cutDirection == 7 && leftHand != 2)
-                                {
-                                    n._cutDirection = 1;
-                                }
-                            }
-                            else if (n._type == 1) // Current note is blue
-                            {
-                                if (n._cutDirection == 4 && rightHand != 3)
-                                {
-                                    n._cutDirection = 0;
-                                }
-                                else if (n._cutDirection == 5 && rightHand != 2)
-                                {
-                                    n._cutDirection = 0;
-                                }
-                                else if (n._cutDirection == 6 && rightHand != 3)
-                                {
-                                    n._cutDirection = 1;
-                                }
-                                else if (n._cutDirection == 7 && rightHand != 2)
-                                {
-                                    n._cutDirection = 1;
-                                }
+                                n._lineIndex++;
                             }
                         }
                     }
-                    // On top of eachother with a down or up.
-                    if((n._cutDirection < 2 || preceding._cutDirection < 2) && n._lineIndex == preceding._lineIndex)
-                    {
-                        if(n._type == 0 && n._lineIndex != 0)
-                        {
-                            n._lineIndex--;
-                        }
-                        else if(n._type == 1 && n._lineIndex != 3)
-                        {
-                            n._lineIndex++;
-                        }
-                    }  
                 }
 
                 // Always start the map on a bottom row down.
@@ -1059,55 +1081,20 @@ namespace Osu2Saber.Model.Algorithm
             if (notes.Any() && notes.Count() > 3) // Fix the last 2 notes
             {
                 notes[notes.Count() - 1]._type = notes[notes.Count() - 3]._type;
-                if (UpCut.Contains(notes[notes.Count() - 3]._cutDirection))
-                {
-                    notes[notes.Count() - 1]._cutDirection = 1;
-                    notes[notes.Count() - 1]._lineIndex = notes[notes.Count() - 3]._lineIndex;
-                    notes[notes.Count() - 1]._lineLayer = 0;
-                }
-                else if (DownCut.Contains(notes[notes.Count() - 3]._cutDirection))
-                {
-                    notes[notes.Count() - 1]._cutDirection = 0;
-                    notes[notes.Count() - 1]._lineIndex = notes[notes.Count() - 3]._lineIndex;
-                    notes[notes.Count() - 1]._lineLayer = 2;
-                }
-                else if (notes[notes.Count() - 3]._cutDirection == 2)
-                {
-                    notes[notes.Count() - 1]._cutDirection = 3;
-                    notes[notes.Count() - 1]._lineIndex = 3;
-                    notes[notes.Count() - 1]._lineLayer = notes[notes.Count() - 3]._lineLayer;
-                }
-                else if (notes[notes.Count() - 3]._cutDirection == 3)
-                {
-                    notes[notes.Count() - 1]._cutDirection = 2;
-                    notes[notes.Count() - 1]._lineIndex = 0;
-                    notes[notes.Count() - 1]._lineLayer = notes[notes.Count() - 3]._lineLayer;
-                }
-
                 notes[notes.Count() - 2]._type = notes[notes.Count() - 4]._type;
-                if (UpCut.Contains(notes[notes.Count() - 4]._cutDirection))
+                notes[notes.Count() - 1]._cutDirection = 8;
+                notes[notes.Count() - 2]._cutDirection = 8;
+                notes[notes.Count() - 1]._lineLayer = 0;
+                notes[notes.Count() - 2]._lineLayer = 0;
+                if (notes[notes.Count() - 1]._type == 0)
                 {
-                    notes[notes.Count() - 2]._cutDirection = 1;
-                    notes[notes.Count() - 2]._lineIndex = notes[notes.Count() - 4]._lineIndex;
-                    notes[notes.Count() - 2]._lineLayer = 0;
+                    notes[notes.Count() - 1]._lineIndex = 1;
+                    notes[notes.Count() - 2]._lineIndex = 2;
                 }
-                else if (DownCut.Contains(notes[notes.Count() - 4]._cutDirection))
+                else
                 {
-                    notes[notes.Count() - 2]._cutDirection = 0;
-                    notes[notes.Count() - 2]._lineIndex = notes[notes.Count() - 4]._lineIndex;
-                    notes[notes.Count() - 2]._lineLayer = 2;
-                }
-                else if (notes[notes.Count() - 4]._cutDirection == 2)
-                {
-                    notes[notes.Count() - 2]._cutDirection = 3;
-                    notes[notes.Count() - 2]._lineIndex = 3;
-                    notes[notes.Count() - 2]._lineLayer = notes[notes.Count() - 4]._lineLayer;
-                }
-                else if (notes[notes.Count() - 4]._cutDirection == 3)
-                {
-                    notes[notes.Count() - 2]._cutDirection = 2;
-                    notes[notes.Count() - 2]._lineIndex = 0;
-                    notes[notes.Count() - 2]._lineLayer = notes[notes.Count() - 4]._lineLayer;
+                    notes[notes.Count() - 1]._lineIndex = 2;
+                    notes[notes.Count() - 2]._lineIndex = 1;
                 }
             }
 
@@ -1118,18 +1105,130 @@ namespace Osu2Saber.Model.Algorithm
             notes = Notes.OrderBy(note => note._time).ToList();
         }
 
+        Queue<Note> FlowCheck(Queue<Note> note, int type)
+        {
+            var hand = 0;
+
+            if(type == 0)
+            {
+                hand = leftHand;
+            }
+            else if (type == 1)
+            {
+                hand = rightHand;
+            }
+
+            for (var i = 0; i < note.Count(); i++)
+            {
+                if (DownCut.Contains(hand) && UpCut.Contains(note.Peek()._cutDirection))
+                {
+                    if(type == 0)
+                    {
+                        foundRed = true;
+                    }
+                    else if(type == 1)
+                    {
+                        foundBlue = true;
+                    }
+                    
+                    break;
+                }
+                else if (UpCut.Contains(hand) && DownCut.Contains(note.Peek()._cutDirection))
+                {
+                    if (type == 0)
+                    {
+                        foundRed = true;
+                    }
+                    else if (type == 1)
+                    {
+                        foundBlue = true;
+                    }
+
+                    break;
+                }
+                else if (hand == 2 && IntoLeft.Contains(note.Peek()._cutDirection))
+                {
+                    if (type == 0)
+                    {
+                        foundRed = true;
+                    }
+                    else if (type == 1)
+                    {
+                        foundBlue = true;
+                    }
+
+                    break;
+                }
+                else if (hand == 3 && IntoRight.Contains(note.Peek()._cutDirection))
+                {
+                    if (type == 0)
+                    {
+                        foundRed = true;
+                    }
+                    else if (type == 1)
+                    {
+                        foundBlue = true;
+                    }
+
+                    break;
+                }
+                else if (IntoLeft.Contains(hand) && note.Peek()._cutDirection == 2)
+                {
+                    if (type == 0)
+                    {
+                        foundRed = true;
+                    }
+                    else if (type == 1)
+                    {
+                        foundBlue = true;
+                    }
+
+                    break;
+                }
+                else if (IntoRight.Contains(hand) && note.Peek()._cutDirection == 3)
+                {
+                    if (type == 0)
+                    {
+                        foundRed = true;
+                    }
+                    else if (type == 1)
+                    {
+                        foundBlue = true;
+                    }
+
+                    break;
+                }
+                note.Enqueue(note.Dequeue());
+            }
+
+            return note;
+        }
+
         bool ParityCheck(int type, int now, int before, int beforeBefore)
         {
-            if(now == 8 || before == 8 || beforeBefore == 8) // Any
+            if(now == 8) // Any
             {
-                return true; // Too lazy to handle those
+                return true;
             }
+
+            // Also have to handle break in parity, hence the non-flow part.
 
             switch (beforeBefore)
             {
                 case 0: // Up
                     switch (before)
                     {
+                        case 0: // Up
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
                         case 1: // Down
                             switch (now)
                             {
@@ -1149,6 +1248,46 @@ namespace Osu2Saber.Model.Algorithm
                                     break;
                             }
                             break;
+                        case 2: // Left
+                            switch (now)
+                            {
+                                case 3: // Right
+                                    return true;
+                                case 7: // Down-Right
+                                    if (type == 0)
+                                    {
+                                        return true;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 3: // Right
+                            switch (now)
+                            {
+                                case 2: // Left
+                                    return true;
+                                case 6: // Down-Left
+                                    if (type == 1)
+                                    {
+                                        return true;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 4: // Up-Left
+                            switch (now)
+                            {
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
+                        case 5: // Up-Right
+                            switch (now)
+                            {
+                                case 6: // Down-Left
+                                    return true;
+                            }
+                            break;
                         case 6: // Down-Left
                             switch (now)
                             {
@@ -1164,6 +1303,17 @@ namespace Osu2Saber.Model.Algorithm
                                 case 0: // Up
                                     return true;
                                 case 4: // Up-Left
+                                    return true;
+                            }
+                            break;
+                        case 8: // Any
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                                case 5: // Up-Right
                                     return true;
                             }
                             break;
@@ -1183,6 +1333,43 @@ namespace Osu2Saber.Model.Algorithm
                                     return true;
                             }
                             break;
+                        case 1: // Down
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
+                        case 2: // Left
+                            switch (now)
+                            {
+                                case 3: // Right
+                                    return true;
+                                case 7: // Down-Right
+                                    if (type == 0)
+                                    {
+                                        return true;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 3: // Right
+                            switch (now)
+                            {
+                                case 2: // Left
+                                    return true;
+                                case 6: // Down-Left
+                                    if (type == 1)
+                                    {
+                                        return true;
+                                    }
+                                    break;
+                            }
+                            break;
                         case 4: // Up-Left
                             switch (now)
                             {
@@ -1201,11 +1388,75 @@ namespace Osu2Saber.Model.Algorithm
                                     return true;
                             }
                             break;
+                        case 6: // Down-Left
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
+                        case 7: // Down-Right
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                            }
+                            break;
+                        case 8: // Any
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
                     }
                     break;
                 case 2: // Left
                     switch (before)
                     {
+                        case 0: // Up
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
+                        case 1: // Down
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
+                        case 2: // Left
+                            switch (now)
+                            {
+                                case 3: // Right
+                                    return true;
+                                case 7: // Down-Right
+                                    if (type == 0)
+                                    {
+                                        return true;
+                                    }
+                                    break;
+                            }
+                            break;
                         case 3: // Right
                             switch (now)
                             {
@@ -1225,6 +1476,15 @@ namespace Osu2Saber.Model.Algorithm
                                     break;
                             }
                             break;
+                        case 4: // Up-Left
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
                         case 5: // Up-Right
                             switch (now)
                             {
@@ -1240,6 +1500,15 @@ namespace Osu2Saber.Model.Algorithm
                                         return true;
                                     }
                                     break;
+                            }
+                            break;
+                        case 6: // Down-Left
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
                             }
                             break;
                         case 7: // Down-Right
@@ -1265,11 +1534,40 @@ namespace Osu2Saber.Model.Algorithm
                                     break;
                             }
                             break;
+                        case 8: // Any
+                            switch (now)
+                            {
+                                case 2: // Left
+                                    return true;
+                            }
+                            break;
                     }
                     break;
                 case 3: // Right
                     switch (before)
                     {
+                        case 0: // Up
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
+                        case 1: // Down
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
                         case 2: // Left
                             switch (now)
                             {
@@ -1283,6 +1581,19 @@ namespace Osu2Saber.Model.Algorithm
                                     break;
                                 case 7: // Down-Right
                                     if (type == 0)
+                                    {
+                                        return true;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 3: // Right
+                            switch (now)
+                            {
+                                case 2: // Left
+                                    return true;
+                                case 6: // Down-Left
+                                    if (type == 1)
                                     {
                                         return true;
                                     }
@@ -1304,6 +1615,15 @@ namespace Osu2Saber.Model.Algorithm
                                         return true;
                                     }
                                     break;
+                            }
+                            break;
+                        case 5: // Up-Right
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
                             }
                             break;
                         case 6: // Down-Left
@@ -1329,11 +1649,38 @@ namespace Osu2Saber.Model.Algorithm
                                     break;
                             }
                             break;
+                        case 7: // Down-Right
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                            }
+                            break;
+                        case 8: // Any
+                            switch (now)
+                            {
+                                case 3: // Right
+                                    return true;
+                            }
+                            break;
                     }
                     break;
                 case 4: // Up-Left
                     switch (before)
                     {
+                        case 0: // Up
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
                         case 1: // Down
                             switch (now)
                             {
@@ -1343,6 +1690,19 @@ namespace Osu2Saber.Model.Algorithm
                                     return true;
                                 case 5: // Up-Right
                                     return true;
+                            }
+                            break;
+                        case 2: // Left
+                            switch (now)
+                            {
+                                case 3: // Right
+                                    return true;
+                                case 7: // Down-Right
+                                    if (type == 0)
+                                    {
+                                        return true;
+                                    }
+                                    break;
                             }
                             break;
                         case 3: // Right
@@ -1362,7 +1722,34 @@ namespace Osu2Saber.Model.Algorithm
                                     break;
                             }
                             break;
-                        case 7: // Down Right
+                        case 4: // Up-Left
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
+                        case 5: // Up-Right
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                            }
+                            break;
+                        case 6: // Down-Left
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
+                        case 7: // Down-Right
                             switch (now)
                             {
                                 case 0: // Up
@@ -1377,11 +1764,29 @@ namespace Osu2Saber.Model.Algorithm
                                     return true;
                             }
                             break;
+                        case 8: // Any
+                            switch (now)
+                            {
+                                case 4: // Up-Left
+                                    return true;
+                            }
+                            break;
                     }
                     break;
                 case 5: // Up-Right
                     switch(before)
                     {
+                        case 0: // Up
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
                         case 1: // Down
                             switch (now)
                             {
@@ -1410,7 +1815,42 @@ namespace Osu2Saber.Model.Algorithm
                                     break;
                             }
                             break;
-                        case 6: // Down Left
+                        case 3: // Right
+                            switch (now)
+                            {
+                                case 2: // Left
+                                    if (type == 0)
+                                    {
+                                        return true;
+                                    }
+                                    break;
+                                case 4: // Up-Left
+                                    if (type == 0)
+                                    {
+                                        return true;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 4: // Up-Left
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
+                        case 5: // Up-Right
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                            }
+                            break;
+                        case 6: // Down-Left
                             switch (now)
                             {
                                 case 0: // Up
@@ -1421,6 +1861,22 @@ namespace Osu2Saber.Model.Algorithm
                                         return true;
                                     }
                                     break;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
+                        case 7: // Down-Right
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                            }
+                            break;
+                        case 8: // Any
+                            switch (now)
+                            {
                                 case 5: // Up-Right
                                     return true;
                             }
@@ -1441,6 +1897,30 @@ namespace Osu2Saber.Model.Algorithm
                                     return true;
                             }
                             break;
+                        case 1: // Down
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
+                        case 2: // Left
+                            switch (now)
+                            {
+                                case 3: // Right
+                                    return true;
+                                case 7: // Down-Right
+                                    if (type == 0)
+                                    {
+                                        return true;
+                                    }
+                                    break;
+                            }
+                            break;
                         case 3: // Right
                             switch (now)
                             {
@@ -1458,6 +1938,15 @@ namespace Osu2Saber.Model.Algorithm
                                     break;
                             }
                             break;
+                        case 4: // Up-Left
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
                         case 5: // Up-Right
                             switch (now)
                             {
@@ -1469,6 +1958,31 @@ namespace Osu2Saber.Model.Algorithm
                                         return true;
                                     }
                                     break;
+                                case 6: // Down-Left
+                                    return true;
+                            }
+                            break;
+                        case 6: // Down-Left
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
+                        case 7: // Down-Right
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                            }
+                            break;
+                        case 8: // Any
+                            switch (now)
+                            {
                                 case 6: // Down-Left
                                     return true;
                             }
@@ -1489,6 +2003,17 @@ namespace Osu2Saber.Model.Algorithm
                                     return true;
                             }
                             break;
+                        case 1: // Down
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
                         case 2: // Left
                             switch (now)
                             {
@@ -1500,6 +2025,19 @@ namespace Osu2Saber.Model.Algorithm
                                     break;
                                 case 7: // Down-Right
                                     if (type == 0)
+                                    {
+                                        return true;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 3: // Right
+                            switch (now)
+                            {
+                                case 2: // Left
+                                    return true;
+                                case 6: // Down-Left
+                                    if (type == 1)
                                     {
                                         return true;
                                     }
@@ -1518,6 +2056,117 @@ namespace Osu2Saber.Model.Algorithm
                                     }
                                     break;
                                 case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
+                        case 5: // Up-Right
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                            }
+                            break;
+                        case 6: // Down-Left
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
+                        case 7: // Down-Right
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                            }
+                            break;
+                        case 8: // Any
+                            switch (now)
+                            {
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
+                    }
+                    break;
+                case 8: // Any
+                    switch (before)
+                    {
+                        case 0: // Up
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
+                        case 1: // Down
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
+                        case 2: // Left
+                            switch (now)
+                            {
+                                case 3: // Right
+                                    return true;
+                            }
+                            break;
+                        case 3: // Right
+                            switch (now)
+                            {
+                                case 2: // Left
+                                    return true;
+                            }
+                            break;
+                        case 4: // Up-Left
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 7: // Down-Right
+                                    return true;
+                            }
+                            break;
+                        case 5: // Up-Right
+                            switch (now)
+                            {
+                                case 1: // Down
+                                    return true;
+                                case 6: // Down-Left
+                                    return true;
+                            }
+                            break;
+                        case 6: // Down-Left
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 5: // Up-Right
+                                    return true;
+                            }
+                            break;
+                        case 7: // Down-Right
+                            switch (now)
+                            {
+                                case 0: // Up
+                                    return true;
+                                case 4: // Up-Left
                                     return true;
                             }
                             break;
