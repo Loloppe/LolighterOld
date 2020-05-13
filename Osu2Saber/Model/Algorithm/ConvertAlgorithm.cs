@@ -4,11 +4,13 @@ using Osu2Saber.Model.Json;
 using osuBMParser;
 using System;
 using System.CodeDom;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Policy;
+using System.Windows.Controls;
 using MessageBox = System.Windows.Forms.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
@@ -467,7 +469,7 @@ namespace Osu2Saber.Model.Algorithm
 
         void PatternCreator(string pattern)
         {
-            // Nb of attempt to get a pattern that fit, if > 10000, forcefully stop the process.
+            // Nb of attempt to get a pattern that fit, if > 100000, forcefully stop the process.
             int attempt = 0;
             int available = notes.Count;
             double first = notes[0]._time;
@@ -499,8 +501,8 @@ namespace Osu2Saber.Model.Algorithm
             {
                 n = notes[i];
 
-                // If the pattern is done or the speed got faster than slow (ignore double).
-                if (noteOrder.Count() == 0 || (slow && notes[i + 1]._time - notes[i]._time < SlowSpeed * (bpm / bpmPerNote[i]) && notes[i + 1]._time - notes[i]._time >= 0.01))
+                // If the pattern is done or the speed got faster than slow (ignore double)
+                if (noteOrder.Count() == 0 || (noteOrder.Count % 2 == 0 && slow && notes[i + 1]._time - notes[i]._time < SlowSpeed * (bpm / bpmPerNote[i]) && notes[i + 1]._time - notes[i]._time >= 0.01))
                 {
                     // Infinite loop until a pattern that fit the condition is met.
                     do
@@ -515,7 +517,7 @@ namespace Osu2Saber.Model.Algorithm
                         redNote.Clear();
                         noteOrder.Clear();
 
-                        if(attempt >= 10000)
+                        if(attempt >= 100000)
                         {
                             MessageBox.Show("Can't find a proper pattern, closing.");
                             Process.GetCurrentProcess().Kill();
@@ -687,9 +689,9 @@ namespace Osu2Saber.Model.Algorithm
                                 foundBlue = false;
                             }
                         }
-                        
+
                         // For patterns with only one color
-                        if((blueNote.Count() == 0 && foundRed) || (redNote.Count() == 0 && foundBlue) && AllowOneHanded)
+                        if ((blueNote.Count() == 0 && foundRed) || (redNote.Count() == 0 && foundBlue) && AllowOneHanded)
                         {
                             break;
                         }
@@ -1532,12 +1534,36 @@ namespace Osu2Saber.Model.Algorithm
 
         void BottomDisplacement()
         {
+            Note lastNote = new Note(0, 0, 0, 0, 0);
+
             foreach (var note in Notes)
             {
-                if(note._lineLayer == 2 || note._lineLayer == 1)
+                if(note._time - lastNote._time >= -0.01 && note._time - lastNote._time <= 0.01 && note._lineIndex == lastNote._lineIndex)
+                {
+                    if(note._type == 0 && note._lineIndex != 0)
+                    {
+                        note._lineIndex--;
+                    }
+                    else if(note._type == 1 && note._lineIndex != 3)
+                    {
+                        note._lineIndex++;
+                    }
+                    else if (note._type == 1)
+                    {
+                        note._lineIndex--;
+                    }
+                    else
+                    {
+                        note._lineIndex++;
+                    }
+                }
+
+                if (note._lineLayer == 2 || note._lineLayer == 1)
                 {
                     note._lineLayer = 0;
                 }
+
+                lastNote = note;
             }
         }
 
