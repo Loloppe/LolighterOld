@@ -21,7 +21,7 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-### Version 4.1
+### Version 4.2
 Fixed variable BPM.
 Added dual-pack for slower/faster section.
 Added variable gallop and pack speed.
@@ -38,6 +38,7 @@ Pack now have their own folder.
 Added buttons to bring up or down notes during pack creation.
 Double hitbox algorithm can be desactivated.
 Fixed parity for DD, since we can create DD with the new limiter.
+Better "double" handle. Fixed the issue it had for now.
 More..?
 ___
 ## Osu2Saber LGPL-3.0
