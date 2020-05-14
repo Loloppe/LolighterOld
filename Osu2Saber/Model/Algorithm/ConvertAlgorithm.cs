@@ -766,8 +766,9 @@ namespace Osu2Saber.Model.Algorithm
                     }
 
                     // We only try to fix if the user decide to.
-                    if(DoubleHitboxFix)
+                    if(DoubleHitboxFix && i > 1)
                     {
+
                         // Attempt to fix vision issue
                         if ((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 1)
                         {
@@ -778,246 +779,161 @@ namespace Osu2Saber.Model.Algorithm
                             preceding._lineLayer++;
                         }
 
-                        // Close together diagonally
-                        if ((n._lineIndex == preceding._lineIndex - 1 && n._lineLayer == preceding._lineIndex - 1) || (n._lineIndex == preceding._lineIndex + 1 && n._lineLayer == preceding._lineIndex + 1) || (n._lineIndex == preceding._lineIndex - 1 && n._lineLayer == preceding._lineIndex + 1) || (n._lineIndex == preceding._lineIndex + 1 && n._lineLayer == preceding._lineIndex - 1))
+                        // No pickles top row
+                        if (((n._type == 0 && n._lineIndex > preceding._lineIndex) || (n._type == 1 && n._lineIndex < preceding._lineIndex)) && n._lineLayer > 0)
                         {
-                            if ((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 0)
+                            int temp = n._lineIndex;
+                            n._lineIndex = preceding._lineIndex;
+                            preceding._lineIndex = temp;
+                        }
+
+                        // We lower a note if it fit
+                        if(n._lineLayer == 2 && preceding._lineLayer == 2)
+                        {
+                            if(n._cutDirection == 1 && preceding._cutDirection == 1)
                             {
-                                if (preceding._lineLayer == 1)
+                                n._lineLayer = 0;
+                                preceding._lineLayer = 0;
+                            }
+                            else if(n._cutDirection == 6 || n._cutDirection == 7)
+                            {
+                                n._lineLayer = 0;
+                            }
+                            else if(preceding._cutDirection == 6 || preceding._cutDirection == 7)
+                            {
+                                preceding._lineLayer = 0;
+                            }
+                        }
+                        // We bring up a note if it fit
+                        else if (n._lineLayer == 0 && preceding._lineLayer == 0)
+                        {
+                            if (n._cutDirection == 0 && preceding._cutDirection == 0)
+                            {
+                                n._lineLayer = 2;
+                                preceding._lineLayer = 2;
+                            }
+                            if (n._cutDirection == 4 || n._cutDirection == 5)
+                            {
+                                n._lineLayer = 2;
+                            }
+                            else if (preceding._cutDirection == 4 || preceding._cutDirection == 5)
+                            {
+                                preceding._lineLayer = 2;
+                            }
+                        }
+                        // Note side by side
+                        if ((n._lineIndex == preceding._lineIndex - 1 || n._lineIndex == preceding._lineIndex + 1) && n._lineLayer == preceding._lineLayer && (n._cutDirection > 1 || preceding._cutDirection > 1))
+                        {
+                            // If the one before wasn't left or right
+                            if(notes[i - 2]._cutDirection != 2 && notes[i - 2]._cutDirection != 3 && notes[i - 3]._cutDirection != 2 && notes[i - 3]._cutDirection != 3)
+                            {
+                                if (n._cutDirection == 6 || n._cutDirection == 7) // Modify to down
                                 {
-                                    preceding._lineLayer++;
+                                    n._cutDirection = 1;
+                                }
+                                else if (n._cutDirection == 4 || n._cutDirection == 5) // Modify to up
+                                {
+                                    n._cutDirection = 0;
+                                }
+                                if (preceding._cutDirection == 6 || preceding._cutDirection == 7)
+                                {
+                                    preceding._cutDirection = 1; // Modify to down
+                                    if (preceding._type == 0) // Need to update for parity
+                                    {
+                                        leftHand = 1;
+                                    }
+                                    else if (preceding._type == 1)
+                                    {
+                                        rightHand = 1;
+                                    }
+                                }
+                                else if (preceding._cutDirection == 4 || preceding._cutDirection == 5)
+                                {
+                                    preceding._cutDirection = 0; // Modify to up
+                                    if (preceding._type == 0) // Need to update for parity
+                                    {
+                                        leftHand = 0;
+                                    }
+                                    else if (preceding._type == 1)
+                                    {
+                                        rightHand = 0;
+                                    }
                                 }
                             }
-                            else if ((n._lineIndex == 1 || n._lineIndex == 2) && n._lineLayer == 2)
+                            else // We separate them
                             {
-                                if (preceding._lineLayer == 1)
+                                if(n._lineIndex < preceding._lineIndex && n._lineIndex != 0)
                                 {
-                                    preceding._lineLayer--;
+                                    n._lineIndex--;
                                 }
-                            }
-                            else if ((preceding._lineIndex == 1 || preceding._lineIndex == 2) && preceding._lineLayer == 0)
-                            {
-                                if (n._lineLayer == 1)
+                                else if(n._lineIndex > preceding._lineIndex && n._lineIndex != 3)
                                 {
-                                    n._lineLayer++;
+                                    n._lineIndex++;
                                 }
-                            }
-                            else if ((preceding._lineIndex == 1 || preceding._lineIndex == 2) && preceding._lineLayer == 2)
-                            {
-                                if (n._lineLayer == 1)
+                                else if (preceding._lineIndex < n._lineIndex && preceding._lineIndex != 0)
                                 {
-                                    n._lineLayer--;
+                                    preceding._lineIndex--;
+                                }
+                                else if (preceding._lineIndex > n._lineIndex && preceding._lineIndex != 3)
+                                {
+                                    preceding._lineIndex++;
                                 }
                             }
                         }
-
-                        // Side by side lane-wise and not down or up.
-                        if ((n._lineIndex == preceding._lineIndex - 1 || n._lineIndex == preceding._lineIndex + 1) && (n._cutDirection > 1 || preceding._cutDirection > 1))
+                        // Close together diagonally
+                        if (((n._lineLayer == preceding._lineLayer - 1) || (n._lineLayer == preceding._lineLayer + 1)) && ((n._lineIndex == preceding._lineIndex - 1) || (n._lineIndex == preceding._lineIndex + 1)))
                         {
-                            // If one of them is left or right
-                            if (n._cutDirection == 2 || n._cutDirection == 3 || preceding._cutDirection == 2 || preceding._cutDirection == 3)
+                            // Some can be skipped
+                            if (n._cutDirection == preceding._cutDirection && ((n._cutDirection == 4 && n._lineIndex < 2 && n._lineLayer > 0 && preceding._lineLayer > 0) || (n._cutDirection == 5 && n._lineIndex > 1 && n._lineLayer > 0 && preceding._lineLayer > 0) || (n._cutDirection == 6 && n._lineIndex < 2 && n._lineLayer < 2 && preceding._lineLayer < 2) || (n._cutDirection == 7 && n._lineIndex > 1 && n._lineLayer < 2 && preceding._lineLayer < 2) || n._cutDirection < 4))
                             {
-                                // If their layer is the same, at bottom
-                                if (n._lineLayer == preceding._lineLayer && n._lineLayer == 0)
-                                {
-                                    // Attempt to bring one up
-                                    if (n._lineIndex == 0 || n._lineIndex == 3)
-                                    {
-                                        n._lineLayer++;
-                                    }
-                                    else if (preceding._lineIndex == 0 || preceding._lineIndex == 3)
-                                    {
-                                        preceding._lineLayer++;
-                                    }
-                                }
-                                // If higher than bottom
-                                else if (n._lineLayer == preceding._lineLayer && n._lineLayer > 0)
-                                {
-                                    // Attempt to bring one down
-                                    if (n._lineIndex == 0 || n._lineIndex == 3)
-                                    {
-                                        n._lineLayer--;
-                                    }
-                                    else if (preceding._lineIndex == 0 || preceding._lineIndex == 3)
-                                    {
-                                        preceding._lineLayer--;
-                                    }
-                                }
+                                // Skip
                             }
-                            // If their cut direction is above 3, we can stack them together.
-                            else if (n._cutDirection > 3 && preceding._cutDirection > 3)
+                            else 
                             {
-                                if (n._cutDirection > 5 && n._type == 0)
+                                if (n._lineIndex == 0 || n._lineIndex == 3)
                                 {
-                                    if (n._lineIndex > 1)
-                                    {
-                                        n._lineLayer = 0;
-                                        preceding._lineLayer = 2;
-                                        preceding._lineIndex = n._lineIndex;
-                                    }
-                                    else if (preceding._lineIndex > 1)
-                                    {
-                                        n._lineLayer = 0;
-                                        preceding._lineLayer = 2;
-                                        n._lineIndex = preceding._lineIndex;
-                                    }
-                                }
-                                else if (n._cutDirection > 5 && n._type == 1)
-                                {
-                                    if (n._lineIndex < 2)
-                                    {
-                                        n._lineLayer = 0;
-                                        preceding._lineLayer = 2;
-                                        preceding._lineIndex = n._lineIndex;
-                                    }
-                                    else if (preceding._lineIndex < 2)
-                                    {
-                                        n._lineLayer = 0;
-                                        preceding._lineLayer = 2;
-                                        n._lineIndex = preceding._lineIndex;
-                                    }
-                                }
-                                else if (n._cutDirection < 6 && n._type == 0)
-                                {
-                                    if (n._lineIndex < 2)
+                                    if (n._cutDirection == 0 || n._cutDirection == 4 || n._cutDirection == 5)
                                     {
                                         n._lineLayer = 2;
                                         preceding._lineLayer = 0;
-                                        preceding._lineIndex = n._lineIndex;
                                     }
-                                    else if (preceding._lineIndex < 2)
+                                    else
                                     {
-                                        n._lineLayer = 2;
-                                        preceding._lineLayer = 0;
-                                        n._lineIndex = preceding._lineIndex;
-                                    }
-                                }
-                                else if (n._cutDirection < 6 && n._type == 1)
-                                {
-                                    if (n._lineIndex > 1)
-                                    {
-                                        n._lineLayer = 2;
-                                        preceding._lineLayer = 0;
-                                        preceding._lineIndex = n._lineIndex;
-                                    }
-                                    else if (preceding._lineIndex > 1)
-                                    {
-                                        n._lineLayer = 2;
-                                        preceding._lineLayer = 0;
-                                        n._lineIndex = preceding._lineIndex;
+                                        if(n._cutDirection != 2 && n._cutDirection != 3)
+                                        {
+                                            n._lineLayer = 0;
+                                        }
+                                        if(preceding._cutDirection == 0 || preceding._cutDirection == 4 || preceding._cutDirection == 5)
+                                        {
+                                            preceding._lineLayer = 2;
+                                        }
+                                        else
+                                        {
+                                            preceding._lineLayer = 0;
+                                        }
                                     }
                                 }
-                                if(n._cutDirection == 6 && n._type == 1 && n._lineLayer == 2 && n._lineIndex == 2)
+                                else if (preceding._lineIndex == 0 || preceding._lineIndex == 3)
                                 {
-                                    n._lineIndex--;
-                                }
-                                else if (n._cutDirection == 7 && n._type == 0 && n._lineLayer == 2 && n._lineIndex == 1)
-                                {
-                                    n._lineIndex++;
-                                }
-                                else if (n._cutDirection == 7 && n._type == 1 && n._lineLayer == 2 && n._lineIndex == 1)
-                                {
-                                    n._lineIndex++;
-                                }
-                                else if (n._cutDirection == 6 && n._type == 0 && n._lineLayer == 2 && n._lineIndex == 2)
-                                {
-                                    n._lineIndex--;
-                                }
-                                else if (preceding._cutDirection == 6 && preceding._type == 1 && preceding._lineLayer == 2 && preceding._lineIndex == 2)
-                                {
-                                    preceding._lineIndex--;
-                                }
-                                else if (preceding._cutDirection == 7 && preceding._type == 0 && preceding._lineLayer == 2 && preceding._lineIndex == 1)
-                                {
-                                    preceding._lineIndex++;
-                                }
-                                else if (preceding._cutDirection == 7 && preceding._type == 1 && preceding._lineLayer == 2 && preceding._lineIndex == 1)
-                                {
-                                    preceding._lineIndex++;
-                                }
-                                else if (preceding._cutDirection == 6 && preceding._type == 0 && preceding._lineLayer == 2 && preceding._lineIndex == 2)
-                                {
-                                    preceding._lineIndex--;
-                                }
-                            }
-                            // If both at the top, we handle them differently.
-                            else if (n._lineLayer == 2 && preceding._lineLayer == 2)
-                            {
-                                if (n._cutDirection > 5 || n._cutDirection == 1)
-                                {
-                                    n._lineLayer = 0;
-                                }
-                                else if (preceding._cutDirection > 5 || preceding._cutDirection == 1)
-                                {
-                                    n._lineLayer = 0;
-                                }
-
-                                if ((n._type == 0 && n._lineIndex > preceding._lineIndex) || (n._type == 1 && n._lineIndex < preceding._lineIndex))
-                                {
-                                    int temp = n._lineIndex;
-                                    n._lineIndex = preceding._lineIndex;
-                                    preceding._lineIndex = temp;
-                                }
-                            }
-                            else // We have to handle them another way
-                            {
-                                // We don't want to turn it into an up/down if the note before is left/right
-                                // If the other one conflict, we have to separate them
-                                if (preceding._cutDirection > 1)
-                                {
-                                    if (n._type == 0 && n._lineIndex == preceding._lineIndex - 1 && n._lineIndex != 0)
+                                    if (preceding._cutDirection == 0 || preceding._cutDirection == 4 || preceding._cutDirection == 5)
                                     {
-                                        n._lineIndex--;
+                                        preceding._lineLayer = 2;
+                                        n._lineLayer = 0;
                                     }
-                                    else if (n._type == 1 && n._lineIndex == preceding._lineIndex + 1 && n._lineIndex != 3)
+                                    else
                                     {
-                                        n._lineIndex++;
-                                    }
-                                    else if (n._type == 0 && n._lineIndex == preceding._lineIndex + 1 && n._lineIndex != 3)
-                                    {
-                                        n._lineIndex++;
-                                    }
-                                    else if (n._type == 1 && n._lineIndex == preceding._lineIndex - 1 && n._lineIndex != 0)
-                                    {
-                                        n._lineIndex--;
-                                    }
-                                }
-                                else if (n._type == 0) // Current note is red
-                                {
-                                    if (n._cutDirection == 4 && leftHand != 3)
-                                    {
-                                        n._cutDirection = 0;
-                                    }
-                                    else if (n._cutDirection == 5 && leftHand != 2)
-                                    {
-                                        n._cutDirection = 0;
-                                    }
-                                    else if (n._cutDirection == 6 && leftHand != 3)
-                                    {
-                                        n._cutDirection = 1;
-                                    }
-                                    else if (n._cutDirection == 7 && leftHand != 2)
-                                    {
-                                        n._cutDirection = 1;
-                                    }
-                                }
-                                else if (n._type == 1) // Current note is blue
-                                {
-                                    if (n._cutDirection == 4 && rightHand != 3)
-                                    {
-                                        n._cutDirection = 0;
-                                    }
-                                    else if (n._cutDirection == 5 && rightHand != 2)
-                                    {
-                                        n._cutDirection = 0;
-                                    }
-                                    else if (n._cutDirection == 6 && rightHand != 3)
-                                    {
-                                        n._cutDirection = 1;
-                                    }
-                                    else if (n._cutDirection == 7 && rightHand != 2)
-                                    {
-                                        n._cutDirection = 1;
+                                        if (preceding._cutDirection != 2 && preceding._cutDirection != 3)
+                                        {
+                                            preceding._lineLayer = 0;
+                                        }
+                                        if (n._cutDirection == 0 || n._cutDirection == 4 || n._cutDirection == 5)
+                                        {
+                                            n._lineLayer = 2;
+                                        }
+                                        else
+                                        {
+                                            n._lineLayer = 0;
+                                        }
                                     }
                                 }
                             }
@@ -1034,11 +950,69 @@ namespace Osu2Saber.Model.Algorithm
                                 n._lineIndex++;
                             }
                         }
+                        // Better flow with diagonal cross
+                        if(n._type == 0 && n._lineLayer == 0 && n._lineIndex < 2 && preceding._lineLayer == 2 && preceding._lineIndex > 1)
+                        {
+                            if(n._cutDirection == 7 && preceding._cutDirection == 6)
+                            {
+                                n._lineIndex = 2;
+                                preceding._lineIndex = 1;
+                            }
+                        }
+                        else if (n._type == 1 && n._lineLayer == 2 && n._lineIndex > 1 && preceding._lineLayer == 0 && preceding._lineIndex < 2)
+                        {
+                            if (n._cutDirection == 6 && preceding._cutDirection == 7)
+                            {
+                                n._lineIndex = 1;
+                                preceding._lineIndex = 2;
+                            }
+                        }
                     }
                 }
 
+                // Down into side doesn't flow, not sure why this is happening, so we fix here.
+                if(i > 1)
+                {
+                    if ((n._cutDirection == 2 || n._cutDirection == 3) && notes[i - 2]._cutDirection == 1 && ParitySpeed * (bpm / bpmPerNote[i]) > notes[i + 1]._time - notes[i]._time)
+                    {
+                        if (n._cutDirection == 2)
+                        {
+                            n._cutDirection = 4;
+                        }
+                        if (n._cutDirection == 3)
+                        {
+                            n._cutDirection = 5;
+                        }
+                    }
+
+                    // Make the flow a little smoother.
+                    if (n._type == 0 && notes[i - 2]._lineIndex > n._lineIndex && notes[i - 2]._lineIndex > 1)
+                    {
+                        if (n._cutDirection == 7)
+                        {
+                            n._cutDirection = 1;
+                        }
+                        else if (n._cutDirection == 5)
+                        {
+                            n._cutDirection = 0;
+                        }
+                    }
+                    else if (n._type == 1 && notes[i - 2]._lineIndex < n._lineIndex && notes[i - 2]._lineIndex < 2)
+                    {
+                        if (n._cutDirection == 6)
+                        {
+                            n._cutDirection = 1;
+                        }
+                        else if (n._cutDirection == 4)
+                        {
+                            n._cutDirection = 0;
+                        }
+                    }
+                }
+                
+
                 // Always start the map on a bottom row down.
-                if(n._time == first)
+                if (n._time == first)
                 {
                     n._cutDirection = 1;
                     if(n._type == 0)
