@@ -21,6 +21,10 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
+### Version 4.3
+Added onset-detection https://github.com/opcon/onset-detection with license and copyright
+Lolighter can now convert audio directly.
+
 ### Version 4.2
 Fixed variable BPM.
 Added dual-pack for slower/faster section.
