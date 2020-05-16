@@ -9,7 +9,6 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Windows;
 using Microsoft.Win32;
-using Osu2Saber.ViewModel;
 
 namespace Lolighter
 {
@@ -51,10 +50,9 @@ namespace Lolighter
                 }
                 else if (extension == ".osz" || extension == ".zip")
                 {
-                    OsuWindow o = new OsuWindow();
+                    ConverterWindow o = new ConverterWindow();
                     o.OszFiles.Clear();
                     o.Show();
-                    o.button.IsEnabled = true;
                     o.OszFiles.Add(file);
                 }
 
@@ -200,7 +198,7 @@ namespace Lolighter
 
         private void Converter_Click(object sender, RoutedEventArgs e)
         {
-            OsuWindow o = new OsuWindow();
+            ConverterWindow o = new ConverterWindow();
             o.OszFiles.Clear();
             o.Show();
         }

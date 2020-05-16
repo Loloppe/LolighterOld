@@ -34,6 +34,7 @@ namespace Osu2Saber.Model.Algorithm
         public static double EnoughIntervalBetweenNotes = 0.2;
         public static double GallopSpeed = 0.3;
         public static string PatternToUse = "Pack";
+        public static double setBPM = 0;
 
         protected Beatmap org;
         protected SaberBeatmap dst;
@@ -86,16 +87,12 @@ namespace Osu2Saber.Model.Algorithm
                     Mines.Add(n);
                 }
             }
-            
-            var pd = PromptDialog.Prompt("Enter the BPM", "BPM");
-            if (pd != null)
+
+            bpm = setBPM;
+            realBpm = bpm;
+            foreach (var n in notes)
             {
-                bpm = double.Parse(pd);
-                realBpm = double.Parse(pd);
-                foreach (var n in notes)
-                {
-                    bpmPerNote.Add(double.Parse(pd));
-                }
+                bpmPerNote.Add(bpm);
             }
         }
 
@@ -124,8 +121,11 @@ namespace Osu2Saber.Model.Algorithm
 
         public void ConvertDat()
         {
-            RemoveExcessNotes();
-            MapReader();
+            if (!OnlyMakeTimingNote)
+            {
+                RemoveExcessNotes();
+                MapReader();
+            }
             if (AllTopUp)
             {
                 AllUpTop();
@@ -476,6 +476,11 @@ namespace Osu2Saber.Model.Algorithm
             int attempt = 0;
             int available = notes.Count;
             double first = notes[0]._time;
+            double second = 0;
+            if (notes[1]._time != notes[0]._time)
+            {
+                 second = notes[1]._time;
+            }
             // Current slow section
             bool slow = false;
             // To know the placement order of notes.
@@ -1012,7 +1017,7 @@ namespace Osu2Saber.Model.Algorithm
                 
 
                 // Always start the map on a bottom row down.
-                if (n._time == first)
+                if (n._time == first || n._time == second)
                 {
                     n._cutDirection = 1;
                     if(n._type == 0)

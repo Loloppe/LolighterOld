@@ -1,0 +1,22 @@
+﻿<Window x:Class="Lolighter.ConverterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:View="clr-namespace:Osu2Saber.View;assembly=Osu2Saber"
+        mc:Ignorable="d"
+        Title="Converter" Height="545.844" Width="268.5" ResizeMode="NoResize">
+    <Grid>
+        <View:ConfigPanel HorizontalAlignment="Right" Height="Auto" Margin="0,0,1.5,0.5" Width="262"/>
+        <Button x:Name="Btn_Osu" Content="Convert .osu" HorizontalAlignment="Left" Margin="10,275,0,0" VerticalAlignment="Top" Width="116" Height="64" Click="Button_Click"/>
+        <Button x:Name="Btn_Dat" Content="Convert .dat" HorizontalAlignment="Left" Margin="131,275,0,0" VerticalAlignment="Top" Width="116" Height="64" Click="Convert_Click"/>
+        <Button x:Name="Btn_Audio" Content="Convert audio" HorizontalAlignment="Left" Margin="10,444,0,0" VerticalAlignment="Top" Width="237" Height="64" Click="Audio_Click"/>
+        <CheckBox x:Name="CBox" Content="Adaptive Whitening" HorizontalAlignment="Left" Margin="10,372,0,0" VerticalAlignment="Top" IsChecked="False"/>
+        <Label Content="Activation Threshold" HorizontalAlignment="Left" Margin="10,344,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="TBox" HorizontalAlignment="Left" Height="23" Margin="127,348,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="120"/>
+        <ComboBox x:Name="Combo" HorizontalAlignment="Left" Margin="127,392,0,0" VerticalAlignment="Top" Width="120"/>
+        <Label Content="Type of Algorithm" HorizontalAlignment="Left" Margin="10,390,0,0" VerticalAlignment="Top"/>
+        <Label Content="Intensity For Double" HorizontalAlignment="Left" Margin="8,415,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="TboxIntensity" HorizontalAlignment="Left" Height="23" Margin="126,417,0,0" TextWrapping="Wrap" Text="12" VerticalAlignment="Top" Width="120"/>
+    </Grid>
+</Window>
