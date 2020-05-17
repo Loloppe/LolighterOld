@@ -8,7 +8,8 @@ using Lolighter.Methods;
 using System.Globalization;
 using System.Diagnostics;
 using System.Windows;
-using Microsoft.Win32;
+using MessageBox = System.Windows.Forms.MessageBox;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace Lolighter
 {
@@ -101,6 +102,7 @@ namespace Lolighter
                 InvertedMadness.IsEnabled = false;
                 BombGenerator.IsEnabled = false;
                 LoloppeGenerator.IsEnabled = false;
+                DownLight.IsEnabled = false;
                 Converter.IsEnabled = true;
                 OpenFile.IsEnabled = true;
             }
@@ -119,6 +121,7 @@ namespace Lolighter
             window.BombGenerator.IsEnabled = true;
             window.LoloppeGenerator.IsEnabled = true;
             window.Converter.IsEnabled = true;
+            window.DownLight.IsEnabled = true;
             window.OpenFile.IsEnabled = false;
         }
 
@@ -151,7 +154,7 @@ namespace Lolighter
 
             List<_Events> eventTempo = Light.CreateLight(noteTempo, Convert.ToDouble(ColorOffset.Text, CultureInfo.InvariantCulture), Convert.ToDouble(ColorSwapSpeed.Text, CultureInfo.InvariantCulture),
                 AllowBackStrobe.IsChecked.GetValueOrDefault(), AllowNeonStrobe.IsChecked.GetValueOrDefault(), AllowSideStrobe.IsChecked.GetValueOrDefault(), AllowFade.IsChecked.GetValueOrDefault(), AllowSpin.IsChecked.GetValueOrDefault(),
-                Convert.ToInt16(SlowMinSpinSpeed.Text), Convert.ToInt16(SlowMaxSpinSpeed.Text), Convert.ToInt16(FastMinSpinSpeed.Text), Convert.ToInt16(FastMaxSpinSpeed.Text));
+                Convert.ToInt16(SlowMinSpinSpeed.Text), Convert.ToInt16(SlowMaxSpinSpeed.Text), Convert.ToInt16(FastMinSpinSpeed.Text), Convert.ToInt16(FastMaxSpinSpeed.Text), NerfStrobes.IsChecked.GetValueOrDefault());
 
             List<_Events> sorted = eventTempo.OrderBy(o => o._time).ToList();
 
@@ -202,6 +205,25 @@ namespace Lolighter
             o.OszFiles.Clear();
             o.Show();
         }
+
+        private void DownLight_Click(object sender, RoutedEventArgs e)
+        {
+            if(map._events != null)
+            {
+                List<_Events> lightTemp = new List<_Events>(map._events);
+                map._events = null;
+
+                lightTemp = DownLighter.Down(lightTemp, Convert.ToDouble(DownSpeed.Text, CultureInfo.InvariantCulture), Convert.ToDouble(SpamSpeed.Text, CultureInfo.InvariantCulture), Convert.ToDouble(onSpeed.Text, CultureInfo.InvariantCulture));
+
+                map._events = lightTemp.ToArray();
+
+                DownLight.IsEnabled = false;
+            }
+            else
+            {
+                MessageBox.Show("No light available");
+            }
+        }
         #endregion
 
         public class MapFile
@@ -216,6 +238,5 @@ namespace Lolighter
             }
         }
 
-        
     }
 }

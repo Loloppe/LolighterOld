@@ -477,6 +477,10 @@ namespace Osu2Saber.Model.Algorithm
             int available = notes.Count;
             double first = notes[0]._time;
             double second = 0;
+            string lastPattern = "";
+            string newPattern = "";
+            bool parityPass = false;
+            int rand = 0;
             if (notes[1]._time != notes[0]._time)
             {
                  second = notes[1]._time;
@@ -530,7 +534,12 @@ namespace Osu2Saber.Model.Algorithm
                         {
                             if (PatternToUse == "Pack")
                             {
-                                foreach (var no in slowPatterns.ElementAt(RandNumber(0, slowPatterns.Count()))._notes)
+                                do
+                                {
+                                    rand = RandNumber(0, slowPatterns.Count());
+                                    newPattern = slowPatterns.ElementAt(rand).name;
+                                } while (lastPattern == newPattern);
+                                foreach (var no in slowPatterns.ElementAt(rand)._notes)
                                 {
                                     Note not = new Note(no);
                                     if(not._type == 0)
@@ -569,7 +578,12 @@ namespace Osu2Saber.Model.Algorithm
                         {
                             if (PatternToUse == "Pack")
                             {
-                                foreach (var no in patterns.ElementAt(RandNumber(0, patterns.Count()))._notes)
+                                do
+                                {
+                                    rand = RandNumber(0, patterns.Count());
+                                    newPattern = patterns.ElementAt(rand).name;
+                                } while (lastPattern == newPattern);
+                                foreach (var no in patterns.ElementAt(rand)._notes)
                                 {
                                     Note not = new Note(no);
                                     if (not._type == 0)
@@ -615,6 +629,7 @@ namespace Osu2Saber.Model.Algorithm
                             }
                             else // Skip flow check
                             {
+                                parityPass = true;
                                 if(blueNote.Any())
                                 {
                                     foundBlue = true;
@@ -634,6 +649,7 @@ namespace Osu2Saber.Model.Algorithm
                             }
                             else // Skip flow check
                             {
+                                parityPass = true;
                                 if (blueNote.Any())
                                 {
                                     foundBlue = true;
@@ -644,10 +660,23 @@ namespace Osu2Saber.Model.Algorithm
                                 }
                             }
                         }
-                            
+
+                        // DD Up is wack
+                        if(parityPass)
+                        {
+                            if((blueNote.First()._cutDirection == 0 && rightHand == 0) || (blueNote.First()._cutDirection == 4 && rightHand == 4) || (blueNote.First()._cutDirection == 5 && rightHand == 5) || (redNote.First()._cutDirection == 0 && leftHand == 0) || (redNote.First()._cutDirection == 4 && leftHand == 4) || (redNote.First()._cutDirection == 5 && leftHand == 5))
+                            {
+                                foundBlue = false;
+                                foundRed = false;
+                            }
+                            else
+                            {
+                                parityPass = false;
+                            }
+                        }
 
                         // We only check parity if it's faster than X beat (for lower diff)
-                        if(foundRed && foundBlue)
+                        if (foundRed && foundBlue)
                         {
                             // We ignore double for this
                             if (!(notes[i + 1]._time - notes[i]._time < 0.02 && notes[i + 1]._time - notes[i]._time > -0.02))
@@ -976,45 +1005,47 @@ namespace Osu2Saber.Model.Algorithm
                 }
 
                 // Down into side doesn't flow, not sure why this is happening, so we fix here.
-                if(i > 1)
+                if(i > 2)
                 {
-                    if ((n._cutDirection == 2 || n._cutDirection == 3) && notes[i - 2]._cutDirection == 1 && ParitySpeed * (bpm / bpmPerNote[i]) > notes[i + 1]._time - notes[i]._time)
+                    if ((ParitySpeed * (bpm / bpmPerNote[i]) > notes[i]._time - notes[i - 2]._time && ParitySpeed * (bpm / bpmPerNote[i - 1]) > notes[i - 1]._time - notes[i - 3]._time))
                     {
-                        if (n._cutDirection == 2)
+                        if ((n._cutDirection == 2 || n._cutDirection == 3) && notes[i - 2]._cutDirection == 1)
                         {
-                            n._cutDirection = 4;
+                            if (n._cutDirection == 2)
+                            {
+                                n._cutDirection = 4;
+                            }
+                            if (n._cutDirection == 3)
+                            {
+                                n._cutDirection = 5;
+                            }
                         }
-                        if (n._cutDirection == 3)
-                        {
-                            n._cutDirection = 5;
-                        }
-                    }
 
-                    // Make the flow a little smoother.
-                    if (n._type == 0 && notes[i - 2]._lineIndex > n._lineIndex && notes[i - 2]._lineIndex > 1)
-                    {
-                        if (n._cutDirection == 7)
+                        // Make the flow a little smoother.
+                        if (n._type == 0 && notes[i - 2]._lineIndex > n._lineIndex && notes[i - 2]._lineIndex > 1)
                         {
-                            n._cutDirection = 1;
+                            if (n._cutDirection == 7)
+                            {
+                                n._cutDirection = 1;
+                            }
+                            else if (n._cutDirection == 5)
+                            {
+                                n._cutDirection = 0;
+                            }
                         }
-                        else if (n._cutDirection == 5)
+                        else if (n._type == 1 && notes[i - 2]._lineIndex < n._lineIndex && notes[i - 2]._lineIndex < 2)
                         {
-                            n._cutDirection = 0;
-                        }
-                    }
-                    else if (n._type == 1 && notes[i - 2]._lineIndex < n._lineIndex && notes[i - 2]._lineIndex < 2)
-                    {
-                        if (n._cutDirection == 6)
-                        {
-                            n._cutDirection = 1;
-                        }
-                        else if (n._cutDirection == 4)
-                        {
-                            n._cutDirection = 0;
+                            if (n._cutDirection == 6)
+                            {
+                                n._cutDirection = 1;
+                            }
+                            else if (n._cutDirection == 4)
+                            {
+                                n._cutDirection = 0;
+                            }
                         }
                     }
                 }
-                
 
                 // Always start the map on a bottom row down.
                 if (n._time == first || n._time == second)
@@ -1052,6 +1083,7 @@ namespace Osu2Saber.Model.Algorithm
 
                 attempt = 0;
                 preceding = new Note(notes[i]);
+                lastPattern = newPattern;
             }
 
             // Set notes by time order.

@@ -16,7 +16,7 @@
         <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="271" VerticalAlignment="Top" Width="200"/>
         <Button x:Name="OpenFile" Content="Open" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Height="68" Click="OpenFile_Click" IsDefault="True"/>
         <Button x:Name="LoloppeGenerator" Content="Loloppe" HorizontalAlignment="Left" Margin="201,134,0,0" VerticalAlignment="Top" Width="199" Height="69" Click="LoloppeGenerator_Click" IsEnabled="False" RenderTransformOrigin="0.82,0.46" Grid.ColumnSpan="2"/>
-        <Button x:Name="SimpleLighter" Content="Light" HorizontalAlignment="Left" Margin="201,0,0,0" VerticalAlignment="Top" Width="199" Height="68" Click="SimpleLighter_Click" IsEnabled="False" Grid.ColumnSpan="2"/>
+        <Button x:Name="SimpleLighter" Content="Light" HorizontalAlignment="Left" Margin="201,0,0,0" VerticalAlignment="Top" Width="99" Height="68" Click="SimpleLighter_Click" IsEnabled="False"/>
         <Button x:Name="SlidersMadness" Content="Sliders" HorizontalAlignment="Left" Margin="0,68,0,0" VerticalAlignment="Top" Width="200" Height="68" Click="SlidersMadness_Click" IsEnabled="False"/>
         <Button x:Name="InvertedMadness" Content="Inverted" HorizontalAlignment="Left" Margin="201,68,0,0" VerticalAlignment="Top" Width="199" Height="69" Click="InvertedMadness_Click" IsEnabled="False" Grid.ColumnSpan="2"/>
         <Button x:Name="BombGenerator" Content="Bomb" HorizontalAlignment="Left" Margin="0,135,0,0" VerticalAlignment="Top" Width="200" Height="68" Click="BombGenerator_Click" IsEnabled="False"/>
@@ -26,33 +26,43 @@
         <Label Content="New file name" HorizontalAlignment="Left" Margin="252,191,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <TextBox x:Name="Limiter" HorizontalAlignment="Left" Height="23" Margin="256,85,0,0" TextWrapping="Wrap" Text="0.25" VerticalAlignment="Top" Width="139" Grid.Column="1"/>
         <TextBox x:Name="FileName" HorizontalAlignment="Left" Height="23" Margin="254,218,0,0" TextWrapping="Wrap" Text="ExpertPlusStandard" VerticalAlignment="Top" Width="139" RenderTransformOrigin="0.189,0.174" Grid.Column="1"/>
-        <Label Content="Offset (in beat)" HorizontalAlignment="Left" Margin="45,215,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
-        <TextBox x:Name="ColorOffset" HorizontalAlignment="Left" Height="23" Margin="44,234,0,0" TextWrapping="Wrap" Text="0.00" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
-        <Label Content="Speed (in beat)" HorizontalAlignment="Left" Margin="44,177,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
-        <TextBox x:Name="ColorSwapSpeed" HorizontalAlignment="Left" Height="23" Margin="44,196,0,0" TextWrapping="Wrap" Text="4.00" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
+        <Label Content="Offset (in beat)" HorizontalAlignment="Left" Margin="30,215,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <TextBox x:Name="ColorOffset" HorizontalAlignment="Left" Height="23" Margin="29,234,0,0" TextWrapping="Wrap" Text="0.00" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
+        <Label Content="Speed (in beat)" HorizontalAlignment="Left" Margin="29,177,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <TextBox x:Name="ColorSwapSpeed" HorizontalAlignment="Left" Height="23" Margin="29,196,0,0" TextWrapping="Wrap" Text="4.00" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
         <CheckBox x:Name="AllowLimiter" HorizontalAlignment="Left" Margin="376,65,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
         <Label Content="Modifier" HorizontalAlignment="Left" Margin="280,15,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="85" FontSize="18" Grid.Column="1"/>
         <Label Content="General" HorizontalAlignment="Left" Margin="284,152,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="74" FontSize="18" Grid.Column="1"/>
-        <Label Content="Back/Top" HorizontalAlignment="Left" Margin="61,66,0,0" VerticalAlignment="Top" FontSize="12" Width="60" Grid.Column="1"/>
-        <Label Content="Use Fade" HorizontalAlignment="Left" Margin="61,130,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
-        <Label Content="Spin/Zoom" HorizontalAlignment="Left" Margin="61,145,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
-        <CheckBox x:Name="AllowBackStrobe" HorizontalAlignment="Left" Margin="44,71,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
-        <CheckBox x:Name="AllowFade" HorizontalAlignment="Left" Margin="44,136,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
-        <CheckBox x:Name="AllowSpin" HorizontalAlignment="Left" Margin="44,151,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
-        <Label Content="Spin Speed" HorizontalAlignment="Left" Margin="140,186,0,0" VerticalAlignment="Top" FontWeight="Bold" Grid.Column="1"/>
-        <Label Content="Slow" HorizontalAlignment="Left" Margin="140,209,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
-        <Label Content="Fast" HorizontalAlignment="Left" Margin="140,233,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
-        <TextBox x:Name="FastMinSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="167,235,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
-        <TextBox x:Name="FastMaxSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="187,235,0,0" TextWrapping="Wrap" Text="13" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
-        <TextBox x:Name="SlowMinSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="167,212,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
-        <TextBox x:Name="SlowMaxSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="187,212,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
-        <Label Content="Bottom/Back/Side" HorizontalAlignment="Left" Margin="61,97,0,0" VerticalAlignment="Top" FontSize="12" Width="108" Grid.Column="1"/>
-        <CheckBox x:Name="AllowSideStrobe" HorizontalAlignment="Left" Margin="44,103,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" RenderTransformOrigin="2.686,0.444" Grid.Column="1"/>
-        <Label Content="Neon Ring" HorizontalAlignment="Left" Margin="61,81,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
-        <CheckBox x:Name="AllowNeonStrobe" HorizontalAlignment="Left" Margin="44,87,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
-        <Label Content="Strobes" HorizontalAlignment="Left" Margin="44,46,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
+        <Label Content="Back/Top" HorizontalAlignment="Left" Margin="46,66,0,0" VerticalAlignment="Top" FontSize="12" Width="60" Grid.Column="1"/>
+        <Label Content="Use Fade" HorizontalAlignment="Left" Margin="46,130,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
+        <Label Content="Spin/Zoom" HorizontalAlignment="Left" Margin="46,145,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
+        <CheckBox x:Name="AllowBackStrobe" HorizontalAlignment="Left" Margin="29,71,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
+        <CheckBox x:Name="AllowFade" HorizontalAlignment="Left" Margin="29,136,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
+        <CheckBox x:Name="AllowSpin" HorizontalAlignment="Left" Margin="29,151,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
+        <Label Content="Spin Speed" HorizontalAlignment="Left" Margin="126,187,0,0" VerticalAlignment="Top" FontWeight="Bold" Grid.Column="1"/>
+        <Label Content="Slow" HorizontalAlignment="Left" Margin="126,210,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <Label Content="Fast" HorizontalAlignment="Left" Margin="126,234,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <TextBox x:Name="FastMinSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="153,236,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
+        <TextBox x:Name="FastMaxSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="173,236,0,0" TextWrapping="Wrap" Text="13" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
+        <TextBox x:Name="SlowMinSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="153,213,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
+        <TextBox x:Name="SlowMaxSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="173,213,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
+        <Label Content="Bot/Back/Side" HorizontalAlignment="Left" Margin="46,97,0,0" VerticalAlignment="Top" FontSize="12" Width="108" Grid.Column="1"/>
+        <CheckBox x:Name="AllowSideStrobe" HorizontalAlignment="Left" Margin="29,103,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" RenderTransformOrigin="2.686,0.444" Grid.Column="1"/>
+        <Label Content="Neon Ring" HorizontalAlignment="Left" Margin="46,81,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
+        <CheckBox x:Name="AllowNeonStrobe" HorizontalAlignment="Left" Margin="29,87,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
+        <Label Content="Strobes" HorizontalAlignment="Left" Margin="29,46,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
         <Label Content="Light" HorizontalAlignment="Left" Margin="98,15,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="55" FontSize="18" Grid.Column="1"/>
-        <Label Content="Other Features" HorizontalAlignment="Left" Margin="44,113,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
-        <Label Content="Color Swap" HorizontalAlignment="Left" Margin="44,162,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
+        <Label Content="Other Features" HorizontalAlignment="Left" Margin="29,113,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
+        <Label Content="Color Swap" HorizontalAlignment="Left" Margin="29,162,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
+        <CheckBox x:Name="NerfStrobes" HorizontalAlignment="Left" Margin="118,177,0,0" VerticalAlignment="Top" Width="17" IsChecked="False" Grid.Column="1"/>
+        <Label Content="Nerf Strobes" HorizontalAlignment="Left" Margin="131,171,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
+        <Button x:Name="DownLight" Content="Down Light" HorizontalAlignment="Left" Margin="300,0,0,0" VerticalAlignment="Top" Width="99" Height="68" Click="DownLight_Click" IsEnabled="False" Grid.ColumnSpan="2"/>
+        <Label Content="Down Light" HorizontalAlignment="Left" Margin="139,46,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
+        <Label Content="Spam (in beat)" HorizontalAlignment="Left" Margin="138,96,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <TextBox x:Name="SpamSpeed" HorizontalAlignment="Left" Height="23" Margin="138,115,0,0" ToolTip="If faster, reduce the amount of spin/zoom event" TextWrapping="Wrap" Text="0.25" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
+        <Label Content="Speed (in beat)" HorizontalAlignment="Left" Margin="138,60,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <TextBox x:Name="DownSpeed" HorizontalAlignment="Left" Height="23" Margin="138,79,0,0" ToolTip="If faster, attempt to downlight specific event" TextWrapping="Wrap" Text="0.50" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
+        <Label Content="Turn On (in beat)" HorizontalAlignment="Left" Margin="135,131,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <TextBox x:Name="onSpeed" HorizontalAlignment="Left" Height="23" Margin="138,150,0,0" ToolTip="If no event for more than this duration, turn On an event" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
     </Grid>
 </Window>

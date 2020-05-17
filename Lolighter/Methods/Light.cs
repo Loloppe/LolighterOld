@@ -7,7 +7,7 @@ namespace Lolighter.Methods
 {
     static class Light
     {
-        static public List<_Events> CreateLight(List<_Notes> noteTempo, double ColorOffset, double ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, int SlowMinSpinSpeed, int SlowMaxSpinSpeed, int FastMinSpinSpeed, int FastMaxSpinSpeed)
+        static public List<_Events> CreateLight(List<_Notes> noteTempo, double ColorOffset, double ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, int SlowMinSpinSpeed, int SlowMaxSpinSpeed, int FastMinSpinSpeed, int FastMaxSpinSpeed, bool NerfStrobes)
         {
             //This massive mess is based on my old AutoLighter that I created in Osu2Saber.
             //It work pretty well and is pretty simple to modify, but could definitely be better.
@@ -146,17 +146,18 @@ namespace Lolighter.Methods
 
             foreach (_Notes note in noteTempo) //Process specific light (Side/Neon) using time.
             {
-                time[0] = note._time;
+                double now = note._time;
+                time[0] = now;
 
                 //Here we process Spin and Zoom
-                if (time[0] == firstNote && time[1] == 0.0D && AllowSpinZoom) //If we are processing the first note, add spin + zoom to it.
+                if (now == firstNote && time[1] == 0.0D && AllowSpinZoom) //If we are processing the first note, add spin + zoom to it.
                 {
-                    ev = new _Events(time[0], EventType.RotationAllTrackRings, 0);
+                    ev = new _Events(now, EventType.RotationAllTrackRings, 0);
                     eventTempo.Add(ev);
-                    ev = new _Events(time[0], EventType.RotationSmallTrackRings, 0);
+                    ev = new _Events(now, EventType.RotationSmallTrackRings, 0);
                     eventTempo.Add(ev);
                 }
-                else if (time[0] >= ColorOffset + ColorSwap + offset && time[0] > firstNote && AllowSpinZoom) //If we are reaching the next threshold of the timer
+                else if (now >= ColorOffset + ColorSwap + offset && now > firstNote && AllowSpinZoom) //If we are reaching the next threshold of the timer
                 {
                     ev = new _Events(offset, EventType.RotationAllTrackRings, 0); //Add a spin at timer.
                     eventTempo.Add(ev);
@@ -172,50 +173,99 @@ namespace Lolighter.Methods
                     }
                 }
                 //If there's a quarter between two double parallel notes and timer didn't pass the check.
-                else if (time[1] - time[2] == 0.25 && time[3] == time[2] && time[1] == time[0] && timer < offset && AllowSpinZoom)
+                else if (time[1] - time[2] == 0.25 && time[3] == time[2] && time[1] == now && timer < offset && AllowSpinZoom)
                 {
-                    ev = new _Events(time[0], EventType.RotationAllTrackRings, 0);
+                    ev = new _Events(now, EventType.RotationAllTrackRings, 0);
                     eventTempo.Add(ev);
                 }
 
                 TimerDuration();
 
-                if ((time[0] == time[1] || (time[0] - time[1] <= 0.05 && time[1] != time[2])) && (time[1] != 0.0D && time[0] != last)) //If not same note, same beat, apply once.
+                if ((now == time[1] || (now - time[1] <= 0.05 && time[1] != time[2])) && (time[1] != 0.0D && now != last)) //If not same note, same beat, apply once.
                 {
-                    if (last != 0.0D && time[0] - last <= 2.5) //Off event
+                    if (last != 0.0D && now - last <= 2.5 && !NerfStrobes) //Off event
                     {
                         if (AllowBackStrobe) //Back Top Laser
                         {
-                            ev = new _Events(time[0] - (time[0] - last) / 2, EventType.LightBackTopLasers, 0);
+                            ev = new _Events(now - (now - last) / 2, EventType.LightBackTopLasers, 0);
                             eventTempo.Add(ev);
                         }
                         if (AllowNeonStrobe) //Neon Light
                         {
-                            ev = new _Events(time[0] - (time[0] - last) / 2, EventType.LightTrackRingNeons, 0);
+                            ev = new _Events(now - (now - last) / 2, EventType.LightTrackRingNeons, 0);
                             eventTempo.Add(ev);
                         }
                         if (AllowSideStrobe) //Side Light
                         {
-                            ev = new _Events(time[0] - (time[0] - last) / 2, EventType.LightBottomBackSideLasers, 0);
+                            ev = new _Events(now - (now - last) / 2, EventType.LightBottomBackSideLasers, 0);
                             eventTempo.Add(ev);
                         }
                     }
 
-                    ev = new _Events(time[0], EventType.LightBackTopLasers, color); //Back Top Laser
+                    ev = new _Events(now, EventType.LightBackTopLasers, color); //Back Top Laser
                     eventTempo.Add(ev);
 
-                    ev = new _Events(time[0], EventType.LightBottomBackSideLasers, color); //Side Light
+                    ev = new _Events(now, EventType.LightBottomBackSideLasers, color); //Side Light
                     eventTempo.Add(ev);
 
-                    ev = new _Events(time[0], EventType.LightTrackRingNeons, color); //Track Ring Neons
+                    ev = new _Events(now, EventType.LightTrackRingNeons, color); //Track Ring Neons
                     eventTempo.Add(ev);
 
-                    last = time[0];
+                    last = now;
                 }
 
                 for (int i = 3; i > 0; i--) //Keep the timing of up to three notes before.
                 {
                     time[i] = time[i - 1];
+                }
+            }
+
+            int Swap(int temp)
+            {
+                if (temp == EventLightValue.BlueFlashFade)
+                    return EventLightValue.BlueOn;
+                else if (temp == EventLightValue.RedFlashFade)
+                    return EventLightValue.RedOn;
+                else if (temp == EventLightValue.BlueOn)
+                    return EventLightValue.BlueFlashFade;
+                else if (temp == EventLightValue.RedOn)
+                    return EventLightValue.RedFlashFade;
+
+                return 0;
+            }
+
+            if (NerfStrobes)
+            {
+                double lastTimeTop = 100;
+                double lastTimeNeon = 100;
+                double lastTimeSide = 100;
+
+                foreach(var x in eventTempo)
+                {
+                    if(x._type == EventType.LightBackTopLasers)
+                    {
+                        if (x._time - lastTimeTop <= 1)
+                        {
+                            x._value = Swap(x._value);
+                        }
+                        lastTimeTop = x._time;
+                    }
+                    else if(x._type == EventType.LightTrackRingNeons)
+                    {
+                        if (x._time - lastTimeNeon <= 1)
+                        {
+                            x._value = Swap(x._value);
+                        }
+                        lastTimeNeon = x._time;
+                    }
+                    else if (x._type == EventType.LightBottomBackSideLasers)
+                    {
+                        if (x._time - lastTimeSide <= 1)
+                        {
+                            x._value = Swap(x._value);
+                        }
+                        lastTimeSide = x._time;
+                    }
                 }
             }
 
@@ -252,7 +302,7 @@ namespace Lolighter.Methods
 
                 if (time[0] - time[1] < 0.25) //Lower than fourth
                 {
-                    if (time[0] != last && time[0] != time[1] && note._type != 3 && note._cutDirection != 8 && note._cutDirection != lastCut && AllowSpinZoom) //Spin
+                    if (time[0] != last && time[0] != time[1] && note._type != 3 && note._cutDirection != 8 && note._cutDirection != lastCut && AllowSpinZoom && !NerfStrobes) //Spin
                     {
                         last = time[0];
                         ev = new _Events(time[0], EventType.RotationAllTrackRings, 0);
