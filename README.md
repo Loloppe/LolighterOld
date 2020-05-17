@@ -5,8 +5,7 @@ By **Loloppe#6435**
 
 **Light?** This program use "_notes" "_time" from your .dat file to generate "_events" corresponding to your Beatmap. A new file called "ExpertPlusStandard.dat" will be created in the same location of the program. Color swap speed: The color swap between blue and red every X beat (default 4). Color swap offset: Where the first color should start (default first note + 0). Use Strobe: Unticking this will remove all the "Off" events. Use Fade: Unticking this will change all "Fade" into "On" events. Spin/Zoom: Unticking this will remove all "Spin" and "Zoom" events. Spin Speed: Range allowed for the randomizer to pick from during left/right laser placement.
 
-**Converter?** Can convert osu!mania (or osu!taiko/osu but I wouldn't recommend) maps into notes and patterns randomly generated with an algorithm and some other features. To use the osu(!mania) converter, just need to open file and select a .osz or .zip file. Be patient, it take a while to read file. Nice for map and light generation. Pattern can be modified. Can also convert already-made BS map.
-Video : https://streamable.com/2jq03s
+**Converter?** Can convert osu!mania, osu!taiko, osu, BS .dat, .mp3, .wav and .flac files.
 
 **Sliders?** Convert most notes into sliders. Limiter: Minimum distance required between notes of the same color, or ignored. Checkbox: Untick to allow "Loloppe notes" to be slidified, can cause issue.
 
@@ -21,6 +20,10 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
+### Version 4.3
+Added onset-detection https://github.com/opcon/onset-detection with license and copyright.
+Lolighter can now convert audio directly.
+
 ### Version 4.2
 Fixed variable BPM.
 Added dual-pack for slower/faster section.
