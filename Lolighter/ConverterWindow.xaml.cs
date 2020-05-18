@@ -192,6 +192,10 @@ namespace Lolighter
                     time.Add(t / (60000 / ConvertAlgorithm.setBPM) + 0.1);
                 }
             }
+
+            ShowOnsets SO = new ShowOnsets(onsets);
+            SO.Show();
+
             return time;
         }
     }

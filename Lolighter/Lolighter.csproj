@@ -69,6 +69,9 @@
     </ApplicationDefinition>
     <Compile Include="Items\Enum.cs" />
     <Compile Include="Items\Map.cs" />
+    <Compile Include="ShowOnsets.xaml.cs">
+      <DependentUpon>ShowOnsets.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -82,6 +85,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="ConverterWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ShowOnsets.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
