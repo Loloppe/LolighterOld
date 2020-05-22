@@ -20,11 +20,12 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-### Version 4.4
+### Version 4.5
 Added onset-detection https://github.com/opcon/onset-detection with license and copyright.
 Lolighter can now convert audio directly.
 Added a simple DownLighter.
 Fixed some stuff in the automapper.
+Now show Onsets Amplitudes info after generation to have an easier time finding the sweet spot for double generation.
 
 ### Version 4.2
 Fixed variable BPM.
