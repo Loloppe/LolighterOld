@@ -84,6 +84,12 @@ namespace Osu2Saber.ViewModel
             get => ConvertAlgorithm.CreateDouble;
         }
 
+        public bool BaseDouble
+        {
+            set { ConvertAlgorithm.BaseDouble = value; }
+            get => ConvertAlgorithm.BaseDouble;
+        }
+
         public bool GenerateAllStrobe
         {
             set { ConvertAlgorithm.GenerateAllStrobe = value; }

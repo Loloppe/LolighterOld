@@ -25,7 +25,8 @@ namespace Osu2Saber.Model.Algorithm
         public static bool GenerateGallops = false;
         public static bool AllTopUp = false;
         public static bool AllowOneHanded = false;
-        public static bool DoubleHitboxFix = true;
+        public static bool DoubleHitboxFix = false;
+        public static bool BaseDouble = true;
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
@@ -469,6 +470,7 @@ namespace Osu2Saber.Model.Algorithm
         private int rightHand = 0;
         private bool foundBlue = false;
         private bool foundRed = false;
+        private bool modified = false;
 
         void PatternCreator(string pattern)
         {
@@ -507,8 +509,30 @@ namespace Osu2Saber.Model.Algorithm
             {
                 n = notes[i];
 
+                if (BaseDouble) // Forcefully put Double and skip if BaseDouble is true
+                {
+                    if (notes[i + 1]._time - notes[i]._time <= 0.01 && notes[i + 1]._time - notes[i]._time >= -0.01) // This will be a double
+                    {
+                        List<Note> l = FindDouble(leftHand, rightHand); // Find the right double
+                        l[0]._time = notes[i]._time;
+                        l[1]._time = notes[i + 1]._time;
+                        // Apply the double
+                        notes[i] = new Note(l[0]);
+                        notes[i + 1] = new Note(l[1]);
+                        // Skip notes
+                        leftHand2 = leftHand;
+                        rightHand2 = rightHand;
+                        leftHand = l[0]._cutDirection;
+                        rightHand = l[1]._cutDirection;
+                        i++;
+                        modified = true;
+                        preceding = new Note(notes[i]);
+                        continue;
+                    }
+                }
+
                 // If the pattern is done or the speed got faster than slow (ignore double)
-                if (noteOrder.Count() == 0 || (noteOrder.Count % 2 == 0 && slow && notes[i + 1]._time - notes[i]._time < SlowSpeed * (bpm / bpmPerNote[i]) && notes[i + 1]._time - notes[i]._time >= 0.01))
+                if (modified || noteOrder.Count() == 0 || (noteOrder.Count % 2 == 0 && slow && notes[i + 1]._time - notes[i]._time < SlowSpeed * (bpm / bpmPerNote[i]) && notes[i + 1]._time - notes[i]._time >= 0.01))
                 {
                     // Infinite loop until a pattern that fit the condition is met.
                     do
@@ -517,6 +541,7 @@ namespace Osu2Saber.Model.Algorithm
                         foundBlue = false;
                         foundRed = false;
                         slow = false;
+                        modified = false;
                         attempt++;
                         // Clear/create a new loop.
                         blueNote.Clear();
@@ -800,7 +825,7 @@ namespace Osu2Saber.Model.Algorithm
                     }
 
                     // We only try to fix if the user decide to.
-                    if(DoubleHitboxFix && i > 1)
+                    if(DoubleHitboxFix && !BaseDouble && i > 1)
                     {
 
                         // Attempt to fix vision issue
@@ -2186,6 +2211,549 @@ namespace Osu2Saber.Model.Algorithm
             }
                 
             return false;
+        }
+
+        List<Note> FindDouble(int left, int right)
+        {
+            List<Note> found = new List<Note>();
+            Note n;
+
+            switch (left)
+            {
+                case 0:
+                    switch (right)
+                    {
+                        case 0: 
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 1:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 2:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 3);
+                            found.Add(n);
+                            break;
+                        case 3:
+                            n = new Note(0, 2, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 0, 1, 1, 2);
+                            found.Add(n);
+                            break;
+                        case 4:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 5:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 6:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 7:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 8:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 8);
+                            found.Add(n);
+                            break;
+                    }
+                    break;
+                case 1:
+                    switch (right)
+                    {
+                        case 0:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 1:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 2:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 3);
+                            found.Add(n);
+                            break;
+                        case 3:
+                            n = new Note(0, 2, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 0, 1, 1, 2);
+                            found.Add(n);
+                            break;
+                        case 4:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 5:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 6:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 7:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 8:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 8);
+                            found.Add(n);
+                            break;
+                    }
+                    break;
+                case 2:
+                    switch (right)
+                    {
+                        case 0:
+                            n = new Note(0, 1, 0, 0, 7);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 1:
+                            n = new Note(0, 2, 0, 0, 7);
+                            found.Add(n);
+                            n = new Note(0, 3, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 2:
+                            n = new Note(0, 3, 0, 0, 3);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 3);
+                            found.Add(n);
+                            break;
+                        case 3:
+                            n = new Note(0, 0, 1, 0, 2);
+                            found.Add(n);
+                            n = new Note(0, 0, 0, 1, 2);
+                            found.Add(n);
+                            break;
+                        case 4:
+                            n = new Note(0, 1, 0, 0, 7);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 7);
+                            found.Add(n);
+                            break;
+                        case 5:
+                            n = new Note(0, 1, 0, 0, 7);
+                            found.Add(n);
+                            n = new Note(0, 3, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 6:
+                            n = new Note(0, 1, 0, 0, 7);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 7:
+                            n = new Note(0, 1, 0, 0, 7);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 8:
+                            n = new Note(0, 1, 0, 0, 7);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 8);
+                            found.Add(n);
+                            break;
+                    }
+                    break;
+                case 3:
+                    switch (right)
+                    {
+                        case 0:
+                            n = new Note(0, 0, 1, 0, 2);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 1:
+                            n = new Note(0, 0, 1, 0, 2);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 2:
+                            n = new Note(0, 0, 1, 0, 2);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 3);
+                            found.Add(n);
+                            break;
+                        case 3:
+                            n = new Note(0, 0, 1, 0, 2);
+                            found.Add(n);
+                            n = new Note(0, 0, 0, 1, 2);
+                            found.Add(n);
+                            break;
+                        case 4:
+                            n = new Note(0, 0, 1, 0, 2);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 5:
+                            n = new Note(0, 0, 1, 0, 2);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 6:
+                            n = new Note(0, 0, 1, 0, 2);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 7:
+                            n = new Note(0, 0, 1, 0, 2);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 8:
+                            n = new Note(0, 0, 1, 0, 2);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 8);
+                            found.Add(n);
+                            break;
+                    }
+                    break;
+                case 4:
+                    switch (right)
+                    {
+                        case 0:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 1:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 2:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 3);
+                            found.Add(n);
+                            break;
+                        case 3:
+                            n = new Note(0, 2, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 0, 1, 1, 2);
+                            found.Add(n);
+                            break;
+                        case 4:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 5:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 6:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 7:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 8:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 8);
+                            found.Add(n);
+                            break;
+                    }
+                    break;
+                case 5:
+                    switch (right)
+                    {
+                        case 0:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 1:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 2:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 3);
+                            found.Add(n);
+                            break;
+                        case 3:
+                            n = new Note(0, 2, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 0, 1, 1, 2);
+                            found.Add(n);
+                            break;
+                        case 4:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 5:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 6:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 7:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 8:
+                            n = new Note(0, 1, 0, 0, 1);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 8);
+                            found.Add(n);
+                            break;
+                    }
+                    break;
+                case 6:
+                    switch (right)
+                    {
+                        case 0:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 1:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 2:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 3);
+                            found.Add(n);
+                            break;
+                        case 3:
+                            n = new Note(0, 2, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 0, 1, 1, 2);
+                            found.Add(n);
+                            break;
+                        case 4:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 5:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 6:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 7:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 8:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 8);
+                            found.Add(n);
+                            break;
+                    }
+                    break;
+                case 7:
+                    switch (right)
+                    {
+                        case 0:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 1:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 2:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 3);
+                            found.Add(n);
+                            break;
+                        case 3:
+                            n = new Note(0, 2, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 0, 1, 1, 2);
+                            found.Add(n);
+                            break;
+                        case 4:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 5:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 6:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 7:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 8:
+                            n = new Note(0, 1, 2, 0, 0);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 8);
+                            found.Add(n);
+                            break;
+                    }
+                    break;
+                case 8:
+                    switch (right)
+                    {
+                        case 0:
+                            n = new Note(0, 1, 0, 0, 8);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 1:
+                            n = new Note(0, 1, 0, 0, 8);
+                            found.Add(n);
+                            n = new Note(0, 3, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 2:
+                            n = new Note(0, 1, 0, 0, 8);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 3);
+                            found.Add(n);
+                            break;
+                        case 3:
+                            n = new Note(0, 0, 1, 0, 8);
+                            found.Add(n);
+                            n = new Note(0, 2, 0, 1, 6);
+                            found.Add(n);
+                            break;
+                        case 4:
+                            n = new Note(0, 1, 0, 0, 8);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 5:
+                            n = new Note(0, 1, 0, 0, 8);
+                            found.Add(n);
+                            n = new Note(0, 3, 1, 1, 1);
+                            found.Add(n);
+                            break;
+                        case 6:
+                            n = new Note(0, 1, 0, 0, 8);
+                            found.Add(n);
+                            n = new Note(0, 3, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 7:
+                            n = new Note(0, 1, 0, 0, 8);
+                            found.Add(n);
+                            n = new Note(0, 3, 2, 1, 0);
+                            found.Add(n);
+                            break;
+                        case 8:
+                            n = new Note(0, 0, 0, 0, 8);
+                            found.Add(n);
+                            n = new Note(0, 3, 0, 1, 8);
+                            found.Add(n);
+                            break;
+                    }
+                    break;
+            }
+
+            return found;
         }
 
         #endregion
