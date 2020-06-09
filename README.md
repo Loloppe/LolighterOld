@@ -3,11 +3,15 @@ By **Loloppe#6435**
 
 [Download Here](https://github.com/Loloppe/Lolighter/releases/latest)
 
-**Light?** This program use "_notes" "_time" from your .dat file to generate "_events" corresponding to your Beatmap. A new file called "ExpertPlusStandard.dat" will be created in the same location of the program. Color swap speed: The color swap between blue and red every X beat (default 4). Color swap offset: Where the first color should start (default first note + 0). Use Strobe: Unticking this will remove all the "Off" events. Use Fade: Unticking this will change all "Fade" into "On" events. Spin/Zoom: Unticking this will remove all "Spin" and "Zoom" events. Spin Speed: Range allowed for the randomizer to pick from during left/right laser placement.
+**Light?** This program use "_notes" "_time" from your .dat file to generate "_events" corresponding to your Beatmap. A new file called "ExpertPlusStandard.dat" will be created in the same location of the program. Color swap speed: The color swap between blue and red every X beat (default 4). Color swap offset: Where the first color should start (default first note + 0). Use Strobe: Unticking this will remove all the "Off" events. Use Fade: Unticking this will change all "Fade" into "On" events. Spin/Zoom: Unticking this will remove all "Spin" and "Zoom" events. Spin Speed: Range allowed for the randomizer to pick from during left/right laser placement. Nerf Strobes: Similar to Down Light.
+
+**Down Light?** Tldr: Remove fast strobes, fast color swap, always keep one light on, reduce spin/zoom spam.
 
 **Converter?** Can convert osu!mania, osu!taiko, osu, BS .dat, .mp3, .wav and .flac files.
 
 **Sliders?** Convert most notes into sliders. Limiter: Minimum distance required between notes of the same color, or ignored. Checkbox: Untick to allow "Loloppe notes" to be slidified, can cause issue.
+
+**Spacing?** Modify dots sliders spacing to a specific speed.
 
 **Inverted?** Invert most notes while keeping the exact same flow. Limiter: Minimum distance required between notes of the same color, or ignored. Checkbox: Untick to allow "Loloppe notes" to be inverted, can cause issue.
 
@@ -20,13 +24,14 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-### Version 4.6
+### Version 4.7
 Added onset-detection https://github.com/opcon/onset-detection with license and copyright.
 Lolighter can now convert audio directly.
 Added a simple DownLighter.
 Fixed some stuff in the automapper.
 Now show Onsets Amplitudes info after generation to have an easier time finding the sweet spot for double generation.
 Added a new way to handle "Double" during generation (doesn't use Pack for them). If "Base Double" is activated, no need for "Double Fix". "Double Fix" is for fixing "Double" when they are generated from Pack.
+Can now set a specific spacing for dots sliders. Modify the spacing at any time. Default: 1/16
 
 ### Version 4.2
 Fixed variable BPM.
