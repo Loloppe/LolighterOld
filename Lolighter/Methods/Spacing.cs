@@ -1,4 +1,5 @@
 ﻿using Lolighter.Items;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using static Lolighter.Items.Enum;
@@ -33,15 +34,24 @@ namespace Lolighter.Methods
                 }
             }
 
-            // Add spacing here
-            red = AddSpacing(red, spacing);
-            blue = AddSpacing(blue, spacing);
-
             // Create the new list
             List<_Notes> newNotes = new List<_Notes>();
-            newNotes.AddRange(red);
-            newNotes.AddRange(blue);
-            newNotes.AddRange(bomb);
+
+            // Add spacing here
+            if (red.Count > 0)
+            {
+                red = AddSpacing(red, spacing);
+                newNotes.AddRange(red);
+            }
+            if (blue.Count > 0)
+            {
+                blue = AddSpacing(blue, spacing);
+                newNotes.AddRange(blue);
+            }
+            if (bomb.Count > 0)
+            {
+                newNotes.AddRange(bomb);
+            }
 
             // Order by time
             newNotes = newNotes.OrderBy(o => o._time).ToList();
@@ -63,12 +73,11 @@ namespace Lolighter.Methods
             {
                 now = noteTemp[i];
 
-                // Faster or equal to 1/10, Check for CutDirection and Position
-                if (now._time - previous._time <= 0.1 && now._cutDirection == CutDirection.Any && VerifyPosition(previous, now))
+                // Faster or equal to 1/10, Check for CutDirection
+                if (now._time - previous._time <= 0.1 && (previous._cutDirection == CutDirection.Any || now._cutDirection == CutDirection.Any))
                 {
                     if (start == -1)
                     {
-                        // We get the starting position here
                         start = i - 1;
                         count = 2;
                     }
@@ -81,11 +90,29 @@ namespace Lolighter.Methods
                 // Modify the slider
                 else if (start != -1)
                 {
-                    // For each note in the slider
+                    // Fix order
+                    List<_Notes> temp = new List<_Notes>();
                     for (int j = 0; j < count; j++)
                     {
-                        // Add spacing to each
-                        noteTemp[start + j]._time = noteTemp[start]._time + (spacing * j);
+                        temp.Add(noteTemp[start + j]);
+                    }
+                    
+                    temp = CheckOrder(temp);
+
+                    // Replace with the fixed order
+                    for (int j = 0; j < count; j++)
+                    {
+                        noteTemp[start + j] = temp[j];
+                    }
+
+                    if(noteTemp[start]._cutDirection != 8)
+                    {
+                        // For each note in the slider
+                        for (int j = 0; j < count; j++)
+                        {
+                            // Add spacing to each
+                            noteTemp[start + j]._time = noteTemp[start]._time + (spacing * j);
+                        }
                     }
 
                     start = -1;
@@ -97,36 +124,92 @@ namespace Lolighter.Methods
             return noteTemp;
         }
 
-        public static bool VerifyPosition(_Notes before, _Notes after)
+        public static IList<T> Swap<T>(this IList<T> list, int indexA, int indexB)
         {
-            if(before._lineIndex == after._lineIndex && (before._lineLayer == after._lineLayer + 1 || before._lineLayer == after._lineLayer - 1))
+            T tmp = list[indexA];
+            list[indexA] = list[indexB];
+            list[indexB] = tmp;
+            return list;
+        }
+
+        public static List<_Notes> CheckOrder(List<_Notes> notes)
+        {
+            // Analyse the sliders and fix the order
+            int count = 0;
+            // Find the arrow
+            foreach(var note in notes)
             {
-                return true;
+                if(note._cutDirection != 8)
+                {
+                    notes = Swap(notes, 0, count).ToList();
+                    break;
+                }
+
+                count++;
             }
-            else if (before._lineLayer == after._lineLayer && (before._lineIndex == after._lineIndex + 1 || before._lineIndex == after._lineIndex - 1))
+
+            // Here, we try to find a note close enough
+            for (int i = 0; i < notes.Count() - 1; i++)
             {
-                return true;
+                if (notes[i]._lineIndex == notes[i + 1]._lineIndex && (notes[i]._lineLayer == notes[i + 1]._lineLayer + 1 || notes[i]._lineLayer == notes[i + 1]._lineLayer - 1))
+                {
+                    // Do nothing
+                }
+                else if (notes[i]._lineLayer == notes[i + 1]._lineLayer && (notes[i]._lineIndex == notes[i + 1]._lineIndex + 1 || notes[i]._lineIndex == notes[i + 1]._lineIndex - 1))
+                {
+                    // Do nothing
+                }
+                else if (notes[i]._lineIndex == notes[i + 1]._lineIndex - 1 && notes[i]._lineLayer == notes[i + 1]._lineLayer - 1)
+                {
+                    // Do nothing
+                }
+                else if (notes[i]._lineIndex == notes[i + 1]._lineIndex + 1 && notes[i]._lineLayer == notes[i + 1]._lineLayer + 1)
+                {
+                    // Do nothing
+                }
+                else if (notes[i]._lineIndex == notes[i + 1]._lineIndex - 1 && notes[i]._lineLayer == notes[i + 1]._lineLayer + 1)
+                {
+                    // Do nothing
+                }
+                else if (notes[i]._lineIndex == notes[i + 1]._lineIndex + 1 && notes[i]._lineLayer == notes[i + 1]._lineLayer - 1)
+                {
+                    // Do nothing
+                }
+                else
+                {
+                    // Not linked
+                    for (int j = 0; j < notes.Count() - 1; j++)
+                    {
+                        if (notes[i]._lineIndex == notes[j]._lineIndex && (notes[i]._lineLayer == notes[j]._lineLayer + 1 || notes[i]._lineLayer == notes[j]._lineLayer - 1))
+                        {
+                            notes = Swap(notes, i, j).ToList();
+                        }
+                        else if (notes[i]._lineLayer == notes[j]._lineLayer && (notes[i]._lineIndex == notes[j]._lineIndex + 1 || notes[i]._lineIndex == notes[j]._lineIndex - 1))
+                        {
+                            notes = Swap(notes, i, j).ToList();
+                        }
+                        else if (notes[i]._lineIndex == notes[j]._lineIndex - 1 && notes[i]._lineLayer == notes[j]._lineLayer - 1)
+                        {
+                            notes = Swap(notes, i, j).ToList();
+                        }
+                        else if (notes[i]._lineIndex == notes[j]._lineIndex + 1 && notes[i]._lineLayer == notes[j]._lineLayer + 1)
+                        {
+                            notes = Swap(notes, i, j).ToList();
+                        }
+                        else if (notes[i]._lineIndex == notes[j]._lineIndex - 1 && notes[i]._lineLayer == notes[j]._lineLayer + 1)
+                        {
+                            notes = Swap(notes, i, j).ToList();
+                        }
+                        else if (notes[i]._lineIndex == notes[j]._lineIndex + 1 && notes[i]._lineLayer == notes[j]._lineLayer - 1)
+                        {
+                            notes = Swap(notes, i, j).ToList();
+                        }
+                        // Now linked
+                    }
+                }
             }
-            else if(before._lineIndex == after._lineIndex - 1 && before._lineLayer == after._lineLayer - 1)
-            {
-                return true;
-            }
-            else if (before._lineIndex == after._lineIndex + 1 && before._lineLayer == after._lineLayer + 1)
-            {
-                return true;
-            }
-            else if (before._lineIndex == after._lineIndex - 1 && before._lineLayer == after._lineLayer + 1)
-            {
-                return true;
-            }
-            else if (before._lineIndex == after._lineIndex + 1 && before._lineLayer == after._lineLayer - 1)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+
+            return notes;
         }
     }
 }
