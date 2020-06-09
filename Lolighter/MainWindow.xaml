@@ -17,22 +17,22 @@
         <Button x:Name="OpenFile" Content="Open" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Height="68" Click="OpenFile_Click" IsDefault="True"/>
         <Button x:Name="LoloppeGenerator" Content="Loloppe" HorizontalAlignment="Left" Margin="201,134,0,0" VerticalAlignment="Top" Width="199" Height="69" Click="LoloppeGenerator_Click" IsEnabled="False" RenderTransformOrigin="0.82,0.46" Grid.ColumnSpan="2"/>
         <Button x:Name="SimpleLighter" Content="Light" HorizontalAlignment="Left" Margin="201,0,0,0" VerticalAlignment="Top" Width="99" Height="68" Click="SimpleLighter_Click" IsEnabled="False"/>
-        <Button x:Name="SlidersMadness" Content="Sliders" HorizontalAlignment="Left" Margin="0,68,0,0" VerticalAlignment="Top" Width="200" Height="68" Click="SlidersMadness_Click" IsEnabled="False"/>
+        <Button x:Name="SlidersMadness" Content="Sliders" HorizontalAlignment="Left" Margin="0,68,0,0" VerticalAlignment="Top" Width="100" Height="68" Click="SlidersMadness_Click" IsEnabled="False"/>
         <Button x:Name="InvertedMadness" Content="Inverted" HorizontalAlignment="Left" Margin="201,68,0,0" VerticalAlignment="Top" Width="199" Height="69" Click="InvertedMadness_Click" IsEnabled="False" Grid.ColumnSpan="2"/>
         <Button x:Name="BombGenerator" Content="Bomb" HorizontalAlignment="Left" Margin="0,135,0,0" VerticalAlignment="Top" Width="200" Height="68" Click="BombGenerator_Click" IsEnabled="False"/>
         <Button x:Name="SaveFile" Content="Save" HorizontalAlignment="Left" Margin="201,203,0,0" VerticalAlignment="Top" Width="199" Height="68" Click="SaveFile_Click" IsEnabled="False" RenderTransformOrigin="0.82,0.46" Grid.ColumnSpan="2"/>
         <Button x:Name="Converter" Content="Converter" HorizontalAlignment="Left" Margin="0,203,0,0" VerticalAlignment="Top" Width="200" Height="68" Click="Converter_Click" IsEnabled="True" RenderTransformOrigin="0.82,0.46"/>
-        <Label Content="Limiter (in beat)" HorizontalAlignment="Left" Margin="254,59,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+        <Label Content="Limiter (in beat)" HorizontalAlignment="Left" Margin="254,43,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <Label Content="New file name" HorizontalAlignment="Left" Margin="252,191,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <TextBox x:Name="Limiter" HorizontalAlignment="Left" Height="23" Margin="256,85,0,0" TextWrapping="Wrap" Text="0.25" VerticalAlignment="Top" Width="139" Grid.Column="1"/>
+        <TextBox x:Name="Limiter" HorizontalAlignment="Left" Height="23" Margin="256,69,0,0" TextWrapping="Wrap" Text="0.25" VerticalAlignment="Top" Width="139" Grid.Column="1"/>
         <TextBox x:Name="FileName" HorizontalAlignment="Left" Height="23" Margin="254,218,0,0" TextWrapping="Wrap" Text="ExpertPlusStandard" VerticalAlignment="Top" Width="139" RenderTransformOrigin="0.189,0.174" Grid.Column="1"/>
         <Label Content="Offset (in beat)" HorizontalAlignment="Left" Margin="30,215,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
         <TextBox x:Name="ColorOffset" HorizontalAlignment="Left" Height="23" Margin="29,234,0,0" TextWrapping="Wrap" Text="0.00" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
         <Label Content="Speed (in beat)" HorizontalAlignment="Left" Margin="29,177,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
         <TextBox x:Name="ColorSwapSpeed" HorizontalAlignment="Left" Height="23" Margin="29,196,0,0" TextWrapping="Wrap" Text="4.00" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
-        <CheckBox x:Name="AllowLimiter" HorizontalAlignment="Left" Margin="376,65,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
+        <CheckBox x:Name="AllowLimiter" HorizontalAlignment="Left" Margin="376,49,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
         <Label Content="Modifier" HorizontalAlignment="Left" Margin="280,15,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="85" FontSize="18" Grid.Column="1"/>
-        <Label Content="General" HorizontalAlignment="Left" Margin="284,152,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="74" FontSize="18" Grid.Column="1"/>
+        <Label Content="General" HorizontalAlignment="Left" Margin="284,164,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="74" FontSize="18" Grid.Column="1"/>
         <Label Content="Back/Top" HorizontalAlignment="Left" Margin="46,66,0,0" VerticalAlignment="Top" FontSize="12" Width="60" Grid.Column="1"/>
         <Label Content="Use Fade" HorizontalAlignment="Left" Margin="46,130,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
         <Label Content="Spin/Zoom" HorizontalAlignment="Left" Margin="46,145,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
@@ -64,5 +64,9 @@
         <TextBox x:Name="DownSpeed" HorizontalAlignment="Left" Height="23" Margin="138,79,0,0" ToolTip="If faster, attempt to downlight specific event" TextWrapping="Wrap" Text="0.50" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
         <Label Content="Turn On (in beat)" HorizontalAlignment="Left" Margin="135,131,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
         <TextBox x:Name="onSpeed" HorizontalAlignment="Left" Height="23" Margin="138,150,0,0" ToolTip="If no event for more than this duration, turn On an event" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
+        <Button x:Name="SliderSpacing" Content="Spacing" HorizontalAlignment="Left" Margin="100,68,0,0" VerticalAlignment="Top" Width="100" Height="68" Click="SliderSpacing_Click" IsEnabled="False"/>
+        <Label Content="Spacing" HorizontalAlignment="Left" Margin="279,91,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="85" FontSize="18" Grid.Column="1"/>
+        <Label Content="Spacing (in beat)" HorizontalAlignment="Left" Margin="254,116,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+        <TextBox x:Name="SpacingNb" HorizontalAlignment="Left" Height="23" Margin="256,142,0,0" TextWrapping="Wrap" Text="0.0625" VerticalAlignment="Top" Width="139" Grid.Column="1"/>
     </Grid>
 </Window>

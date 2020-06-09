@@ -1,4 +1,6 @@
-﻿namespace Lolighter.Items
+﻿using System;
+
+namespace Lolighter.Items
 {
     static class Enum
     {

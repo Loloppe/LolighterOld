@@ -69,6 +69,7 @@
     </ApplicationDefinition>
     <Compile Include="Items\Enum.cs" />
     <Compile Include="Items\Map.cs" />
+    <Compile Include="Methods\Spacing.cs" />
     <Compile Include="ShowOnsets.xaml.cs">
       <DependentUpon>ShowOnsets.xaml</DependentUpon>
     </Compile>

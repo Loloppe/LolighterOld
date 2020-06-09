@@ -103,6 +103,7 @@ namespace Lolighter
                 BombGenerator.IsEnabled = false;
                 LoloppeGenerator.IsEnabled = false;
                 DownLight.IsEnabled = false;
+                SliderSpacing.IsEnabled = false;
                 Converter.IsEnabled = true;
                 OpenFile.IsEnabled = true;
             }
@@ -122,6 +123,7 @@ namespace Lolighter
             window.LoloppeGenerator.IsEnabled = true;
             window.Converter.IsEnabled = true;
             window.DownLight.IsEnabled = true;
+            window.SliderSpacing.IsEnabled = true;
             window.OpenFile.IsEnabled = false;
         }
 
@@ -224,6 +226,19 @@ namespace Lolighter
                 MessageBox.Show("No light available");
             }
         }
+
+        private void SliderSpacing_Click(object sender, RoutedEventArgs e)
+        {
+            List<_Notes> noteTemp = new List<_Notes>(map._notes);
+            map._notes = null;
+
+            noteTemp = Spacing.Space(noteTemp, Convert.ToDouble(SpacingNb.Text, CultureInfo.InvariantCulture));
+
+            map._notes = noteTemp.ToArray();
+
+            SliderSpacing.IsEnabled = false;
+        }
+
         #endregion
 
         public class MapFile
@@ -237,6 +252,5 @@ namespace Lolighter
                 this.Path = selectedFile;
             }
         }
-
     }
 }
