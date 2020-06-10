@@ -66,7 +66,9 @@
         <TextBox x:Name="onSpeed" HorizontalAlignment="Left" Height="23" Margin="138,150,0,0" ToolTip="If no event for more than this duration, turn On an event" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
         <Button x:Name="SliderSpacing" Content="Spacing" HorizontalAlignment="Left" Margin="100,68,0,0" VerticalAlignment="Top" Width="100" Height="68" Click="SliderSpacing_Click" IsEnabled="False"/>
         <Label Content="Spacing" HorizontalAlignment="Left" Margin="279,91,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="85" FontSize="18" Grid.Column="1"/>
-        <Label Content="Spacing (in beat)" HorizontalAlignment="Left" Margin="254,116,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <TextBox x:Name="SpacingNb" HorizontalAlignment="Left" Height="23" Margin="256,142,0,0" TextWrapping="Wrap" Text="0.0625" VerticalAlignment="Top" Width="139" Grid.Column="1"/>
+        <Label Content="Spacing (in beat)" HorizontalAlignment="Left" Margin="320,116,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+        <TextBox x:Name="SpacingNb" HorizontalAlignment="Left" Height="23" Margin="322,142,0,0" TextWrapping="Wrap" Text="0.0625" VerticalAlignment="Top" Width="82" Grid.Column="1"/>
+        <Label Content="Convert to       ->" HorizontalAlignment="Left" Margin="228,116,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+        <TextBox x:Name="CurrentSpacing" HorizontalAlignment="Left" Height="23" Margin="230,142,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="82" Grid.Column="1"/>
     </Grid>
 </Window>

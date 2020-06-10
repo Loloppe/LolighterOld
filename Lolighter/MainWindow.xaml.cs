@@ -232,7 +232,7 @@ namespace Lolighter
             List<_Notes> noteTemp = new List<_Notes>(map._notes);
             map._notes = null;
 
-            noteTemp = Spacing.Space(noteTemp, Convert.ToDouble(SpacingNb.Text, CultureInfo.InvariantCulture));
+            noteTemp = Spacing.Space(noteTemp, Convert.ToDouble(SpacingNb.Text, CultureInfo.InvariantCulture), Convert.ToDouble(CurrentSpacing.Text, CultureInfo.InvariantCulture));
 
             map._notes = noteTemp.ToArray();
 

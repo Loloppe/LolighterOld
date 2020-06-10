@@ -8,7 +8,7 @@ namespace Lolighter.Methods
 {
     static class Spacing
     {
-        static public List<_Notes> Space(List<_Notes> noteTemp, double spacing)
+        static public List<_Notes> Space(List<_Notes> noteTemp, double spacing, double initial)
         {
             // Order by time
             noteTemp = noteTemp.OrderBy(o => o._time).ToList();
@@ -40,12 +40,12 @@ namespace Lolighter.Methods
             // Add spacing here
             if (red.Count > 0)
             {
-                red = AddSpacing(red, spacing);
+                red = AddSpacing(red, spacing, initial);
                 newNotes.AddRange(red);
             }
             if (blue.Count > 0)
             {
-                blue = AddSpacing(blue, spacing);
+                blue = AddSpacing(blue, spacing, initial);
                 newNotes.AddRange(blue);
             }
             if (bomb.Count > 0)
@@ -59,7 +59,7 @@ namespace Lolighter.Methods
             return newNotes;
         }
 
-        public static List<_Notes> AddSpacing(List<_Notes> noteTemp, double spacing)
+        public static List<_Notes> AddSpacing(List<_Notes> noteTemp, double spacing, double initial)
         {
             // Number of notes in the slider
             int count = 0;
@@ -74,7 +74,7 @@ namespace Lolighter.Methods
                 now = noteTemp[i];
 
                 // Faster or equal to 1/10, Check for CutDirection
-                if (now._time - previous._time <= 0.1 && (previous._cutDirection == CutDirection.Any || now._cutDirection == CutDirection.Any))
+                if (now._time - previous._time <= initial + 0.01 && now._time - previous._time >= initial - 0.01 && (previous._cutDirection == CutDirection.Any || now._cutDirection == CutDirection.Any))
                 {
                     if (start == -1)
                     {
