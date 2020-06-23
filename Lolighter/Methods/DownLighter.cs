@@ -121,12 +121,20 @@ namespace Lolighter.Methods
                     if (now._value == 4 || now._value == 0)
                     {
                         light.Remove(now);
+                        if (i == light.Count())
+                        {
+                            i--;
+                        }
                         now = light[i];
                         previous = light[i - 1];
                     }
                     if (previous._value == 4 || previous._value == 0)
                     {
                         light.Remove(previous);
+                        if (i == light.Count())
+                        {
+                            i--;
+                        }
                         now = light[i];
                         previous = light[i - 1];
                     }
