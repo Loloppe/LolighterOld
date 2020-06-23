@@ -24,7 +24,7 @@ Any bugs or ideas? Message me on Discord.
 Enjoy :)
 ___
 ## Changelog
-### Version 4.7
+### Version 4.8
 Added onset-detection https://github.com/opcon/onset-detection with license and copyright.
 Lolighter can now convert audio directly.
 Added a simple DownLighter.
