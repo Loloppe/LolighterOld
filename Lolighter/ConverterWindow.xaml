@@ -11,12 +11,12 @@
         <Button x:Name="Btn_Osu" Content="Convert .osu" HorizontalAlignment="Left" Margin="10,275,0,0" VerticalAlignment="Top" Width="116" Height="64" Click="Button_Click"/>
         <Button x:Name="Btn_Dat" Content="Convert .dat" HorizontalAlignment="Left" Margin="131,275,0,0" VerticalAlignment="Top" Width="116" Height="64" Click="Convert_Click"/>
         <Button x:Name="Btn_Audio" Content="Convert audio" HorizontalAlignment="Left" Margin="10,444,0,0" VerticalAlignment="Top" Width="237" Height="64" Click="Audio_Click"/>
-        <CheckBox x:Name="CBox" Content="Adaptive Whitening" HorizontalAlignment="Left" Margin="10,372,0,0" VerticalAlignment="Top" IsChecked="False"/>
+        <CheckBox x:Name="CBox" Content="Adaptive Whitening" HorizontalAlignment="Left" Margin="10,372,0,0" VerticalAlignment="Top" IsChecked="False" ToolTip="Can improve amplitude estimation"/>
         <Label Content="Activation Threshold" HorizontalAlignment="Left" Margin="10,344,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="TBox" HorizontalAlignment="Left" Height="23" Margin="127,348,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="120"/>
-        <ComboBox x:Name="Combo" HorizontalAlignment="Left" Margin="127,392,0,0" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="TBox" HorizontalAlignment="Left" Height="23" Margin="127,348,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="120" ToolTip="Amplitude to reach to add a note"/>
+        <ComboBox x:Name="Combo" HorizontalAlignment="Left" Margin="127,392,0,0" VerticalAlignment="Top" Width="120" ToolTip="Spectral Diff and Spectral Flux"/>
         <Label Content="Type of Algorithm" HorizontalAlignment="Left" Margin="10,390,0,0" VerticalAlignment="Top"/>
         <Label Content="Intensity For Double" HorizontalAlignment="Left" Margin="8,415,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="TboxIntensity" HorizontalAlignment="Left" Height="23" Margin="126,417,0,0" TextWrapping="Wrap" Text="12" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="TboxIntensity" HorizontalAlignment="Left" Height="23" Margin="126,417,0,0" TextWrapping="Wrap" Text="12" VerticalAlignment="Top" Width="120" ToolTip="Amplitude required to generate Double"/>
     </Grid>
 </Window>

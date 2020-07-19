@@ -25,8 +25,8 @@ namespace Osu2Saber.Model.Algorithm
         public static bool GenerateGallops = false;
         public static bool AllTopUp = false;
         public static bool AllowOneHanded = false;
-        public static bool DoubleHitboxFix = false;
-        public static bool BaseDouble = true;
+        public static bool DoubleHitboxFix = true;
+        public static bool BaseDouble = false;
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
