@@ -39,13 +39,6 @@
         <CheckBox x:Name="AllowBackStrobe" HorizontalAlignment="Left" Margin="29,71,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
         <CheckBox x:Name="AllowFade" HorizontalAlignment="Left" Margin="29,136,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
         <CheckBox x:Name="AllowSpin" HorizontalAlignment="Left" Margin="29,151,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" Grid.Column="1"/>
-        <Label Content="Spin Speed" HorizontalAlignment="Left" Margin="126,187,0,0" VerticalAlignment="Top" FontWeight="Bold" Grid.Column="1"/>
-        <Label Content="Slow" HorizontalAlignment="Left" Margin="126,210,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
-        <Label Content="Fast" HorizontalAlignment="Left" Margin="126,234,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
-        <TextBox x:Name="FastMinSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="153,236,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
-        <TextBox x:Name="FastMaxSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="173,236,0,0" TextWrapping="Wrap" Text="13" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
-        <TextBox x:Name="SlowMinSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="153,213,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
-        <TextBox x:Name="SlowMaxSpinSpeed" HorizontalAlignment="Left" Height="19" Margin="173,213,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="19" Grid.Column="1"/>
         <Label Content="Bot/Back/Side" HorizontalAlignment="Left" Margin="46,97,0,0" VerticalAlignment="Top" FontSize="12" Width="108" Grid.Column="1"/>
         <CheckBox x:Name="AllowSideStrobe" HorizontalAlignment="Left" Margin="29,103,0,0" VerticalAlignment="Top" Width="17" IsChecked="True" RenderTransformOrigin="2.686,0.444" Grid.Column="1"/>
         <Label Content="Neon Ring" HorizontalAlignment="Left" Margin="46,81,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
@@ -54,21 +47,25 @@
         <Label Content="Light" HorizontalAlignment="Left" Margin="98,15,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="55" FontSize="18" Grid.Column="1"/>
         <Label Content="Other Features" HorizontalAlignment="Left" Margin="29,113,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
         <Label Content="Color Swap" HorizontalAlignment="Left" Margin="29,162,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
-        <CheckBox x:Name="NerfStrobes" HorizontalAlignment="Left" Margin="118,177,0,0" VerticalAlignment="Top" Width="17" IsChecked="False" Grid.Column="1"/>
-        <Label Content="Nerf Strobes" HorizontalAlignment="Left" Margin="131,171,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
+        <CheckBox x:Name="NerfStrobes" HorizontalAlignment="Left" Margin="118,240,0,0" VerticalAlignment="Top" Width="17" IsChecked="False" Grid.Column="1"/>
+        <Label Content="Nerf Strobes" HorizontalAlignment="Left" Margin="131,234,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
         <Button x:Name="DownLight" Content="Down Light" HorizontalAlignment="Left" Margin="300,0,0,0" VerticalAlignment="Top" Width="99" Height="68" Click="DownLight_Click" IsEnabled="False" Grid.ColumnSpan="2"/>
         <Label Content="Down Light" HorizontalAlignment="Left" Margin="139,46,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
-        <Label Content="Spam (in beat)" HorizontalAlignment="Left" Margin="138,96,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <Label Content="Spam (in beat)" HorizontalAlignment="Left" Margin="138,95,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
         <TextBox x:Name="SpamSpeed" HorizontalAlignment="Left" Height="23" Margin="138,115,0,0" ToolTip="If faster, reduce the amount of spin/zoom event" TextWrapping="Wrap" Text="0.25" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
-        <Label Content="Speed (in beat)" HorizontalAlignment="Left" Margin="138,60,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
-        <TextBox x:Name="DownSpeed" HorizontalAlignment="Left" Height="23" Margin="138,79,0,0" ToolTip="If faster, attempt to downlight specific event" TextWrapping="Wrap" Text="0.50" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
+        <Label Content="Speed (in beat)" HorizontalAlignment="Left" Margin="138,59,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <TextBox x:Name="DownSpeed" HorizontalAlignment="Left" Height="23" Margin="138,78,0,0" ToolTip="If faster, attempt to downlight specific event" TextWrapping="Wrap" Text="0.50" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
         <Label Content="Turn On (in beat)" HorizontalAlignment="Left" Margin="135,131,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
-        <TextBox x:Name="onSpeed" HorizontalAlignment="Left" Height="23" Margin="138,150,0,0" ToolTip="If no event for more than this duration, turn On an event" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
+        <TextBox x:Name="onSpeed" HorizontalAlignment="Left" Height="23" Margin="138,149,0,0" ToolTip="If no event for more than this duration, turn On an event" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
         <Button x:Name="SliderSpacing" Content="Spacing" HorizontalAlignment="Left" Margin="100,68,0,0" VerticalAlignment="Top" Width="100" Height="68" Click="SliderSpacing_Click" IsEnabled="False"/>
         <Label Content="Spacing" HorizontalAlignment="Left" Margin="279,91,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="85" FontSize="18" Grid.Column="1"/>
         <Label Content="Spacing (in beat)" HorizontalAlignment="Left" Margin="320,116,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <TextBox x:Name="SpacingNb" HorizontalAlignment="Left" Height="23" Margin="322,142,0,0" TextWrapping="Wrap" Text="0.0625" VerticalAlignment="Top" Width="82" Grid.Column="1"/>
         <Label Content="Convert to       ->" HorizontalAlignment="Left" Margin="228,116,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <TextBox x:Name="CurrentSpacing" HorizontalAlignment="Left" Height="23" Margin="230,142,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="82" Grid.Column="1"/>
+        <Label Content="Mid-Layer Strb" HorizontalAlignment="Left" Margin="138,165,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <TextBox x:Name="MidLayerSpeed" HorizontalAlignment="Left" Height="23" Margin="138,184,0,0" ToolTip="Left/Right lasers strobes speed for middle layer notes" TextWrapping="Wrap" Text="0.03125" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
+        <Label Content="Top-Layer Strb" HorizontalAlignment="Left" Margin="135,200,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
+        <TextBox x:Name="TopLayerSpeed" HorizontalAlignment="Left" Height="23" Margin="138,218,0,0" ToolTip="Left/Right lasers strobes speed for top layer notes" TextWrapping="Wrap" Text="0.0625" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
     </Grid>
 </Window>

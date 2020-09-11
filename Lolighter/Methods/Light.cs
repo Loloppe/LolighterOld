@@ -1,20 +1,20 @@
 ﻿using Lolighter.Items;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
 using static Lolighter.Items.Enum;
 
 namespace Lolighter.Methods
 {
     static class Light
     {
-        static public List<_Events> CreateLight(List<_Notes> noteTempo, double ColorOffset, double ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, int SlowMinSpinSpeed, int SlowMaxSpinSpeed, int FastMinSpinSpeed, int FastMaxSpinSpeed, bool NerfStrobes)
+        static public List<_Events> CreateLight(List<_Notes> noteTempo, double ColorOffset, double ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, bool NerfStrobes, double MidStrobes, double TopStrobes)
         {
             //This massive mess is based on my old AutoLighter that I created in Osu2Saber.
             //It work pretty well and is pretty simple to modify, but could definitely be better.
             //This could use a cleanup.
 
-            Random rnd = new Random();
-            int lastSpeed = 0;
             double last = new double(); //Var to stop spin-stack and also used as time check.
             double[] time = new double[4]; //Now, before, before-before, before-before-before, in this order.
             //0.0D = Default value for double, similar to NULL for int.
@@ -27,6 +27,13 @@ namespace Lolighter.Methods
             int maximum = 2; //Maximum number of light per same time.
             int color; //Set color start value.
             int lastCut = 0;
+            int currentSpeed = 0;
+            bool left;
+            double comp = 0;
+            bool lastRed = false;
+            bool lastBlue = false;
+            double lastRedSpeed = 0;
+            double lastBlueSpeed = 0;
             _Events ev;
             List<_Events> eventTempo = new List<_Events>();
 
@@ -288,11 +295,11 @@ namespace Lolighter.Methods
                     {
                         ev = new _Events(time[0], EventType.LightRightLasers, color);
                         eventTempo.Add(ev);
-                        ev = new _Events(0, EventType.RotatingRightLasers, rnd.Next(SlowMinSpinSpeed, SlowMaxSpinSpeed));
+                        ev = new _Events(0, EventType.RotatingRightLasers, 1);
                         eventTempo.Add(ev);
                         ev = new _Events(time[1], EventType.LightLeftLasers, color);
                         eventTempo.Add(ev);
-                        ev = new _Events(0, EventType.RotatingLeftLasers, rnd.Next(SlowMinSpinSpeed, SlowMaxSpinSpeed));
+                        ev = new _Events(0, EventType.RotatingLeftLasers, 1);
                         eventTempo.Add(ev);
                         time[2] = time[1];
                         time[1] = time[0];
@@ -314,22 +321,26 @@ namespace Lolighter.Methods
                         }
                     }
 
-                    if (time[0] == time[1]) //Same timing, keep same laser speed.
+                    if(time[0] == time[1])
                     {
-                        CreateGenericLight(lastSpeed);
+                        CreateGenericLight(currentSpeed);
                     }
                     else
                     {
-                        CreateGenericLight(lastSpeed = rnd.Next(FastMinSpinSpeed, FastMaxSpinSpeed));
+                        CreateGenericLight(currentSpeed = 7);
                     }
                 }
                 else if (time[0] - time[1] >= 0.25 && time[0] - time[1] < 0.5) //Quarter to half
                 {
-                    CreateGenericLight(lastSpeed = rnd.Next(FastMinSpinSpeed, FastMaxSpinSpeed));
+                    CreateGenericLight(currentSpeed = 5);
                 }
-                else if (time[0] - time[1] >= 0.5) //Half and above
+                else if (time[0] - time[1] >= 0.5 && time[0] - time[1] < 1) //Half and above
                 {
-                    CreateGenericLight(lastSpeed = rnd.Next(SlowMinSpinSpeed, SlowMaxSpinSpeed));
+                    CreateGenericLight(currentSpeed = 3);
+                }
+                else if (time[0] - time[1] >= 1) //Half and above
+                {
+                    CreateGenericLight(currentSpeed = 1);
                 }
 
                 lastCut = note._cutDirection; //For the spin check.
@@ -338,6 +349,151 @@ namespace Lolighter.Methods
                 {
                     time[i] = time[i - 1];
                 }
+            }
+
+            count = 0;
+
+            foreach(_Events e in eventTempo)
+            {
+                if(e._type == EventType.LightLeftLasers || e._type == EventType.LightRightLasers)
+                {
+                    count++;
+                }
+            }
+
+            if(count % 2 != 0)
+            {
+                left = true;
+            }
+            else
+            {
+                left = false;
+            }
+
+            count = 0;
+
+            // Here we add some depth to the left/right laser using off event right before each lights, depending on their speed.
+            for(int i = noteTempo.Count() - 3; i > 1; i--)
+            {
+                _Notes note = noteTempo[i];
+
+                // Only two lights maximum
+                if(note._time == comp)
+                {
+                    count++;
+                }
+                else
+                {
+                    count = 0;
+                }
+
+                if(count >= 2)
+                {
+                    count++;
+                    continue;
+                }
+
+                if(lastRed && note._type == 0 && note._lineLayer == 0)
+                {
+                    if (note._lineLayer == 0)
+                    {
+                        if (left)
+                        {
+                            ev = new _Events(note._time - lastRedSpeed, EventType.LightLeftLasers, 0);
+                            eventTempo.Add(ev);
+                        }
+                        else
+                        {
+                            ev = new _Events(note._time - lastRedSpeed, EventType.LightRightLasers, 0);
+                            eventTempo.Add(ev);
+                        }
+                    }
+
+                    lastRed = false;
+                }
+                else if(lastBlue && note._type == 1)
+                {
+                    if(note._lineLayer == 0)
+                    {
+                        if(left)
+                        {
+                            ev = new _Events(note._time - lastBlueSpeed, EventType.LightLeftLasers, 0);
+                            eventTempo.Add(ev);
+                        }
+                        else
+                        {
+                            ev = new _Events(note._time - lastBlueSpeed, EventType.LightRightLasers, 0);
+                            eventTempo.Add(ev);
+                        }
+                    }
+
+                    lastBlue = false;
+                }
+
+                // Check the note placement, only apply if the note is middle or top layer.
+                if(note._lineLayer == 1) // Middle
+                {
+                    // Bool to apply to the next note
+                    if(note._type == 0)
+                    {
+                        lastRedSpeed = MidStrobes;
+                        lastRed = true;
+                    }
+                    else if(note._type == 1)
+                    {
+                        lastBlueSpeed = MidStrobes;
+                        lastBlue = true;
+                    }
+
+                    // Apply a specific speed for middle note and the note of the same type before that (if it's bottom).
+                    if(left)
+                    {
+                        ev = new _Events(note._time - MidStrobes, EventType.LightLeftLasers, 0);
+                        eventTempo.Add(ev);
+                    }
+                    else // right
+                    {
+                        ev = new _Events(note._time - MidStrobes, EventType.LightRightLasers, 0);
+                        eventTempo.Add(ev);
+                    }
+                }
+                else if(note._lineLayer == 2) // Top
+                {
+                    // Bool to apply to the next note
+                    if (note._type == 0)
+                    {
+                        lastRedSpeed = TopStrobes;
+                        lastRed = true;
+                    }
+                    else if (note._type == 1)
+                    {
+                        lastBlueSpeed = TopStrobes;
+                        lastBlue = true;
+                    }
+
+                    // Apply a specific speed for top note and the note of the same type before that (if it's bottom).
+                    if (left)
+                    {
+                        ev = new _Events(note._time - TopStrobes, EventType.LightLeftLasers, 0);
+                        eventTempo.Add(ev);
+                    }
+                    else // right
+                    {
+                        ev = new _Events(note._time - TopStrobes, EventType.LightRightLasers, 0);
+                        eventTempo.Add(ev);
+                    }
+                }
+
+                if(left)
+                {
+                    left = false;
+                }
+                else
+                {
+                    left = true;
+                }
+
+                comp = note._time;
             }
 
             return eventTempo;
