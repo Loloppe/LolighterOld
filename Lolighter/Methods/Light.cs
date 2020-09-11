@@ -334,11 +334,11 @@ namespace Lolighter.Methods
                 {
                     CreateGenericLight(currentSpeed = 5);
                 }
-                else if (time[0] - time[1] >= 0.5 && time[0] - time[1] < 1) //Half and above
+                else if (time[0] - time[1] >= 0.5 && time[0] - time[1] < 1) //Half to 1
                 {
                     CreateGenericLight(currentSpeed = 3);
                 }
-                else if (time[0] - time[1] >= 1) //Half and above
+                else if (time[0] - time[1] >= 1) //1 and above
                 {
                     CreateGenericLight(currentSpeed = 1);
                 }
@@ -389,11 +389,10 @@ namespace Lolighter.Methods
 
                 if(count >= 2)
                 {
-                    count++;
                     continue;
                 }
 
-                if(lastRed && note._type == 0 && note._lineLayer == 0)
+                if(lastRed && note._type == 0)
                 {
                     if (note._lineLayer == 0)
                     {
