@@ -47,8 +47,8 @@
         <Label Content="Light" HorizontalAlignment="Left" Margin="98,15,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="55" FontSize="18" Grid.Column="1"/>
         <Label Content="Other Features" HorizontalAlignment="Left" Margin="29,113,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
         <Label Content="Color Swap" HorizontalAlignment="Left" Margin="29,162,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
-        <CheckBox x:Name="NerfStrobes" HorizontalAlignment="Left" Margin="118,240,0,0" VerticalAlignment="Top" Width="17" IsChecked="False" Grid.Column="1"/>
-        <Label Content="Nerf Strobes" HorizontalAlignment="Left" Margin="131,234,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
+        <CheckBox x:Name="NerfStrobes" HorizontalAlignment="Left" Margin="122,183,0,0" VerticalAlignment="Top" Width="17" IsChecked="False" Grid.Column="1"/>
+        <Label Content="Nerf Strobes" HorizontalAlignment="Left" Margin="135,177,0,0" VerticalAlignment="Top" FontSize="12" Grid.Column="1"/>
         <Button x:Name="DownLight" Content="Down Light" HorizontalAlignment="Left" Margin="300,0,0,0" VerticalAlignment="Top" Width="99" Height="68" Click="DownLight_Click" IsEnabled="False" Grid.ColumnSpan="2"/>
         <Label Content="Down Light" HorizontalAlignment="Left" Margin="139,46,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" Grid.Column="1"/>
         <Label Content="Spam (in beat)" HorizontalAlignment="Left" Margin="138,95,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
@@ -63,9 +63,5 @@
         <TextBox x:Name="SpacingNb" HorizontalAlignment="Left" Height="23" Margin="322,142,0,0" TextWrapping="Wrap" Text="0.0625" VerticalAlignment="Top" Width="82" Grid.Column="1"/>
         <Label Content="Convert to       ->" HorizontalAlignment="Left" Margin="228,116,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <TextBox x:Name="CurrentSpacing" HorizontalAlignment="Left" Height="23" Margin="230,142,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="82" Grid.Column="1"/>
-        <Label Content="Mid-Layer Strb" HorizontalAlignment="Left" Margin="138,165,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
-        <TextBox x:Name="MidLayerSpeed" HorizontalAlignment="Left" Height="23" Margin="138,184,0,0" ToolTip="Left/Right lasers strobes speed for middle layer notes" TextWrapping="Wrap" Text="0.03125" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
-        <Label Content="Top-Layer Strb" HorizontalAlignment="Left" Margin="135,200,0,0" VerticalAlignment="Top" FontSize="10" Grid.Column="1"/>
-        <TextBox x:Name="TopLayerSpeed" HorizontalAlignment="Left" Height="23" Margin="138,218,0,0" ToolTip="Left/Right lasers strobes speed for top layer notes" TextWrapping="Wrap" Text="0.0625" VerticalAlignment="Top" Width="77" Grid.Column="1"/>
     </Grid>
 </Window>

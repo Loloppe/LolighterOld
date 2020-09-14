@@ -10,7 +10,7 @@ namespace Lolighter.Methods
 {
     static class Light
     {
-        static public List<_Events> CreateLight(List<_Notes> noteTempo, double ColorOffset, double ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, bool NerfStrobes, double MidStrobes, double TopStrobes)
+        static public List<_Events> CreateLight(List<_Notes> noteTempo, double ColorOffset, double ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, bool NerfStrobes)
         {
             //This massive mess is based on my old AutoLighter that I created in Osu2Saber.
             //It work pretty well and is pretty simple to modify, but could definitely be better.
@@ -326,26 +326,44 @@ namespace Lolighter.Methods
                 }
 
                 // Place light
-                _Events lig = new _Events(noteTempo[0]._time, sliderLight[sliderIndex], color - 2);
-                eventTempo.Add(lig);
-                lig = new _Events(noteTempo[0]._time + 0.125, sliderLight[sliderIndex], color - 1);
-                eventTempo.Add(lig);
-                lig = new _Events(noteTempo[0]._time + 0.25, sliderLight[sliderIndex], color - 2);
-                eventTempo.Add(lig);
-                lig = new _Events(noteTempo[0]._time + 0.375, sliderLight[sliderIndex], color - 1);
-                eventTempo.Add(lig);
+                if(AllowFade)
+                {
+                    _Events lig = new _Events(noteTempo[0]._time, sliderLight[sliderIndex], color - 2);
+                    eventTempo.Add(lig);
+                    lig = new _Events(noteTempo[0]._time + 0.125, sliderLight[sliderIndex], color - 1);
+                    eventTempo.Add(lig);
+                    lig = new _Events(noteTempo[0]._time + 0.25, sliderLight[sliderIndex], color - 2);
+                    eventTempo.Add(lig);
+                    lig = new _Events(noteTempo[0]._time + 0.375, sliderLight[sliderIndex], color - 1);
+                    eventTempo.Add(lig);
+                }
+                else
+                {
+                    _Events lig = new _Events(noteTempo[0]._time, sliderLight[sliderIndex], color);
+                    eventTempo.Add(lig);
+                    lig = new _Events(noteTempo[0]._time + 0.125, sliderLight[sliderIndex], color + 1);
+                    eventTempo.Add(lig);
+                    lig = new _Events(noteTempo[0]._time + 0.25, sliderLight[sliderIndex], color);
+                    eventTempo.Add(lig);
+                    lig = new _Events(noteTempo[0]._time + 0.375, sliderLight[sliderIndex], color + 1);
+                    eventTempo.Add(lig);
+                }
+                
                 _Events off = new _Events(noteTempo[0]._time + 0.5, sliderLight[sliderIndex], 0);
                 eventTempo.Add(off);
 
                 sliderIndex--;
 
                 // Spin goes brrr
-                lig = new _Events(noteTempo[0]._time, EventType.RotationAllTrackRings, 0);
-                eventTempo.Add(lig);
-                for (int i = 0; i < 8; i++)
+                if(AllowSpinZoom)
                 {
-                    lig = new _Events(noteTempo[0]._time + 0.5 - (0.5 / 8 * i), EventType.RotationAllTrackRings, 0);
+                    _Events lig = new _Events(noteTempo[0]._time, EventType.RotationAllTrackRings, 0);
                     eventTempo.Add(lig);
+                    for (int i = 0; i < 8; i++)
+                    {
+                        lig = new _Events(noteTempo[0]._time + 0.5 - (0.5 / 8 * i), EventType.RotationAllTrackRings, 0);
+                        eventTempo.Add(lig);
+                    }
                 }
             }
 
@@ -461,26 +479,43 @@ namespace Lolighter.Methods
                     }
 
                     // Place light
-                    _Events lig = new _Events(time[0], sliderLight[sliderIndex], color - 2);
-                    eventTempo.Add(lig);
-                    lig = new _Events(time[0] + 0.125, sliderLight[sliderIndex], color - 1);
-                    eventTempo.Add(lig);
-                    lig = new _Events(time[0] + 0.25, sliderLight[sliderIndex], color - 2);
-                    eventTempo.Add(lig);
-                    lig = new _Events(time[0] + 0.375, sliderLight[sliderIndex], color - 1);
-                    eventTempo.Add(lig);
+                    if (AllowFade)
+                    {
+                        _Events lig = new _Events(noteTempo[0]._time, sliderLight[sliderIndex], color - 2);
+                        eventTempo.Add(lig);
+                        lig = new _Events(noteTempo[0]._time + 0.125, sliderLight[sliderIndex], color - 1);
+                        eventTempo.Add(lig);
+                        lig = new _Events(noteTempo[0]._time + 0.25, sliderLight[sliderIndex], color - 2);
+                        eventTempo.Add(lig);
+                        lig = new _Events(noteTempo[0]._time + 0.375, sliderLight[sliderIndex], color - 1);
+                        eventTempo.Add(lig);
+                    }
+                    else
+                    {
+                        _Events lig = new _Events(noteTempo[0]._time, sliderLight[sliderIndex], color);
+                        eventTempo.Add(lig);
+                        lig = new _Events(noteTempo[0]._time + 0.125, sliderLight[sliderIndex], color + 1);
+                        eventTempo.Add(lig);
+                        lig = new _Events(noteTempo[0]._time + 0.25, sliderLight[sliderIndex], color);
+                        eventTempo.Add(lig);
+                        lig = new _Events(noteTempo[0]._time + 0.375, sliderLight[sliderIndex], color + 1);
+                        eventTempo.Add(lig);
+                    }
                     _Events off = new _Events(time[0] + 0.5, sliderLight[sliderIndex], 0);
                     eventTempo.Add(off);
 
                     sliderIndex--;
 
                     // Spin goes brrr
-                    lig = new _Events(time[0], EventType.RotationAllTrackRings, 0);
-                    eventTempo.Add(lig);
-                    for (int i = 0; i < 8; i++)
+                    if(AllowSpinZoom)
                     {
-                        lig = new _Events(time[0] + 0.5 - (0.5 / 8 * i), EventType.RotationAllTrackRings, 0);
+                        _Events lig = new _Events(time[0], EventType.RotationAllTrackRings, 0);
                         eventTempo.Add(lig);
+                        for (int i = 0; i < 8; i++)
+                        {
+                            lig = new _Events(time[0] + 0.5 - (0.5 / 8 * i), EventType.RotationAllTrackRings, 0);
+                            eventTempo.Add(lig);
+                        }
                     }
 
                     wasSlider = true;

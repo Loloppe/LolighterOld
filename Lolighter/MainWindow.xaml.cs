@@ -156,7 +156,7 @@ namespace Lolighter
 
             List<_Events> eventTempo = Light.CreateLight(noteTempo, Convert.ToDouble(ColorOffset.Text, CultureInfo.InvariantCulture), Convert.ToDouble(ColorSwapSpeed.Text, CultureInfo.InvariantCulture),
                 AllowBackStrobe.IsChecked.GetValueOrDefault(), AllowNeonStrobe.IsChecked.GetValueOrDefault(), AllowSideStrobe.IsChecked.GetValueOrDefault(), AllowFade.IsChecked.GetValueOrDefault(), AllowSpin.IsChecked.GetValueOrDefault(),
-                NerfStrobes.IsChecked.GetValueOrDefault(), Convert.ToDouble(MidLayerSpeed.Text, CultureInfo.InvariantCulture), Convert.ToDouble(TopLayerSpeed.Text, CultureInfo.InvariantCulture));
+                NerfStrobes.IsChecked.GetValueOrDefault());
 
             List<_Events> sorted = eventTempo.OrderBy(o => o._time).ToList();
 
