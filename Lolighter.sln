@@ -11,6 +11,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Osu2Saber", "Osu2Saber\Osu2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "onset-detection", "onset-detection-master\onset-detection.csproj", "{0F0D44C0-D951-4F8D-A472-E1053646A408}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{65CEA738-E794-40C5-9470-83CFCABCD38F}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		AllDebug|Any CPU = AllDebug|Any CPU

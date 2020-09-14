@@ -66,6 +66,9 @@
     <Compile Include="Vector2.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
     <None Include="LICENSE.md" />
     <None Include="README.md" />
   </ItemGroup>
