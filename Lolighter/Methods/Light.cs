@@ -196,24 +196,43 @@ namespace Lolighter.Methods
 
                 if ((now == time[1] || (now - time[1] <= 0.02 && time[1] != time[2])) && (time[1] != 0.0D && now != last)) //If not same note, same beat, apply once.
                 {
-                    // Old: now - last <= 2.5 && last != 0.0D
                     if (!NerfStrobes) //Off event
                     {
-                        // Old: now - (now - last) / 2
-                        if (AllowBackStrobe) //Back Top Laser
+                        if(now - last >= 0.5)
                         {
-                            ev = new _Events(now + 0.25, EventType.LightBackTopLasers, 0);
-                            eventTempo.Add(ev);
+                            if (AllowBackStrobe) //Back Top Laser
+                            {
+                                ev = new _Events(now + 0.25, EventType.LightBackTopLasers, 0);
+                                eventTempo.Add(ev);
+                            }
+                            if (AllowNeonStrobe) //Neon Light
+                            {
+                                ev = new _Events(now + 0.25, EventType.LightTrackRingNeons, 0);
+                                eventTempo.Add(ev);
+                            }
+                            if (AllowSideStrobe) //Side Light
+                            {
+                                ev = new _Events(now + 0.25, EventType.LightBottomBackSideLasers, 0);
+                                eventTempo.Add(ev);
+                            }
                         }
-                        if (AllowNeonStrobe) //Neon Light
+                        else
                         {
-                            ev = new _Events(now + 0.25, EventType.LightTrackRingNeons, 0);
-                            eventTempo.Add(ev);
-                        }
-                        if (AllowSideStrobe) //Side Light
-                        {
-                            ev = new _Events(now + 0.25, EventType.LightBottomBackSideLasers, 0);
-                            eventTempo.Add(ev);
+                            if (AllowBackStrobe) //Back Top Laser
+                            {
+                                ev = new _Events(now - (now - last) / 2, EventType.LightBackTopLasers, 0);
+                                eventTempo.Add(ev);
+                            }
+                            if (AllowNeonStrobe) //Neon Light
+                            {
+                                ev = new _Events(now - (now - last) / 2, EventType.LightTrackRingNeons, 0);
+                                eventTempo.Add(ev);
+                            }
+                            if (AllowSideStrobe) //Side Light
+                            {
+                                ev = new _Events(now - (now - last) / 2, EventType.LightBottomBackSideLasers, 0);
+                                eventTempo.Add(ev);
+                            }
                         }
                     }
 
@@ -656,22 +675,16 @@ namespace Lolighter.Methods
             // Sort lights
             eventTempo = eventTempo.OrderBy(o => o._time).ToList();
 
-            // Remove fused off lights
+            // Remove fused
             for (int i = 1; i < eventTempo.Count() - 1; i++)
             {
-                if(eventTempo.Any(e => e._time == eventTempo[i]._time && e._type == eventTempo[i]._type && e != eventTempo[i]))
+                // Very close to eachother
+                if (eventTempo.Any(e => e._time >= eventTempo[i]._time - 0.05 && e._time <= eventTempo[i]._time + 0.05 && e._type == eventTempo[i]._type && e != eventTempo[i]))
                 {
-                    if(eventTempo[i]._value == 0 || eventTempo[i]._value == 4)
+                    // Off event
+                    if (eventTempo[i]._value == 0 || eventTempo[i]._value == 4)
                     {
-                        if ((eventTempo[i]._type == 0 || eventTempo[i]._type == 1 || eventTempo[i]._type == 4) && noteTempo.FindAll(n => n._time == eventTempo[i]._time).Count() > 1)
-                        {
-                            eventTempo[i]._time = eventTempo[i]._time - ((eventTempo[i]._time - eventTempo[eventTempo.FindIndex(e => e._time == eventTempo[i]._time) - 1]._time) / 2);
-                        }
-                        else
-                        {
-                            eventTempo.Remove(eventTempo[i]);
-                        }
-                        
+                        eventTempo.Remove(eventTempo[i]);
                         i--;
                     }
                 }
