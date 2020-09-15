@@ -500,24 +500,24 @@ namespace Lolighter.Methods
                     // Place light
                     if (AllowFade)
                     {
-                        _Events lig = new _Events(noteTempo[0]._time, sliderLight[sliderIndex], color - 2);
+                        _Events lig = new _Events(time[0], sliderLight[sliderIndex], color - 2);
                         eventTempo.Add(lig);
-                        lig = new _Events(noteTempo[0]._time + 0.125, sliderLight[sliderIndex], color - 1);
+                        lig = new _Events(time[0] + 0.125, sliderLight[sliderIndex], color - 1);
                         eventTempo.Add(lig);
-                        lig = new _Events(noteTempo[0]._time + 0.25, sliderLight[sliderIndex], color - 2);
+                        lig = new _Events(time[0] + 0.25, sliderLight[sliderIndex], color - 2);
                         eventTempo.Add(lig);
-                        lig = new _Events(noteTempo[0]._time + 0.375, sliderLight[sliderIndex], color - 1);
+                        lig = new _Events(time[0] + 0.375, sliderLight[sliderIndex], color - 1);
                         eventTempo.Add(lig);
                     }
                     else
                     {
-                        _Events lig = new _Events(noteTempo[0]._time, sliderLight[sliderIndex], color);
+                        _Events lig = new _Events(time[0], sliderLight[sliderIndex], color);
                         eventTempo.Add(lig);
-                        lig = new _Events(noteTempo[0]._time + 0.125, sliderLight[sliderIndex], color + 1);
+                        lig = new _Events(time[0] + 0.125, sliderLight[sliderIndex], color + 1);
                         eventTempo.Add(lig);
-                        lig = new _Events(noteTempo[0]._time + 0.25, sliderLight[sliderIndex], color);
+                        lig = new _Events(time[0] + 0.25, sliderLight[sliderIndex], color);
                         eventTempo.Add(lig);
-                        lig = new _Events(noteTempo[0]._time + 0.375, sliderLight[sliderIndex], color + 1);
+                        lig = new _Events(time[0] + 0.375, sliderLight[sliderIndex], color + 1);
                         eventTempo.Add(lig);
                     }
                     _Events off = new _Events(time[0] + 0.5, sliderLight[sliderIndex], 0);
@@ -679,7 +679,7 @@ namespace Lolighter.Methods
             for (int i = 1; i < eventTempo.Count() - 1; i++)
             {
                 // Very close to eachother
-                if (eventTempo.Any(e => e._time >= eventTempo[i]._time - 0.05 && e._time <= eventTempo[i]._time + 0.05 && e._type == eventTempo[i]._type && e != eventTempo[i]))
+                if (eventTempo.Any(e => e._time == eventTempo[i]._time && e._type == eventTempo[i]._type && e != eventTempo[i]))
                 {
                     // Off event
                     if (eventTempo[i]._value == 0 || eventTempo[i]._value == 4)
