@@ -690,18 +690,6 @@ namespace Lolighter.Methods
                 }
             }
 
-            // Off event at the end
-            _Events end = new _Events(eventTempo.Last()._time + 1, 2, 0);
-            eventTempo.Add(end);
-            end = new _Events(eventTempo.Last()._time + 1, 3, 0);
-            eventTempo.Add(end);
-            end = new _Events(eventTempo.Last()._time + 1, 1, 0);
-            eventTempo.Add(end);
-            end = new _Events(eventTempo.Last()._time + 1, 0, 0);
-            eventTempo.Add(end);
-            end = new _Events(eventTempo.Last()._time + 1, 4, 0);
-            eventTempo.Add(end);
-
             return eventTempo;
         }
 
