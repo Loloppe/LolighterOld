@@ -13,7 +13,7 @@
     public class _Customdata
     {
         public double _time { get; set; }
-        public object[] _BPMChanges { get; set; }
+        public _Bpmchanges[] _BPMChanges { get; set; }
         public _Bookmarks[] _bookmarks { get; set; }
     }
 
