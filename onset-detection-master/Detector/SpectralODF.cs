@@ -200,7 +200,7 @@ namespace OnsetDetection
         }
 
         /// <summary>
-        /// Helper method used by CD() & RCD()
+        /// Helper method used by CD() and RCD()
         /// we use the simple implementation presented in:
         /// "Onset Detection Revisited"
         /// Simon Dixon

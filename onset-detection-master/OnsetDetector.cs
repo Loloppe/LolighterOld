@@ -59,7 +59,6 @@ namespace OnsetDetection
             //init parallel specific variables
             var pOptions = new ParallelOptions();
             if (_options.MaxDegreeOfParallelism != -1) pOptions.MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism;
-            ParallelLoopState loopState;
 
             List<Wav> wavSlices = new List<Wav>();
             for (int i = 0; i < _sliceCount; i++)
@@ -98,7 +97,6 @@ namespace OnsetDetection
             onsets = onsets.OrderBy(f => f.OnsetTime).ToList();
 
             float prev = 0;
-            float combine = 0.03f;
             var ret = new List<Onset>();
             for (int i = 0; i < onsets.Count; i++)
             {
@@ -164,7 +162,6 @@ namespace OnsetDetection
                     break;
                 default:
                     throw new Exception("Unsupported detection function");
-                    break;
             }
 
             return activations;

@@ -12,10 +12,6 @@ namespace Lolighter.Methods
     {
         static public List<_Events> CreateLight(List<_Notes> noteTempo, double ColorOffset, double ColorSwap, bool AllowBackStrobe, bool AllowNeonStrobe, bool AllowSideStrobe, bool AllowFade, bool AllowSpinZoom, bool NerfStrobes)
         {
-            //This massive mess is based on my old AutoLighter that I created in Osu2Saber.
-            //It work pretty well and is pretty simple to modify, but could definitely be better.
-            //This could use a cleanup.
-
             double last = new double(); //Var to stop spin-stack and also used as time check.
             double[] time = new double[4]; //Now, before, before-before, before-before-before, in this order.
             //0.0D = Default value for double, similar to NULL for int.
@@ -304,87 +300,6 @@ namespace Lolighter.Methods
             }
 
             ResetTimer();
-
-            // Check if the first few notes are sliders
-            for (int j = 1; j < 3; j++)
-            {
-                for (int i = noteTempo.FindIndex(n => n == noteTempo[j]); i < noteTempo.Count() - 1; i++)
-                {
-                    // Between 1/8 and 0, same cut direction or dots
-                    if (noteTempo[i]._time - noteTempo[i - 1]._time <= 0.125 && noteTempo[i]._time - noteTempo[i - 1]._time > 0 && (noteTempo[i]._cutDirection == noteTempo[i - 1]._cutDirection || noteTempo[i]._cutDirection == 8))
-                    {
-                        // Search for the last note of the slider
-                        if (sliderNoteCount == 0)
-                        {
-                            // This is the first note of the slider
-                            nextSlider = noteTempo[i - 1];
-                        }
-                        sliderNoteCount++;
-                    }
-                    else if (sliderNoteCount != 0)
-                    {
-                        firstSlider = true;
-                        break;
-                    }
-                }
-            }
-
-            if(firstSlider)
-            {
-                // Take a light between neon, side or backlight and strobes it via On/Flash
-                if (sliderIndex == -1)
-                {
-                    int old = sliderLight[sliderIndex + 1];
-
-                    do
-                    {
-                        sliderLight.Shuffle();
-                    } while (sliderLight[2] == old);
-
-                    sliderIndex = 2;
-                }
-
-                // Place light
-                if(AllowFade)
-                {
-                    _Events lig = new _Events(noteTempo[0]._time, sliderLight[sliderIndex], color - 2);
-                    eventTempo.Add(lig);
-                    lig = new _Events(noteTempo[0]._time + 0.125, sliderLight[sliderIndex], color - 1);
-                    eventTempo.Add(lig);
-                    lig = new _Events(noteTempo[0]._time + 0.25, sliderLight[sliderIndex], color - 2);
-                    eventTempo.Add(lig);
-                    lig = new _Events(noteTempo[0]._time + 0.375, sliderLight[sliderIndex], color - 1);
-                    eventTempo.Add(lig);
-                }
-                else
-                {
-                    _Events lig = new _Events(noteTempo[0]._time, sliderLight[sliderIndex], color);
-                    eventTempo.Add(lig);
-                    lig = new _Events(noteTempo[0]._time + 0.125, sliderLight[sliderIndex], color + 1);
-                    eventTempo.Add(lig);
-                    lig = new _Events(noteTempo[0]._time + 0.25, sliderLight[sliderIndex], color);
-                    eventTempo.Add(lig);
-                    lig = new _Events(noteTempo[0]._time + 0.375, sliderLight[sliderIndex], color + 1);
-                    eventTempo.Add(lig);
-                }
-                
-                _Events off = new _Events(noteTempo[0]._time + 0.5, sliderLight[sliderIndex], 0);
-                eventTempo.Add(off);
-
-                sliderIndex--;
-
-                // Spin goes brrr
-                if(AllowSpinZoom)
-                {
-                    _Events lig = new _Events(noteTempo[0]._time, EventType.RotationAllTrackRings, 0);
-                    eventTempo.Add(lig);
-                    for (int i = 0; i < 8; i++)
-                    {
-                        lig = new _Events(noteTempo[0]._time + 0.5 - (0.5 / 8 * i), EventType.RotationAllTrackRings, 0);
-                        eventTempo.Add(lig);
-                    }
-                }
-            }
 
             foreach (_Notes note in noteTempo) //Process all note using time.
             {

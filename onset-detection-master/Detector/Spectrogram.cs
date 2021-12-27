@@ -30,6 +30,7 @@ namespace OnsetDetection
         /// Creates a new Spectrogram object instance and performs a STFT on the given audio
         /// </summary>
         /// <param name="wav">a Wav object</param>
+        /// <param name="allocator">allocator</param>
         /// <param name="windowSize">is the size for the window in samples</param>
         /// <param name="fps">is the desired frame rate</param>
         /// <param name="online">work in online mode (i.e. use only past audio information)</param>
@@ -132,7 +133,7 @@ namespace OnsetDetection
                 {
                     result[i] = signal[i];
                 }
-                MathNet.Numerics.IntegralTransforms.Fourier.BluesteinForward(result, MathNet.Numerics.IntegralTransforms.FourierOptions.NoScaling);
+                MathNet.Numerics.IntegralTransforms.Fourier.Forward(result, MathNet.Numerics.IntegralTransforms.FourierOptions.NoScaling);
                 _STFT.SetRow(frame, result.Select(r => new Complex32((float)r.Real, (float)r.Imaginary)).Take(_ffts).ToArray());
                 //var _newSTFTRow = result.Select(r => new Complex32((float)r.Real, (float)r.Imaginary)).Take(_ffts).ToArray();
                 //_STFT.SetRow(frame, _newSTFTRow);
@@ -209,7 +210,7 @@ namespace OnsetDetection
         /// Filter the magnitude spectrogram with a filterbank
         /// If no filter is given a standard one will be created
         /// </summary>
-        /// <param name="Filterbank">Filter object which includes the filterbank</param>
+        /// <param name="filterbank">Filter object which includes the filterbank</param>
         public void Filter(Matrix<float> filterbank = null)
         {
             Filter f = null;
