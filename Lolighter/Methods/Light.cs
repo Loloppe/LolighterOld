@@ -1,10 +1,8 @@
 ﻿using Lolighter.Items;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Windows.Forms;
 using static Lolighter.Items.Enum;
+using static Lolighter.Items.Utils;
 
 namespace Lolighter.Methods
 {
@@ -33,7 +31,6 @@ namespace Lolighter.Methods
             int sliderIndex = 0;
             double sliderNoteCount = 0;
             bool wasSlider = false;
-            _Events ev;
             List<int> pattern = new List<int>(Enumerable.Range(0, 5));
             int patternIndex = 0;
             int patternCount = 0;
@@ -68,14 +65,6 @@ namespace Lolighter.Methods
                 time[3] = 0.0D;
             }
 
-            int Inverse(int temp) //Red -> Blue, Blue -> Red
-            {
-                if (temp > EventLightValue.BlueFlashFade)
-                    return temp - 4; //Turn to blue
-                else
-                    return temp + 4; //Turn to red
-            }
-
             void TimerDuration() //Check the checkpoint
             {
                 timer = time[0];
@@ -106,8 +95,7 @@ namespace Lolighter.Methods
                     {
                         if (light[i] != 0 && time[0] - time[1] <= 2.5) //TODO: Re-add as an option left/right laser strobe.
                         {
-                            //ev = new _Events((time[0] - (time[0] - time[1]) / 2), light[i], 0);
-                            //eventTempo.Add(ev);
+                            //eventTempo.Add(new _Events((time[0] - (time[0] - time[1]) / 2), light[i], 0));
                         }
                         light[i] = 0;
                     }
@@ -135,16 +123,12 @@ namespace Lolighter.Methods
                 switch (light[0]) //Add laser + speed
                 {
                     case 2:
-                        ev = new _Events(time[0], EventType.LightLeftLasers, color);
-                        eventTempo.Add(ev);
-                        ev = new _Events(time[0], EventType.RotatingLeftLasers, speed);
-                        eventTempo.Add(ev);
+                        eventTempo.Add(new _Events(time[0], EventType.LightLeftLasers, color));
+                        eventTempo.Add(new _Events(time[0], EventType.RotatingLeftLasers, speed));
                         break;
                     case 3:
-                        ev = new _Events(time[0], EventType.LightRightLasers, color);
-                        eventTempo.Add(ev);
-                        ev = new _Events(time[0], EventType.RotatingRightLasers, speed);
-                        eventTempo.Add(ev);
+                        eventTempo.Add(new _Events(time[0], EventType.LightRightLasers, color));
+                        eventTempo.Add(new _Events(time[0], EventType.RotatingRightLasers, speed));
                         break;
                 }
 
@@ -161,19 +145,16 @@ namespace Lolighter.Methods
                 //Here we process Spin and Zoom
                 if (now == firstNote && time[1] == 0.0D && AllowSpinZoom) //If we are processing the first note, add spin + zoom to it.
                 {
-                    ev = new _Events(now, EventType.RotationAllTrackRings, 0);
-                    eventTempo.Add(ev);
-                    ev = new _Events(now, EventType.RotationSmallTrackRings, 0);
-                    eventTempo.Add(ev);
+                    eventTempo.Add(new _Events(now, EventType.RotationAllTrackRings, 0));
+                    eventTempo.Add(new _Events(now, EventType.RotationSmallTrackRings, 0));
                 }
                 else if (now >= ColorOffset + ColorSwap + offset && now > firstNote && AllowSpinZoom) //If we are reaching the next threshold of the timer
                 {
-                    ev = new _Events(offset, EventType.RotationAllTrackRings, 0); //Add a spin at timer.
-                    eventTempo.Add(ev);
+                    //Add a spin at timer.
+                    eventTempo.Add(new _Events(offset, EventType.RotationAllTrackRings, 0));
                     if (count == 0) //Only add zoom every 2 spin.
                     {
-                        ev = new _Events(offset, EventType.RotationSmallTrackRings, 0);
-                        eventTempo.Add(ev);
+                        eventTempo.Add(new _Events(offset, EventType.RotationSmallTrackRings, 0));
                         count = 1;
                     }
                     else
@@ -184,8 +165,7 @@ namespace Lolighter.Methods
                 //If there's a quarter between two double parallel notes and timer didn't pass the check.
                 else if (time[1] - time[2] == 0.25 && time[3] == time[2] && time[1] == now && timer < offset && AllowSpinZoom)
                 {
-                    ev = new _Events(now, EventType.RotationAllTrackRings, 0);
-                    eventTempo.Add(ev);
+                    eventTempo.Add(new _Events(now, EventType.RotationAllTrackRings, 0));
                 }
 
                 TimerDuration();
@@ -198,48 +178,37 @@ namespace Lolighter.Methods
                         {
                             if (AllowBackStrobe) //Back Top Laser
                             {
-                                ev = new _Events(now + 0.25, EventType.LightBackTopLasers, 0);
-                                eventTempo.Add(ev);
+                                eventTempo.Add(new _Events(now + 0.25, EventType.LightBackTopLasers, 0));
                             }
                             if (AllowNeonStrobe) //Neon Light
                             {
-                                ev = new _Events(now + 0.25, EventType.LightTrackRingNeons, 0);
-                                eventTempo.Add(ev);
+                                eventTempo.Add(new _Events(now + 0.25, EventType.LightTrackRingNeons, 0));
                             }
                             if (AllowSideStrobe) //Side Light
                             {
-                                ev = new _Events(now + 0.25, EventType.LightBottomBackSideLasers, 0);
-                                eventTempo.Add(ev);
+                                eventTempo.Add(new _Events(now + 0.25, EventType.LightBottomBackSideLasers, 0));
                             }
                         }
                         else
                         {
                             if (AllowBackStrobe) //Back Top Laser
                             {
-                                ev = new _Events(now - (now - last) / 2, EventType.LightBackTopLasers, 0);
-                                eventTempo.Add(ev);
+                                eventTempo.Add(new _Events(now - (now - last) / 2, EventType.LightBackTopLasers, 0));
                             }
                             if (AllowNeonStrobe) //Neon Light
                             {
-                                ev = new _Events(now - (now - last) / 2, EventType.LightTrackRingNeons, 0);
-                                eventTempo.Add(ev);
+                                eventTempo.Add(new _Events(now - (now - last) / 2, EventType.LightTrackRingNeons, 0));
                             }
                             if (AllowSideStrobe) //Side Light
                             {
-                                ev = new _Events(now - (now - last) / 2, EventType.LightBottomBackSideLasers, 0);
-                                eventTempo.Add(ev);
+                                eventTempo.Add(new _Events(now - (now - last) / 2, EventType.LightBottomBackSideLasers, 0));
                             }
                         }
                     }
 
-                    ev = new _Events(now, EventType.LightBackTopLasers, color); //Back Top Laser
-                    eventTempo.Add(ev);
-
-                    ev = new _Events(now, EventType.LightBottomBackSideLasers, color); //Side Light
-                    eventTempo.Add(ev);
-
-                    ev = new _Events(now, EventType.LightTrackRingNeons, color); //Track Ring Neons
-                    eventTempo.Add(ev);
+                    eventTempo.Add(new _Events(now, EventType.LightBackTopLasers, color)); //Back Top Laser
+                    eventTempo.Add(new _Events(now, EventType.LightBottomBackSideLasers, color)); //Side Light
+                    eventTempo.Add(new _Events(now, EventType.LightTrackRingNeons, color)); //Track Ring Neons
 
                     last = now;
                 }
@@ -248,20 +217,6 @@ namespace Lolighter.Methods
                 {
                     time[i] = time[i - 1];
                 }
-            }
-
-            int Swap(int temp)
-            {
-                if (temp == EventLightValue.BlueFlashFade)
-                    return EventLightValue.BlueOn;
-                else if (temp == EventLightValue.RedFlashFade)
-                    return EventLightValue.RedOn;
-                else if (temp == EventLightValue.BlueOn)
-                    return EventLightValue.BlueFlashFade;
-                else if (temp == EventLightValue.RedOn)
-                    return EventLightValue.RedFlashFade;
-
-                return 0;
             }
 
             if (NerfStrobes)
@@ -337,14 +292,10 @@ namespace Lolighter.Methods
                     {
                         if(!firstSlider)
                         {
-                            ev = new _Events(time[0], EventType.LightRightLasers, color);
-                            eventTempo.Add(ev);
-                            ev = new _Events(0, EventType.RotatingRightLasers, 1);
-                            eventTempo.Add(ev);
-                            ev = new _Events(time[1], EventType.LightLeftLasers, color);
-                            eventTempo.Add(ev);
-                            ev = new _Events(0, EventType.RotatingLeftLasers, 1);
-                            eventTempo.Add(ev);
+                            eventTempo.Add(new _Events(time[0], EventType.LightRightLasers, color));
+                            eventTempo.Add(new _Events(0, EventType.RotatingRightLasers, 1));
+                            eventTempo.Add(new _Events(time[1], EventType.LightLeftLasers, color));
+                            eventTempo.Add(new _Events(0, EventType.RotatingLeftLasers, 1));
                         }
                         time[2] = time[1];
                         time[1] = time[0];
@@ -415,40 +366,29 @@ namespace Lolighter.Methods
                     // Place light
                     if (AllowFade)
                     {
-                        _Events lig = new _Events(time[0], sliderLight[sliderIndex], color - 2);
-                        eventTempo.Add(lig);
-                        lig = new _Events(time[0] + 0.125, sliderLight[sliderIndex], color - 1);
-                        eventTempo.Add(lig);
-                        lig = new _Events(time[0] + 0.25, sliderLight[sliderIndex], color - 2);
-                        eventTempo.Add(lig);
-                        lig = new _Events(time[0] + 0.375, sliderLight[sliderIndex], color - 1);
-                        eventTempo.Add(lig);
+                        eventTempo.Add(new _Events(time[0], sliderLight[sliderIndex], color - 2));
+                        eventTempo.Add(new _Events(time[0] + 0.125, sliderLight[sliderIndex], color - 1));
+                        eventTempo.Add(new _Events(time[0] + 0.25, sliderLight[sliderIndex], color - 2));
+                        eventTempo.Add(new _Events(time[0] + 0.375, sliderLight[sliderIndex], color - 1));
                     }
                     else
                     {
-                        _Events lig = new _Events(time[0], sliderLight[sliderIndex], color);
-                        eventTempo.Add(lig);
-                        lig = new _Events(time[0] + 0.125, sliderLight[sliderIndex], color + 1);
-                        eventTempo.Add(lig);
-                        lig = new _Events(time[0] + 0.25, sliderLight[sliderIndex], color);
-                        eventTempo.Add(lig);
-                        lig = new _Events(time[0] + 0.375, sliderLight[sliderIndex], color + 1);
-                        eventTempo.Add(lig);
+                        eventTempo.Add(new _Events(time[0], sliderLight[sliderIndex], color));
+                        eventTempo.Add(new _Events(time[0] + 0.125, sliderLight[sliderIndex], color + 1));
+                        eventTempo.Add(new _Events(time[0] + 0.25, sliderLight[sliderIndex], color));
+                        eventTempo.Add(new _Events(time[0] + 0.375, sliderLight[sliderIndex], color + 1));
                     }
-                    _Events off = new _Events(time[0] + 0.5, sliderLight[sliderIndex], 0);
-                    eventTempo.Add(off);
+                    eventTempo.Add(new _Events(time[0] + 0.5, sliderLight[sliderIndex], 0));
 
                     sliderIndex--;
 
                     // Spin goes brrr
                     if(AllowSpinZoom)
                     {
-                        _Events lig = new _Events(time[0], EventType.RotationAllTrackRings, 0);
-                        eventTempo.Add(lig);
+                        eventTempo.Add(new _Events(time[0], EventType.RotationAllTrackRings, 0));
                         for (int i = 0; i < 8; i++)
                         {
-                            lig = new _Events(time[0] + 0.5 - (0.5 / 8 * i), EventType.RotationAllTrackRings, 0);
-                            eventTempo.Add(lig);
+                            eventTempo.Add(new _Events(time[0] + 0.5 - (0.5 / 8 * i), EventType.RotationAllTrackRings, 0));
                         }
                     }
 
@@ -479,8 +419,7 @@ namespace Lolighter.Methods
                     }
 
                     // Place the next light
-                    _Events lig = new _Events(time[0], pattern[patternIndex], color);
-                    eventTempo.Add(lig);
+                    eventTempo.Add(new _Events(time[0], pattern[patternIndex], color));
 
                     if(time[0] - time[1] < 0.25)
                     {
@@ -501,13 +440,11 @@ namespace Lolighter.Methods
 
                     if (pattern[patternIndex] == 2)
                     {
-                        _Events spd = new _Events(time[0], EventType.RotatingLeftLasers, currentSpeed);
-                        eventTempo.Add(spd);
+                        eventTempo.Add(new _Events(time[0], EventType.RotatingLeftLasers, currentSpeed));
                     }
                     else if(pattern[patternIndex] == 3)
                     {
-                        _Events spd = new _Events(time[0], EventType.RotatingRightLasers, currentSpeed);
-                        eventTempo.Add(spd);
+                        eventTempo.Add(new _Events(time[0], EventType.RotatingRightLasers, currentSpeed));
                     }
 
                     // Place off event
@@ -518,14 +455,12 @@ namespace Lolighter.Methods
                             if(noteTempo[noteTempo.FindIndex(n => n == note) + 1]._time - time[0] <= 2)
                             {
                                 double value = (noteTempo[noteTempo.FindIndex(n => n == note) + 1]._time - noteTempo[noteTempo.FindIndex(n => n == note)]._time) / 2;
-                                _Events off = new _Events(noteTempo[noteTempo.FindIndex(n => n == note)]._time + value, pattern[patternIndex], 0);
-                                eventTempo.Add(off);
+                                eventTempo.Add(new _Events(noteTempo[noteTempo.FindIndex(n => n == note)]._time + value, pattern[patternIndex], 0));
                             }
                         }
                         else
                         {
-                            _Events off = new _Events(noteTempo[noteTempo.FindIndex(n => n == note) + 1]._time, pattern[patternIndex], 0);
-                            eventTempo.Add(off);
+                            eventTempo.Add(new _Events(noteTempo[noteTempo.FindIndex(n => n == note) + 1]._time, pattern[patternIndex], 0));
                         }
                     }
 
@@ -547,12 +482,10 @@ namespace Lolighter.Methods
                     if (time[0] != last && time[0] != time[1] && note._type != 3 && note._cutDirection != 8 && note._cutDirection != lastCut && AllowSpinZoom && !NerfStrobes) //Spin
                     {
                         last = time[0];
-                        ev = new _Events(time[0], EventType.RotationAllTrackRings, 0);
-                        eventTempo.Add(ev);
+                        eventTempo.Add(new _Events(time[0], EventType.RotationAllTrackRings, 0));
                         for (int i = 0; i < 8; i++)
                         {
-                            ev = new _Events(time[0] - ((time[0] - time[1]) / 8 * i), EventType.RotationAllTrackRings, 0);
-                            eventTempo.Add(ev);
+                            eventTempo.Add(new _Events(time[0] - ((time[0] - time[1]) / 8 * i), EventType.RotationAllTrackRings, 0));
                         }
                     }
 
@@ -606,23 +539,6 @@ namespace Lolighter.Methods
             }
 
             return eventTempo;
-        }
-
-        public static void Shuffle<T>(this IList<T> list)
-        {
-            RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
-            int n = list.Count;
-            while (n > 1)
-            {
-                byte[] box = new byte[1];
-                do provider.GetBytes(box);
-                while (!(box[0] < n * (Byte.MaxValue / n)));
-                int k = (box[0] % n);
-                n--;
-                T value = list[k];
-                list[k] = list[n];
-                list[n] = value;
-            }
         }
     }
 }

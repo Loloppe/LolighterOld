@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EventLightValue = Lolighter.Items.Enum.EventLightValue;
-using EventType = Lolighter.Items.Enum.EventType;
+using Utils = Lolighter.Items.Utils;
 
 namespace Lolighter.Methods
 {
@@ -19,43 +19,33 @@ namespace Lolighter.Methods
             light.Sort((x, y) => x._time.CompareTo(y._time));
 
             // Sort each of them per type
-            List<_Events> Back = new List<_Events>(light.Where(x => x._type == EventType.LightBackTopLasers));
-            List<_Events> Neon = new List<_Events>(light.Where(x => x._type == EventType.LightTrackRingNeons));
-            List<_Events> Side = new List<_Events>(light.Where(x => x._type == EventType.LightBottomBackSideLasers));
-            List<_Events> Left = new List<_Events>(light.Where(x => x._type == EventType.LightLeftLasers));
-            List<_Events> Right = new List<_Events>(light.Where(x => x._type == EventType.LightRightLasers));
-            List<_Events> LeftSpeed = new List<_Events>(light.Where(x => x._type == EventType.RotatingLeftLasers));
-            List<_Events> RightSpeed = new List<_Events>(light.Where(x => x._type == EventType.RotatingRightLasers));
-            List<_Events> Spin = new List<_Events>(light.Where(x => x._type == EventType.RotationAllTrackRings));
-            List<_Events> Zoom = new List<_Events>(light.Where(x => x._type == EventType.RotationSmallTrackRings));
+            Dictionary<int, List<_Events>> mapEvents = new Dictionary<int, List<_Events>>(9);
+            foreach (var type in Utils.EnvironmentEvent.AllEventType)
+            {
+                mapEvents.Add(type, new List<_Events>(light.Where(x => x._type == type)));
+            }
 
             // Send them to the algorithm
-            Back = Mod(Back, speed);
-            Neon = Mod(Neon, speed);
-            Side = Mod(Side, speed);
-            Left = Mod(Left, speed);
-            Right = Mod(Right, speed);
+            foreach (var type in Utils.EnvironmentEvent.LightEventType)
+            {
+                mapEvents[type] = Mod(mapEvents[type], speed);
+            }
 
             // Spin/Zoom, we want to remove spam
-            Spin = Spam(Spin, spamSpeed);
-            Zoom = Spam(Zoom, spamSpeed);
+            foreach (var type in Utils.EnvironmentEvent.TrackRingEventType)
+            {
+                mapEvents[type] = Spam(mapEvents[type], spamSpeed);
+            }
 
             // Put back together the list
             light = new List<_Events>();
-            light.AddRange(Back);
-            light.AddRange(Neon);
-            light.AddRange(Side);
-            light.AddRange(Left);
-            light.AddRange(Right);
-            light.AddRange(LeftSpeed);
-            light.AddRange(RightSpeed);
+            foreach (var type in Utils.EnvironmentEvent.AllEventType)
+            {
+                light.AddRange(mapEvents[type]);
+            }
 
             // Turn On an Event if no light for a while.
             light = On(light, onSpeed);
-
-            // Put back together the list
-            light.AddRange(Spin);
-            light.AddRange(Zoom);
 
             // Sort the list
             light.Sort((x, y) => x._time.CompareTo(y._time));
@@ -137,34 +127,12 @@ namespace Lolighter.Methods
                 {
                     if (now._value == EventLightValue.BlueFlashFade || now._value == EventLightValue.RedFlashFade || now._value == EventLightValue.BlueOn || now._value == EventLightValue.RedOn)
                     {
-                        now._value = Swap(now._value);
+                        now._value = Utils.Swap(now._value);
                     }
                 }
             }
 
             return light;
-        }
-
-        static int Inverse(int temp) //Red -> Blue, Blue -> Red
-        {
-            if (temp > EventLightValue.BlueFlashFade)
-                return temp - 4; //Turn to blue
-            else
-                return temp + 4; //Turn to red
-        }
-
-        static int Swap(int temp)
-        {
-            if (temp == EventLightValue.BlueFlashFade)
-                return EventLightValue.BlueOn;
-            else if (temp == EventLightValue.RedFlashFade)
-                return EventLightValue.RedOn;
-            else if (temp == EventLightValue.BlueOn)
-                return EventLightValue.BlueFlashFade;
-            else if (temp == EventLightValue.RedOn)
-                return EventLightValue.RedFlashFade;
-
-            return 0;
         }
     }
 }
