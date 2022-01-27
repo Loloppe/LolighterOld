@@ -26,6 +26,7 @@ namespace OnsetDetection
         /// <param name="fmin">the minimum frequency [in Hz]</param>
         /// <param name="fmax">the maximum frequency [in Hz]</param>
         /// <param name="equal">normalize each band to equal energy</param>
+        /// <param name="allocator">allocator</param>
         public Filter(int ffts, int fs, MemoryAllocator allocator, int bands=12, float fmin=27.5f, float fmax=16000f, bool equal=false)
         {
             _allocator = allocator;

@@ -24,6 +24,7 @@ namespace OnsetDetection
         /// <param name="spectogram">the spectrogram on which the detection functions operate</param>
         /// <param name="ratio">calculate the difference to the frame which has the given magnitude ratio</param>
         /// <param name="frames">calculate the difference to the N-th previous frame</param>
+        /// <param name="allocator">allocator</param>
         public SpectralODF(Spectrogram spectogram, MemoryAllocator allocator, float ratio=0.22f, int frames=0)
         {
             _s = spectogram;
@@ -199,7 +200,7 @@ namespace OnsetDetection
         }
 
         /// <summary>
-        /// Helper method used by CD() & RCD()
+        /// Helper method used by CD() and RCD()
         /// we use the simple implementation presented in:
         /// "Onset Detection Revisited"
         /// Simon Dixon
