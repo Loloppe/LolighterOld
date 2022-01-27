@@ -59,6 +59,7 @@ namespace OnsetDetection
             //init parallel specific variables
             var pOptions = new ParallelOptions();
             if (_options.MaxDegreeOfParallelism != -1) pOptions.MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism;
+            ParallelLoopState loopState;
 
             List<Wav> wavSlices = new List<Wav>();
             for (int i = 0; i < _sliceCount; i++)
@@ -97,6 +98,7 @@ namespace OnsetDetection
             onsets = onsets.OrderBy(f => f.OnsetTime).ToList();
 
             float prev = 0;
+            float combine = 0.03f;
             var ret = new List<Onset>();
             for (int i = 0; i < onsets.Count; i++)
             {
@@ -154,14 +156,36 @@ namespace OnsetDetection
             Vector<float> activations;
             switch (detectionFunction)
             {
+                case Detectors.HFC:
+                    activations = sODF.HFC();
+                    break;
                 case Detectors.SD:
                     activations = sODF.SD();
                     break;
                 case Detectors.SF:
                     activations = sODF.SF();
                     break;
+                case Detectors.MKL:
+                    activations = sODF.MKL();
+                    break;
+                case Detectors.PD:
+                    activations = sODF.PD();
+                    break;
+                case Detectors.WPD:
+                    activations = sODF.WPD();
+                    break;
+                case Detectors.NWPD:
+                    activations = sODF.NWPD();
+                    break;
+                case Detectors.CD:
+                    activations = sODF.CD();
+                    break;
+                case Detectors.RCD:
+                    activations = sODF.RCD();
+                    break;
                 default:
                     throw new Exception("Unsupported detection function");
+                    break;
             }
 
             return activations;
@@ -169,7 +193,7 @@ namespace OnsetDetection
 
         private bool NeedPhaseInformation(Detectors detectionFunction)
         {
-            return new Detectors[] {}.Contains(detectionFunction);
+            return new Detectors[] { Detectors.PD, Detectors.WPD, Detectors.NWPD, Detectors.CD, Detectors.RCD }.Contains(detectionFunction);
         }
     }
 
@@ -281,10 +305,24 @@ namespace OnsetDetection
 
     public enum Detectors
     {
+        /// <summary>High Frequency Content</summary>
+        HFC,
         /// <summary>Spectral Diff</summary>
         SD,
         /// <summary>Spectral Flux</summary>
-        SF
+        SF,
+        /// <summary>Modified Kullback-Leibler</summary>
+        MKL,
+        /// <summary>Phase Deviation</summary>
+        PD,
+        /// <summary>Weighted Phase Deviation</summary>
+        WPD,
+        /// <summary>Normalized Weighted Phase Deviation</summary>
+        NWPD,
+        /// <summary>Complex Domain</summary>
+        CD,
+        /// <summary>Rectified Complex Domain</summary>
+        RCD
     }
 
     public struct Onset

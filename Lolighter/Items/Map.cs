@@ -3,18 +3,18 @@
     public class Rootobject
     {
         public string _version { get; set; }
-        public _Customdata _customData { get; set; }
+        public _Customdata _customData { get; set; } = new _Customdata();
         public _Events[] _events { get; set; }
         public _Notes[] _notes { get; set; }
         public _Obstacles[] _obstacles { get; set; }
-        public object[] _waypoints { get; set; }
+        public object[] _waypoints { get; set; } = new object[0];
     }
 
     public class _Customdata
     {
-        public double _time { get; set; }
-        public _Bpmchanges[] _BPMChanges { get; set; }
-        public _Bookmarks[] _bookmarks { get; set; }
+        public double _time { get; set; } = 0;
+        public _Bpmchanges[] _BPMChanges { get; set; } = new _Bpmchanges[0];
+        public _Bookmarks[] _bookmarks { get; set; } = new _Bookmarks[0];
     }
 
     public class _Bookmarks

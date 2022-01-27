@@ -22,7 +22,6 @@ namespace OnsetDetection
         /// </summary>
         /// <param name="ffts">number of FFT coefficients</param>
         /// <param name="fs">sample rate of the audio file</param>
-        /// <param name="allocator">allocator</param>
         /// <param name="bands">number of filter bands</param>
         /// <param name="fmin">the minimum frequency [in Hz]</param>
         /// <param name="fmax">the maximum frequency [in Hz]</param>
