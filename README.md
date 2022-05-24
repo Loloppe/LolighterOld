@@ -1,7 +1,10 @@
-# Lolighter 
+# LolighterOld 
 By **Loloppe#6435**
 
-[Download Here](https://github.com/Loloppe/Lolighter/releases/latest)
+[Download Here](https://github.com/Loloppe/LolighterOld/releases/latest)
+
+OR find the new rework of Lolighter here:
+[Lolighter](https://github.com/Loloppe/Lolighter)
 
 **Light?** This program use "_notes" "_time" from your .dat file to generate "_events" corresponding to your Beatmap. A new file called "ExpertPlusStandard.dat" will be created in the same location of the program. Color swap speed: The color swap between blue and red every X beat (default 4). Color swap offset: Where the first color should start (default first note + 0). Use Strobe: Unticking this will remove all the "Off" events. Use Fade: Unticking this will change all "Fade" into "On" events. Spin/Zoom: Unticking this will remove all "Spin" and "Zoom" events. Spin Speed: Range allowed for the randomizer to pick from during left/right laser placement. Nerf Strobes: Similar to Down Light.
 
